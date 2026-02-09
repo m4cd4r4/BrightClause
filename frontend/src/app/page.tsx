@@ -128,11 +128,6 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/20 rounded-full mb-8">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-xs font-mono text-accent uppercase tracking-wide">Full-Stack AI Portfolio Project</span>
-            </div>
-
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
               AI-Powered{' '}
               <span className="text-accent">Contract Analysis</span>{' '}
