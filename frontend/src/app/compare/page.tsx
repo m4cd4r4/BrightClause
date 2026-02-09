@@ -5,19 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
   GitCompareArrows, FileText, CheckCircle, Loader2,
-  AlertTriangle, X, Plus, ChevronRight, Eye, Shield
+  AlertTriangle, X, Plus, ChevronRight, Eye
 } from 'lucide-react'
 import { api, Document, AnalysisSummary, Clause } from '@/lib/api'
+import { useToast } from '@/lib/toast'
 import { Navigation } from '@/lib/navigation'
-
-type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
-
-const riskConfig: Record<RiskLevel, { color: string; bg: string; text: string }> = {
-  critical: { color: 'text-red-400', bg: 'bg-red-500/15', text: 'Critical' },
-  high: { color: 'text-orange-400', bg: 'bg-orange-500/15', text: 'High' },
-  medium: { color: 'text-amber-400', bg: 'bg-amber-500/15', text: 'Medium' },
-  low: { color: 'text-emerald-400', bg: 'bg-emerald-500/15', text: 'Low' },
-}
+import { type RiskLevel, riskConfig, formatClauseType, getTopRisk } from '@/lib/risk'
 
 interface CompareDoc {
   doc: Document
@@ -32,6 +25,7 @@ export default function ComparePage() {
   const [compareDocs, setCompareDocs] = useState<CompareDoc[]>([])
   const [showPicker, setShowPicker] = useState(false)
   const [expandedCell, setExpandedCell] = useState<string | null>(null)
+  const { error: showError } = useToast()
 
   useEffect(() => {
     loadDocuments()
@@ -43,6 +37,7 @@ export default function ComparePage() {
       setDocuments(response.documents.filter(d => d.status === 'completed'))
     } catch (err) {
       console.error('Failed to load documents:', err)
+      showError('Failed to load documents. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -138,8 +133,8 @@ export default function ComparePage() {
               <span className="text-sm text-ink-200 font-medium max-w-[200px] truncate">{cd.doc.filename}</span>
               {cd.summary && (
                 <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded
-                  ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk as RiskLevel]?.color : 'text-ink-500'}
-                  ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk as RiskLevel]?.bg : 'bg-ink-800/30'}`}>
+                  ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk]?.color : 'text-ink-500'}
+                  ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk]?.bg + '/15' : 'bg-ink-800/30'}`}>
                   {cd.summary.overall_risk}
                 </span>
               )}
@@ -255,8 +250,8 @@ export default function ComparePage() {
                             </span>
                             {cd.summary && (
                               <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded
-                                ${riskConfig[cd.summary.overall_risk as RiskLevel]?.color}
-                                ${riskConfig[cd.summary.overall_risk as RiskLevel]?.bg}`}>
+                                ${riskConfig[cd.summary.overall_risk]?.color}
+                                ${riskConfig[cd.summary.overall_risk]?.bg}/15`}>
                                 {cd.summary.overall_risk}
                               </span>
                             )}
@@ -266,7 +261,7 @@ export default function ComparePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-ink-800/20">
-                    {allClauseTypes.map((clauseType, rowIdx) => (
+                    {allClauseTypes.map((clauseType) => (
                       <tr key={clauseType} className="hover:bg-ink-900/20 transition-colors">
                         <td className="sticky left-0 bg-ink-950 z-10 px-6 py-3">
                           <span className="text-xs font-medium text-ink-300">{formatClauseType(clauseType)}</span>
@@ -320,12 +315,12 @@ export default function ComparePage() {
                                     </button>
                                   </div>
                                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    {cellData.clauses.slice(0, 3).map((clause, ci) => (
+                                    {cellData.clauses.slice(0, 3).map((clause) => (
                                       <div key={clause.id} className="p-2.5 bg-ink-800/30 rounded-lg">
                                         {clause.risk_level && (
                                           <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded mb-1.5 inline-block
                                             ${riskConfig[clause.risk_level as RiskLevel]?.color}
-                                            ${riskConfig[clause.risk_level as RiskLevel]?.bg}`}>
+                                            ${riskConfig[clause.risk_level as RiskLevel]?.bg}/15`}>
                                             {clause.risk_level}
                                           </span>
                                         )}
@@ -420,17 +415,4 @@ export default function ComparePage() {
       </main>
     </div>
   )
-}
-
-function formatClauseType(type: string): string {
-  return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-}
-
-function getTopRisk(riskLevels?: Record<string, number>): RiskLevel | null {
-  if (!riskLevels) return null
-  const order: RiskLevel[] = ['critical', 'high', 'medium', 'low']
-  for (const level of order) {
-    if (riskLevels[level] && riskLevels[level] > 0) return level
-  }
-  return null
 }

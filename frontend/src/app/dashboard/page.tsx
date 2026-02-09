@@ -10,11 +10,10 @@ import {
   Eye, PlayCircle, Pencil, Check
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
-import { ToastProvider, useToast } from '@/lib/toast'
+import { useToast } from '@/lib/toast'
 import { useWalkthrough, WalkthroughOverlay, WalkthroughButton } from '@/lib/walkthrough'
 import { Navigation } from '@/lib/navigation'
-
-type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
+import { type RiskLevel } from '@/lib/risk'
 
 const riskColors: Record<RiskLevel, string> = {
   critical: 'text-red-400 bg-red-500/10 border-red-500/20',
@@ -30,12 +29,8 @@ const riskGlow: Record<RiskLevel, string> = {
   low: 'shadow-none',
 }
 
-export default function Dashboard() {
-  return (
-    <ToastProvider>
-      <DashboardContent />
-    </ToastProvider>
-  )
+export default function DashboardPage() {
+  return <DashboardContent />
 }
 
 function DashboardContent() {
@@ -284,7 +279,7 @@ function DashboardContent() {
     >
       <Navigation>
         {/* Search */}
-        <div className="relative hidden sm:block" data-tour="search">
+        <div className="relative" data-tour="search">
           <label htmlFor="search-input" className="sr-only">Search contracts</label>
           <input
             id="search-input"
@@ -292,13 +287,13 @@ function DashboardContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Search contracts..."
-            className="w-40 lg:w-64 pl-10 pr-4 py-2 bg-ink-900/60 border border-ink-700/50 rounded-lg
+            placeholder="Search..."
+            className="w-28 sm:w-40 lg:w-64 pl-8 sm:pl-10 pr-4 py-2 bg-ink-900/60 border border-ink-700/50 rounded-lg
                      text-sm text-ink-100 placeholder:text-ink-500
                      focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/10
                      transition-all duration-200"
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
+          <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
           {searching && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent animate-spin" />
           )}

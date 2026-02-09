@@ -34,7 +34,7 @@ export default function DocumentError({
             Retry
           </button>
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-2 px-5 py-2.5 bg-ink-800 text-ink-200 rounded-xl hover:bg-ink-700 transition-colors"
           >
             <Home className="w-4 h-4" />

@@ -8,6 +8,7 @@ import {
   Zap, Database, ArrowRight, X, SlidersHorizontal, Sparkles
 } from 'lucide-react'
 import { api, Document, SearchResult } from '@/lib/api'
+import { useToast } from '@/lib/toast'
 import { Navigation } from '@/lib/navigation'
 
 type SearchMode = 'hybrid' | 'semantic' | 'keyword'
@@ -41,6 +42,8 @@ export default function SearchPage() {
   const [resultLimit, setResultLimit] = useState(20)
   const [showFilters, setShowFilters] = useState(false)
 
+  const { error: showError } = useToast()
+
   useEffect(() => {
     loadDocuments()
   }, [])
@@ -51,6 +54,7 @@ export default function SearchPage() {
       setDocuments(response.documents.filter(d => d.status === 'completed'))
     } catch (error) {
       console.error('Failed to load documents:', error)
+      showError('Failed to load document list.')
     }
   }
 
@@ -69,6 +73,7 @@ export default function SearchPage() {
       setResults(response.results)
     } catch (error) {
       console.error('Search failed:', error)
+      showError('Search failed. Please try again.')
       setResults([])
     } finally {
       setLoading(false)
@@ -108,7 +113,7 @@ export default function SearchPage() {
     <div className="min-h-screen">
       <Navigation />
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Search Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -116,7 +121,7 @@ export default function SearchPage() {
           className="max-w-3xl mx-auto"
         >
           <div className="text-center mb-8">
-            <h2 className="font-display text-3xl font-bold tracking-tight mb-2">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-ink-50 mb-2">
               Search Your Contract Portfolio
             </h2>
             <p className="text-ink-400">

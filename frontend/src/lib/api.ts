@@ -77,7 +77,7 @@ export interface AnalysisSummary {
     medium: number
     low: number
   }
-  overall_risk: string
+  overall_risk: 'critical' | 'high' | 'medium' | 'low'
   clause_breakdown: Record<string, { total: number; risk_levels: Record<string, number> }>
   high_risk_highlights: Array<{
     clause_type: string
@@ -88,19 +88,37 @@ export interface AnalysisSummary {
 }
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30000)
 
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`)
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    })
+
+    if (!response.ok) {
+      let detail = ''
+      try {
+        const body = await response.json()
+        detail = body.error || body.detail || body.message || ''
+      } catch { /* ignore parse errors */ }
+      throw new Error(detail || `Request failed (${response.status})`)
+    }
+
+    return response.json()
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeout)
   }
-
-  return response.json()
 }
 
 export const api = {

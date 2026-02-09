@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ArrowLeft, Network, Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2,
-  Filter, RefreshCw, Building2, User, Calendar, DollarSign,
+  Network, Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2,
+  RefreshCw, Building2, User, Calendar, DollarSign,
   MapPin, Clock, Percent, FileText, Link2, ChevronRight, Quote
 } from 'lucide-react'
 import { api, Document, GraphData, Entity } from '@/lib/api'
+import { useToast } from '@/lib/toast'
 import { Navigation } from '@/lib/navigation'
 
 const entityTypeConfig: Record<string, { icon: typeof Building2; color: string; bg: string }> = {
@@ -99,6 +100,7 @@ export default function GraphPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [draggedNode, setDraggedNode] = useState<Node | null>(null)
+  const { error: showError } = useToast()
 
   useEffect(() => {
     loadData()
@@ -114,10 +116,10 @@ export default function GraphPage() {
 
       if (graph && graph.nodes.length > 0) {
         setGraphData(graph)
-        // initializeGraph will be called by effect when graphData changes
       }
     } catch (error) {
       console.error('Failed to load graph:', error)
+      showError('Failed to load knowledge graph data.')
     } finally {
       setLoading(false)
     }

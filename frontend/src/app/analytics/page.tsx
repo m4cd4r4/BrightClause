@@ -8,24 +8,9 @@ import {
   TrendingUp, Activity, Loader2, ChevronRight, Eye
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
+import { useToast } from '@/lib/toast'
 import { Navigation } from '@/lib/navigation'
-
-type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
-
-const riskConfig: Record<RiskLevel, { color: string; bg: string; border: string; label: string }> = {
-  critical: { color: 'text-red-400', bg: 'bg-red-500', border: 'border-red-500/30', label: 'Critical' },
-  high: { color: 'text-orange-400', bg: 'bg-orange-500', border: 'border-orange-500/30', label: 'High' },
-  medium: { color: 'text-amber-400', bg: 'bg-amber-500', border: 'border-amber-500/30', label: 'Medium' },
-  low: { color: 'text-emerald-400', bg: 'bg-emerald-500', border: 'border-emerald-500/30', label: 'Low' },
-}
-
-const riskCellColors: Record<string, string> = {
-  critical: 'bg-red-500/60',
-  high: 'bg-orange-500/50',
-  medium: 'bg-amber-500/40',
-  low: 'bg-emerald-500/30',
-  none: 'bg-ink-800/30',
-}
+import { type RiskLevel, riskConfig, riskCellColors, formatClauseType, getTopRisk } from '@/lib/risk'
 
 interface DocAnalysis {
   doc: Document
@@ -37,6 +22,7 @@ export default function AnalyticsPage() {
   const [analyses, setAnalyses] = useState<Map<string, AnalysisSummary>>(new Map())
   const [loading, setLoading] = useState(true)
   const [loadingAnalyses, setLoadingAnalyses] = useState(false)
+  const { error: showError } = useToast()
 
   useEffect(() => {
     loadData()
@@ -49,7 +35,6 @@ export default function AnalyticsPage() {
       setDocuments(completed)
       setLoading(false)
 
-      // Load analyses for all completed documents
       setLoadingAnalyses(true)
       const summaries = new Map<string, AnalysisSummary>()
       const results = await Promise.allSettled(
@@ -63,6 +48,7 @@ export default function AnalyticsPage() {
       setAnalyses(summaries)
     } catch (err) {
       console.error('Failed to load analytics data:', err)
+      showError('Failed to load analytics data. Please try again.')
     } finally {
       setLoading(false)
       setLoadingAnalyses(false)
@@ -335,8 +321,8 @@ export default function AnalyticsPage() {
                         })}
                         <td className="px-4 py-3 text-center">
                           <span className={`inline-flex px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase tracking-wide
-                            ${summary?.overall_risk ? riskConfig[summary.overall_risk as RiskLevel]?.color : 'text-ink-500'}
-                            ${summary?.overall_risk ? riskConfig[summary.overall_risk as RiskLevel]?.bg + '/10' : 'bg-ink-800/30'}`}>
+                            ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.color : 'text-ink-500'}
+                            ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.bg + '/10' : 'bg-ink-800/30'}`}>
                             {summary?.overall_risk || '?'}
                           </span>
                         </td>
@@ -379,7 +365,7 @@ export default function AnalyticsPage() {
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-medium text-ink-300">{formatClauseType(type)}</span>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-mono ${topRisk ? riskConfig[topRisk as RiskLevel]?.color : 'text-ink-500'}`}>
+                            <span className={`text-[10px] font-mono ${topRisk ? riskConfig[topRisk]?.color : 'text-ink-500'}`}>
                               {topRisk?.toUpperCase() || 'N/A'}
                             </span>
                             <span className="text-xs font-mono text-ink-400">{data.total}</span>
@@ -390,7 +376,7 @@ export default function AnalyticsPage() {
                             initial={{ width: 0 }}
                             animate={{ width: `${pct}%` }}
                             transition={{ delay: 0.4 + i * 0.03, duration: 0.5 }}
-                            className={`h-full rounded-full ${topRisk ? riskConfig[topRisk as RiskLevel]?.bg : 'bg-ink-600'}`}
+                            className={`h-full rounded-full ${topRisk ? riskConfig[topRisk]?.bg : 'bg-ink-600'}`}
                             style={{ opacity: 0.6 }}
                           />
                         </div>
@@ -518,8 +504,8 @@ export default function AnalyticsPage() {
                             <td className="px-4 py-3 text-center text-xs font-mono text-emerald-400">{summary?.risk_summary.low || 0}</td>
                             <td className="px-4 py-3 text-center">
                               <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase
-                                ${summary?.overall_risk ? riskConfig[summary.overall_risk as RiskLevel]?.color : 'text-ink-500'}
-                                ${summary?.overall_risk ? riskConfig[summary.overall_risk as RiskLevel]?.bg + '/10' : 'bg-ink-800/30'}`}>
+                                ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.color : 'text-ink-500'}
+                                ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.bg + '/10' : 'bg-ink-800/30'}`}>
                                 {summary?.overall_risk || '?'}
                               </span>
                             </td>
@@ -561,17 +547,4 @@ export default function AnalyticsPage() {
       </main>
     </div>
   )
-}
-
-function formatClauseType(type: string): string {
-  return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-}
-
-function getTopRisk(riskLevels?: Record<string, number>): RiskLevel | null {
-  if (!riskLevels) return null
-  const order: RiskLevel[] = ['critical', 'high', 'medium', 'low']
-  for (const level of order) {
-    if (riskLevels[level] && riskLevels[level] > 0) return level
-  }
-  return null
 }

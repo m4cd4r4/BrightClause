@@ -5,42 +5,15 @@ import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
-  ArrowLeft, FileText, AlertTriangle, CheckCircle, Shield,
-  Clock, Loader2, ChevronDown, ChevronRight, Network,
-  Filter, Download, Zap, RefreshCw, FileSpreadsheet, FileType, FileJson
+  FileText, AlertTriangle, Shield,
+  Loader2, ChevronDown, ChevronRight, Network,
+  Download, Zap, FileSpreadsheet, FileType, FileJson
 } from 'lucide-react'
 import { api, Document, Clause, AnalysisSummary, Entity } from '@/lib/api'
+import { useToast } from '@/lib/toast'
 import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON } from '@/lib/export-lazy'
 import { Navigation } from '@/lib/navigation'
-
-type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
-
-const riskConfig: Record<RiskLevel, { color: string; bg: string; border: string; glow: string }> = {
-  critical: {
-    color: 'text-red-400',
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/30',
-    glow: 'shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-  },
-  high: {
-    color: 'text-orange-400',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/30',
-    glow: 'shadow-[0_0_10px_rgba(249,115,22,0.2)]'
-  },
-  medium: {
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
-    glow: ''
-  },
-  low: {
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/30',
-    glow: ''
-  },
-}
+import { type RiskLevel, riskConfig } from '@/lib/risk'
 
 const clauseTypeLabels: Record<string, string> = {
   termination: 'Termination',
@@ -79,6 +52,7 @@ export default function DocumentDetailPage() {
   const [exporting, setExporting] = useState<string | null>(null)
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { error: showError, success: showSuccess } = useToast()
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -109,6 +83,7 @@ export default function DocumentDetailPage() {
       setEntities(entitiesRes)
     } catch (error) {
       console.error('Failed to load document:', error)
+      showError('Failed to load document data.')
     } finally {
       setLoading(false)
     }
@@ -185,6 +160,7 @@ export default function DocumentDetailPage() {
       }
     } catch (error) {
       console.error('Export failed:', error)
+      showError(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setExporting(null)
     }
@@ -193,22 +169,8 @@ export default function DocumentDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <header className="border-b border-ink-800/50 bg-ink-950/80 backdrop-blur-sm sticky top-0 z-50">
-          <div className="max-w-[1800px] mx-auto px-6 py-4">
-            <div className="flex items-center gap-4">
-              <div className="skeleton w-9 h-9 rounded-lg" />
-              <div className="space-y-2">
-                <div className="skeleton h-5 w-64 rounded" />
-                <div className="flex gap-3">
-                  <div className="skeleton h-3 w-16 rounded" />
-                  <div className="skeleton h-3 w-20 rounded" />
-                  <div className="skeleton h-3 w-24 rounded" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-        <main className="max-w-[1800px] mx-auto px-6 py-8">
+        <Navigation />
+        <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
             <div className="skeleton h-28 rounded-lg col-span-2 md:col-span-3 lg:col-span-2" />
             {Array.from({ length: 4 }).map((_, i) => (
@@ -339,7 +301,7 @@ export default function DocumentDetailPage() {
         </div>
       </Navigation>
 
-      <main className="max-w-[1800px] mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Risk Summary */}
         {analysis && analysis.clauses_extracted > 0 ? (
           <motion.div
@@ -356,12 +318,12 @@ export default function DocumentDetailPage() {
                 <div>
                   <p className="text-sm text-ink-400">Overall Risk Assessment</p>
                   <p className={`text-3xl font-display font-bold mt-1 capitalize
-                              ${riskConfig[analysis.overall_risk as RiskLevel]?.color || 'text-ink-300'}`}>
+                              ${riskConfig[analysis.overall_risk]?.color || 'text-ink-300'}`}>
                     {analysis.overall_risk}
                   </p>
                 </div>
                 <Shield className={`w-12 h-12 ${
-                  riskConfig[analysis.overall_risk as RiskLevel]?.color || 'text-ink-600'
+                  riskConfig[analysis.overall_risk]?.color || 'text-ink-600'
                 }`} />
               </div>
             </div>
@@ -525,7 +487,7 @@ export default function DocumentDetailPage() {
                                   <span className="font-medium text-ink-100">
                                     {clauseTypeLabels[clause.clause_type] || clause.clause_type.replace(/_/g, ' ')}
                                   </span>
-                                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${risk.color} ${risk.bg}`}>
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${risk.color} ${risk.bg}/10`}>
                                     {clause.risk_level}
                                   </span>
                                   {clause.confidence && (
