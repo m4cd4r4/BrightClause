@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { api, Document, Clause, AnalysisSummary, Entity } from '@/lib/api'
 import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON } from '@/lib/export-lazy'
+import { Navigation } from '@/lib/navigation'
 
 type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
 
@@ -250,117 +251,95 @@ export default function DocumentDetailPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-ink-800/50 bg-ink-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.back()}
-                className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
-                aria-label="Go back"
-              >
-                <ArrowLeft className="w-5 h-5 text-ink-400" />
-              </button>
-              <div>
-                <h1 className="font-display text-xl font-bold tracking-tight">{document.filename}</h1>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-xs text-ink-500">
-                    {document.page_count ? `${document.page_count} pages` : 'Processing...'}
-                  </span>
-                  <span className="text-xs text-ink-600">•</span>
-                  <span className="text-xs text-ink-500">{document.chunk_count} chunks</span>
-                  {analysis && (
-                    <>
-                      <span className="text-xs text-ink-600">•</span>
-                      <span className="text-xs text-ink-500">{analysis.clauses_extracted} clauses</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Link
-                href={`/documents/${documentId}/graph`}
-                className="flex items-center gap-2 px-4 py-2 bg-ink-800 text-ink-200 rounded-lg
-                         hover:bg-ink-700 transition-colors"
-              >
-                <Network className="w-4 h-4" />
-                Knowledge Graph
-              </Link>
-
-              {/* Export Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
-                  disabled={exporting !== null}
-                  className="flex items-center gap-2 px-4 py-2 bg-ink-800 text-ink-200 rounded-lg
-                           hover:bg-ink-700 transition-colors disabled:opacity-50"
-                >
-                  {exporting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
-                  {exporting ? 'Exporting...' : 'Export'}
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-
-                <AnimatePresence>
-                  {showExportMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-48 bg-ink-900 border border-ink-700 rounded-lg shadow-xl overflow-hidden z-50"
-                    >
-                      <button
-                        onClick={() => handleExport('pdf')}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                      >
-                        <FileText className="w-4 h-4 text-red-400" />
-                        PDF Report
-                      </button>
-                      <button
-                        onClick={() => handleExport('excel')}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                      >
-                        <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                        Excel (.xlsx)
-                      </button>
-                      <button
-                        onClick={() => handleExport('word')}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                      >
-                        <FileType className="w-4 h-4 text-blue-400" />
-                        Word (.docx)
-                      </button>
-                      <div className="border-t border-ink-700" />
-                      <button
-                        onClick={() => handleExport('csv')}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                      >
-                        <FileSpreadsheet className="w-4 h-4 text-ink-400" />
-                        CSV (Clauses)
-                      </button>
-                      <button
-                        onClick={() => handleExport('json')}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                      >
-                        <FileJson className="w-4 h-4 text-amber-400" />
-                        JSON (Full Data)
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
+      <Navigation>
+        {/* Document Info */}
+        <div className="hidden sm:flex items-center gap-3 text-sm text-ink-400">
+          <FileText className="w-4 h-4" />
+          <span className="max-w-[200px] truncate font-medium text-ink-200">{document.filename}</span>
+          <span className="text-ink-600">|</span>
+          <span className="text-[11px] font-mono">
+            {document.page_count && `${document.page_count}p`}
+            {analysis && ` / ${analysis.clauses_extracted} clauses`}
+          </span>
         </div>
-      </header>
 
-      <main className="max-w-[1800px] mx-auto px-6 py-8">
+        <Link
+          href={`/documents/${documentId}/graph`}
+          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
+                   hover:bg-ink-700 transition-colors text-sm"
+        >
+          <Network className="w-4 h-4" />
+          <span className="hidden sm:inline">Graph</span>
+        </Link>
+
+        {/* Export Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            disabled={exporting !== null}
+            className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
+                     hover:bg-ink-700 transition-colors disabled:opacity-50 text-sm"
+          >
+            {exporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'Export'}</span>
+            <ChevronDown className="w-3 h-3" />
+          </button>
+
+          <AnimatePresence>
+            {showExportMenu && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute right-0 mt-2 w-48 bg-ink-900 border border-ink-700 rounded-lg shadow-xl overflow-hidden z-50"
+              >
+                <button
+                  onClick={() => handleExport('pdf')}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
+                >
+                  <FileText className="w-4 h-4 text-red-400" />
+                  PDF Report
+                </button>
+                <button
+                  onClick={() => handleExport('excel')}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                  Excel (.xlsx)
+                </button>
+                <button
+                  onClick={() => handleExport('word')}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
+                >
+                  <FileType className="w-4 h-4 text-blue-400" />
+                  Word (.docx)
+                </button>
+                <div className="border-t border-ink-700" />
+                <button
+                  onClick={() => handleExport('csv')}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-ink-400" />
+                  CSV (Clauses)
+                </button>
+                <button
+                  onClick={() => handleExport('json')}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
+                >
+                  <FileJson className="w-4 h-4 text-amber-400" />
+                  JSON (Full Data)
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </Navigation>
+
+      <main className="max-w-[1800px] mx-auto px-4 sm:px-6 py-8">
         {/* Risk Summary */}
         {analysis && analysis.clauses_extracted > 0 ? (
           <motion.div

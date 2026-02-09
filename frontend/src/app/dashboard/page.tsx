@@ -7,11 +7,12 @@ import {
   FileText, Search, Upload, AlertTriangle, CheckCircle,
   Clock, Database, Zap, ChevronRight, X, Loader2,
   FileWarning, Shield, Network, TrendingUp, BarChart3,
-  ExternalLink, Eye, PlayCircle, Pencil, Check
+  Eye, PlayCircle, Pencil, Check
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { ToastProvider, useToast } from '@/lib/toast'
 import { useWalkthrough, WalkthroughOverlay, WalkthroughButton } from '@/lib/walkthrough'
+import { Navigation } from '@/lib/navigation'
 
 type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
 
@@ -61,6 +62,7 @@ function DashboardContent() {
   const [searching, setSearching] = useState(false)
   const [renamingDoc, setRenamingDoc] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -194,6 +196,68 @@ function DashboardContent() {
     setRenamingDoc(null)
   }
 
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const files = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.pdf'))
+    if (files.length === 0) {
+      showError('Only PDF files are supported.')
+      return
+    }
+    setUploading(true)
+    let uploaded = 0
+    for (const file of files) {
+      if (file.size > 50 * 1024 * 1024) {
+        showError(`"${file.name}" is too large (max 50MB). Skipped.`)
+        continue
+      }
+      try {
+        await api.documents.upload(file)
+        uploaded++
+      } catch {
+        showError(`Failed to upload "${file.name}".`)
+      }
+    }
+    if (uploaded > 0) {
+      showSuccess(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded successfully.`)
+      await loadData()
+    }
+    setUploading(false)
+  }
+
+  const handleMultiUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
+    if (files.length === 0) return
+    if (files.length === 1) {
+      handleUpload(event)
+      return
+    }
+    setUploading(true)
+    let uploaded = 0
+    for (const file of files) {
+      if (file.size > 50 * 1024 * 1024) {
+        showError(`"${file.name}" is too large (max 50MB). Skipped.`)
+        continue
+      }
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        showError(`"${file.name}" is not a PDF. Skipped.`)
+        continue
+      }
+      try {
+        await api.documents.upload(file)
+        uploaded++
+      } catch {
+        showError(`Failed to upload "${file.name}".`)
+      }
+    }
+    if (uploaded > 0) {
+      showSuccess(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded successfully.`)
+      await loadData()
+    }
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const navigateToDocument = (docId: string) => {
     router.push(`/documents/${docId}`)
   }
@@ -212,90 +276,86 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
-      {/* Header */}
-      <header className="border-b border-ink-800/50 bg-ink-950/95 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-[1920px] mx-auto px-8 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent via-accent to-accent-dark flex items-center justify-center shadow-lg shadow-accent/20">
-                <Shield className="w-6 h-6 text-ink-950" />
-              </div>
-              <div>
-                <h1 className="font-display text-2xl font-bold tracking-tight text-ink-50">ContractClarity</h1>
-                <p className="text-[11px] text-ink-500 tracking-wide uppercase font-mono">M&A Due Diligence Platform</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-5">
-              {/* Search */}
-              <div className="relative" data-tour="search">
-                <label htmlFor="search-input" className="sr-only">Search contracts</label>
-                <input
-                  id="search-input"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  placeholder="Search contracts..."
-                  className="w-48 sm:w-64 lg:w-96 pl-11 pr-4 py-2.5 bg-ink-900/60 border border-ink-700/50 rounded-xl
-                           text-sm text-ink-100 placeholder:text-ink-500
-                           focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/10
-                           transition-all duration-200"
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
-                {searching && (
-                  <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-accent animate-spin" />
-                )}
-              </div>
-
-              {/* Advanced Search Link */}
-              <button
-                type="button"
-                onClick={() => router.push('/search')}
-                className="text-sm text-ink-400 hover:text-accent transition-colors font-medium"
-              >
-                Advanced Search
-              </button>
-
-              {/* Tour Button */}
-              <WalkthroughButton onClick={walkthrough.restart} />
-
-              {/* Upload Button */}
-              <button
-                type="button"
-                data-tour="upload"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-2.5 px-5 py-2.5 bg-accent text-ink-950 font-semibold rounded-xl
-                         hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
-                         transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {uploading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )}
-                Upload Contract
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleUpload}
-                className="hidden"
-              />
-            </div>
-          </div>
+    <div
+      className="min-h-screen bg-ink-950"
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+      onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOver(false) }}
+      onDrop={handleDrop}
+    >
+      <Navigation>
+        {/* Search */}
+        <div className="relative hidden sm:block" data-tour="search">
+          <label htmlFor="search-input" className="sr-only">Search contracts</label>
+          <input
+            id="search-input"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="Search contracts..."
+            className="w-40 lg:w-64 pl-10 pr-4 py-2 bg-ink-900/60 border border-ink-700/50 rounded-lg
+                     text-sm text-ink-100 placeholder:text-ink-500
+                     focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/10
+                     transition-all duration-200"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
+          {searching && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent animate-spin" />
+          )}
         </div>
-      </header>
 
-      <main className="max-w-[1920px] mx-auto px-8 py-8">
+        <WalkthroughButton onClick={walkthrough.restart} />
+
+        <button
+          type="button"
+          data-tour="upload"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 px-4 py-2 bg-accent text-ink-950 font-semibold rounded-lg
+                   hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
+                   transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        >
+          {uploading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Upload className="w-4 h-4" />
+          )}
+          <span className="hidden sm:inline">Upload</span>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf"
+          multiple
+          onChange={handleMultiUpload}
+          className="hidden"
+        />
+      </Navigation>
+
+      {/* Drag & Drop Overlay */}
+      <AnimatePresence>
+        {dragOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-ink-950/80 backdrop-blur-sm flex items-center justify-center pointer-events-none"
+          >
+            <div className="p-12 border-2 border-dashed border-accent/50 rounded-2xl bg-accent/5 text-center">
+              <Upload className="w-12 h-12 text-accent mx-auto mb-4" />
+              <p className="text-xl font-display font-semibold text-ink-100">Drop PDF files here</p>
+              <p className="text-sm text-ink-500 mt-2">Supports multiple files up to 50MB each</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Stats Row - Data Dense */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8"
           data-tour="stats"
         >
           {loading ? (
@@ -418,10 +478,10 @@ function DashboardContent() {
           {/* Document List - Enhanced */}
           <div className="lg:col-span-2" data-tour="documents">
             <div className="card overflow-hidden">
-              <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-ink-800/50 bg-ink-925">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="font-display text-xl font-semibold text-ink-50">Contract Portfolio</h2>
+                    <h2 className="font-display text-lg sm:text-xl font-semibold text-ink-50">Contract Portfolio</h2>
                     <p className="text-[11px] text-ink-500 mt-1 font-mono">
                       {documents.length} documents · Click to analyze
                     </p>

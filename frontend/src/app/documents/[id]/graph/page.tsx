@@ -10,6 +10,7 @@ import {
   MapPin, Clock, Percent, FileText, Link2, ChevronRight, Quote
 } from 'lucide-react'
 import { api, Document, GraphData, Entity } from '@/lib/api'
+import { Navigation } from '@/lib/navigation'
 
 const entityTypeConfig: Record<string, { icon: typeof Building2; color: string; bg: string }> = {
   party: { icon: Building2, color: 'text-blue-400', bg: 'bg-blue-500' },
@@ -603,78 +604,44 @@ export default function GraphPage() {
   return (
     <div ref={containerRef} className={`min-h-screen flex flex-col bg-ink-950 ${isFullscreen ? 'fullscreen-container' : ''}`}
          style={isFullscreen ? { width: '100vw', height: '100vh' } : undefined}>
-      {/* Header */}
-      <header className="border-b border-ink-800/50 bg-ink-950/80 backdrop-blur-sm z-50">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.back()}
-                className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
-                aria-label="Go back"
-              >
-                <ArrowLeft className="w-5 h-5 text-ink-400" />
-              </button>
-              <div>
-                <h1 className="font-display text-xl font-bold tracking-tight">
-                  Knowledge Graph
-                </h1>
-                <p className="text-xs text-ink-500">{contractDoc?.filename}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {graphData && (
-                <div className="flex items-center gap-4 mr-4 text-sm text-ink-400">
-                  <span>{graphData.stats.total_entities} entities</span>
-                  <span className="text-ink-600">|</span>
-                  <span>{graphData.stats.total_relationships} relationships</span>
-                </div>
-              )}
-              <button
-                onClick={() => setZoom((z) => Math.min(3, z * 1.2))}
-                className="p-2 hover:bg-ink-800 rounded-lg transition-colors group relative"
-                title="Zoom In"
-              >
-                <ZoomIn className="w-4 h-4 text-ink-400 group-hover:text-ink-200" />
-              </button>
-              <button
-                onClick={() => setZoom((z) => Math.max(0.3, z * 0.8))}
-                className="p-2 hover:bg-ink-800 rounded-lg transition-colors group relative"
-                title="Zoom Out"
-              >
-                <ZoomOut className="w-4 h-4 text-ink-400 group-hover:text-ink-200" />
-              </button>
-              <button
-                onClick={toggleFullscreen}
-                className="p-2 hover:bg-ink-800 rounded-lg transition-colors group relative"
-                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-4 h-4 text-ink-400 group-hover:text-ink-200" />
-                ) : (
-                  <Maximize2 className="w-4 h-4 text-ink-400 group-hover:text-ink-200" />
-                )}
-              </button>
-              <button
-                onClick={resetView}
-                className="p-2 hover:bg-ink-800 rounded-lg transition-colors group relative"
-                title="Reset View"
-              >
-                <RefreshCw className="w-4 h-4 text-ink-400 group-hover:text-ink-200" />
-              </button>
-              <Link
-                href={`/documents/${documentId}`}
-                className="flex items-center gap-2 px-4 py-2 bg-ink-800 text-ink-200 rounded-lg
-                         hover:bg-ink-700 transition-colors"
-              >
-                <FileText className="w-4 h-4" />
-                Clauses
-              </Link>
-            </div>
+      <Navigation>
+        {graphData && (
+          <div className="hidden sm:flex items-center gap-3 text-sm text-ink-400">
+            <span className="font-mono text-[11px]">{graphData.stats.total_entities} entities</span>
+            <span className="text-ink-600">|</span>
+            <span className="font-mono text-[11px]">{graphData.stats.total_relationships} rels</span>
           </div>
-        </div>
-      </header>
+        )}
+        <button
+          onClick={() => setZoom((z) => Math.min(3, z * 1.2))}
+          className="p-2 hover:bg-ink-800 rounded-lg transition-colors" title="Zoom In"
+        >
+          <ZoomIn className="w-4 h-4 text-ink-400" />
+        </button>
+        <button
+          onClick={() => setZoom((z) => Math.max(0.3, z * 0.8))}
+          className="p-2 hover:bg-ink-800 rounded-lg transition-colors" title="Zoom Out"
+        >
+          <ZoomOut className="w-4 h-4 text-ink-400" />
+        </button>
+        <button
+          onClick={toggleFullscreen}
+          className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
+          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+        >
+          {isFullscreen ? <Minimize2 className="w-4 h-4 text-ink-400" /> : <Maximize2 className="w-4 h-4 text-ink-400" />}
+        </button>
+        <button onClick={resetView} className="p-2 hover:bg-ink-800 rounded-lg transition-colors" title="Reset View">
+          <RefreshCw className="w-4 h-4 text-ink-400" />
+        </button>
+        <Link
+          href={`/documents/${documentId}`}
+          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg hover:bg-ink-700 transition-colors text-sm"
+        >
+          <FileText className="w-4 h-4" />
+          <span className="hidden sm:inline">Clauses</span>
+        </Link>
+      </Navigation>
 
       <div className="flex-1 flex">
         {/* Entity Type Filter */}

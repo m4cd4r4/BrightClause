@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Search, Shield, FileText, Loader2, Filter, ChevronDown,
+  Search, FileText, Loader2,
   Zap, Database, ArrowRight, X, SlidersHorizontal, Sparkles
 } from 'lucide-react'
 import { api, Document, SearchResult } from '@/lib/api'
+import { Navigation } from '@/lib/navigation'
 
 type SearchMode = 'hybrid' | 'semantic' | 'keyword'
 
@@ -105,31 +106,9 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-ink-800/50 bg-ink-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center">
-                <Shield className="w-5 h-5 text-ink-950" />
-              </div>
-              <div>
-                <h1 className="font-display text-xl font-bold tracking-tight">ContractClarity</h1>
-                <p className="text-xs text-ink-500">Advanced Contract Search</p>
-              </div>
-            </Link>
+      <Navigation />
 
-            <Link
-              href="/dashboard"
-              className="text-sm text-ink-400 hover:text-ink-200 transition-colors"
-            >
-              Back to Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-[1400px] mx-auto px-6 py-12">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Search Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
