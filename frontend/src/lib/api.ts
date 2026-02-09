@@ -127,6 +127,11 @@ export const api = {
       if (!response.ok) throw new Error('Upload failed')
       return response.json() as Promise<Document>
     },
+    rename: (id: string, filename: string) =>
+      fetchAPI<Document>(`/documents/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ filename }),
+      }),
     delete: (id: string) => fetch(`${API_URL}/documents/${id}`, { method: 'DELETE' }),
     chunks: (id: string) => fetchAPI<{ chunks: Array<{ id: string; content: string; page_number: number }> }>(
       `/documents/${id}/chunks`

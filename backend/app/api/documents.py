@@ -209,6 +209,40 @@ async def get_document(
     )
 
 
+class RenameRequest(BaseModel):
+    """Rename a document."""
+    filename: str
+
+
+@router.patch("/{document_id}", response_model=DocumentResponse)
+async def rename_document(
+    document_id: UUID,
+    body: RenameRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Rename a document."""
+    query = select(Document).where(Document.id == document_id).options(selectinload(Document.chunks))
+    result = await db.execute(query)
+    doc = result.scalar_one_or_none()
+
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    doc.filename = body.filename.strip()
+    await db.commit()
+
+    return DocumentResponse(
+        id=doc.id,
+        filename=doc.filename,
+        file_size=doc.file_size,
+        file_type=doc.file_type,
+        page_count=doc.page_count,
+        status=doc.status,
+        chunk_count=len(doc.chunks) if doc.chunks else 0,
+        metadata=doc.doc_metadata,
+    )
+
+
 @router.delete("/{document_id}")
 async def delete_document(
     document_id: UUID,

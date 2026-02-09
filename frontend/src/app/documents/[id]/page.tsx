@@ -191,11 +191,44 @@ export default function DocumentDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto" />
-          <p className="mt-4 text-ink-400">Loading document...</p>
-        </div>
+      <div className="min-h-screen">
+        <header className="border-b border-ink-800/50 bg-ink-950/80 backdrop-blur-sm sticky top-0 z-50">
+          <div className="max-w-[1800px] mx-auto px-6 py-4">
+            <div className="flex items-center gap-4">
+              <div className="skeleton w-9 h-9 rounded-lg" />
+              <div className="space-y-2">
+                <div className="skeleton h-5 w-64 rounded" />
+                <div className="flex gap-3">
+                  <div className="skeleton h-3 w-16 rounded" />
+                  <div className="skeleton h-3 w-20 rounded" />
+                  <div className="skeleton h-3 w-24 rounded" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="max-w-[1800px] mx-auto px-6 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+            <div className="skeleton h-28 rounded-lg col-span-2 md:col-span-3 lg:col-span-2" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="skeleton h-28 rounded-lg" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <div className="card p-4 space-y-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="skeleton h-8 rounded-lg" />
+                ))}
+              </div>
+            </div>
+            <div className="lg:col-span-3 space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="skeleton h-20 rounded-lg" />
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
     )
   }

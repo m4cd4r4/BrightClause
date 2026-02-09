@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # Auth
     api_key: str = ""  # Set in production; empty = auth disabled
 
+    # CORS
+    cors_origins: str = ""  # Comma-separated extra origins (e.g. "https://contractclarity.com,https://www.contractclarity.com")
+
     # Database
     database_url: str = "postgresql://contractclarity:contractclarity_dev@localhost:5433/contractclarity"
 

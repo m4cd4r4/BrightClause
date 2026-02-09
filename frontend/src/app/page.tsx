@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { ToastProvider, useToast } from '@/lib/toast'
+import { useWalkthrough, WalkthroughOverlay, WalkthroughButton } from '@/lib/walkthrough'
 
 type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
 
@@ -59,6 +60,7 @@ function DashboardContent() {
   }>>([])
   const [searching, setSearching] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const walkthrough = useWalkthrough()
 
   const loadData = useCallback(async () => {
     try {
@@ -183,7 +185,7 @@ function DashboardContent() {
 
             <div className="flex items-center gap-5">
               {/* Search */}
-              <div className="relative">
+              <div className="relative" data-tour="search">
                 <label htmlFor="search-input" className="sr-only">Search contracts</label>
                 <input
                   id="search-input"
@@ -212,9 +214,13 @@ function DashboardContent() {
                 Advanced Search
               </button>
 
+              {/* Tour Button */}
+              <WalkthroughButton onClick={walkthrough.restart} />
+
               {/* Upload Button */}
               <button
                 type="button"
+                data-tour="upload"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 className="flex items-center gap-2.5 px-5 py-2.5 bg-accent text-ink-950 font-semibold rounded-xl
@@ -246,53 +252,70 @@ function DashboardContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8"
+          data-tour="stats"
         >
-          <StatCard
-            icon={<FileText className="w-5 h-5" />}
-            value={stats?.documents_indexed ?? 0}
-            label="Documents Indexed"
-            sublabel="Ready for analysis"
-            delay={0}
-            onClick={() => router.push('/search')}
-          />
-          <StatCard
-            icon={<Database className="w-5 h-5" />}
-            value={stats?.chunks_with_embeddings ?? 0}
-            label="Text Chunks"
-            sublabel="Vector embeddings"
-            delay={0.05}
-            onClick={() => router.push('/search')}
-          />
-          <StatCard
-            icon={<Zap className="w-5 h-5" />}
-            value={stats?.clauses_extracted ?? 0}
-            label="Clauses Extracted"
-            sublabel="AI-powered analysis"
-            delay={0.1}
-            onClick={() => {
-              // Navigate to first completed document with clauses
-              const docWithClauses = documents.find(d => d.status === 'completed')
-              if (docWithClauses) {
-                router.push(`/documents/${docWithClauses.id}`)
-              } else {
-                router.push('/search')
-              }
-            }}
-          />
-          <StatCard
-            icon={<TrendingUp className="w-5 h-5" />}
-            value={documents.filter(d => d.status === 'completed').length}
-            label="Ready for Review"
-            sublabel="Completed processing"
-            delay={0.15}
-            onClick={() => {
-              // Select first completed document
-              const completed = documents.find(d => d.status === 'completed')
-              if (completed) {
-                loadAnalysis(completed.id)
-              }
-            }}
-          />
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="card p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="skeleton w-10 h-10 rounded-xl" />
+                  <div className="skeleton w-4 h-4 rounded" />
+                </div>
+                <div className="mt-2 space-y-2">
+                  <div className="skeleton h-8 w-16 rounded" />
+                  <div className="skeleton h-4 w-32 rounded" />
+                  <div className="skeleton h-3 w-24 rounded" />
+                </div>
+              </div>
+            ))
+          ) : (
+            <>
+              <StatCard
+                icon={<FileText className="w-5 h-5" />}
+                value={stats?.documents_indexed ?? 0}
+                label="Documents Indexed"
+                sublabel="Ready for analysis"
+                delay={0}
+                onClick={() => router.push('/search')}
+              />
+              <StatCard
+                icon={<Database className="w-5 h-5" />}
+                value={stats?.chunks_with_embeddings ?? 0}
+                label="Text Chunks"
+                sublabel="Vector embeddings"
+                delay={0.05}
+                onClick={() => router.push('/search')}
+              />
+              <StatCard
+                icon={<Zap className="w-5 h-5" />}
+                value={stats?.clauses_extracted ?? 0}
+                label="Clauses Extracted"
+                sublabel="AI-powered analysis"
+                delay={0.1}
+                onClick={() => {
+                  const docWithClauses = documents.find(d => d.status === 'completed')
+                  if (docWithClauses) {
+                    router.push(`/documents/${docWithClauses.id}`)
+                  } else {
+                    router.push('/search')
+                  }
+                }}
+              />
+              <StatCard
+                icon={<TrendingUp className="w-5 h-5" />}
+                value={documents.filter(d => d.status === 'completed').length}
+                label="Ready for Review"
+                sublabel="Completed processing"
+                delay={0.15}
+                onClick={() => {
+                  const completed = documents.find(d => d.status === 'completed')
+                  if (completed) {
+                    loadAnalysis(completed.id)
+                  }
+                }}
+              />
+            </>
+          )}
         </motion.div>
 
         {/* Search Results */}
@@ -349,7 +372,7 @@ function DashboardContent() {
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Document List - Enhanced */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2" data-tour="documents">
             <div className="card overflow-hidden">
               <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                 <div className="flex items-center justify-between">
@@ -371,9 +394,20 @@ function DashboardContent() {
               </div>
               <div className="divide-y divide-ink-800/30 max-h-[calc(100vh-320px)] overflow-y-auto">
                 {loading ? (
-                  <div className="p-16 text-center">
-                    <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto" />
-                    <p className="mt-5 text-ink-500 text-sm">Loading documents...</p>
+                  <div className="divide-y divide-ink-800/30">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="px-6 py-5 flex items-start gap-4" style={{ animationDelay: `${i * 0.08}s` }}>
+                        <div className="skeleton w-4 h-4 rounded-full mt-0.5 shrink-0" />
+                        <div className="flex-1 space-y-2.5">
+                          <div className="skeleton h-4 rounded" style={{ width: `${65 + Math.random() * 30}%` }} />
+                          <div className="flex items-center gap-3">
+                            <div className="skeleton h-3 w-16 rounded" />
+                            <div className="skeleton h-3 w-20 rounded" />
+                            <div className="skeleton h-3 w-12 rounded" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : documents.length === 0 ? (
                   <div className="p-16 text-center">
@@ -475,7 +509,7 @@ function DashboardContent() {
           </div>
 
           {/* Risk Analysis Panel - Enhanced & Data Dense */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1" data-tour="analysis">
             <AnimatePresence mode="wait">
               {selectedDoc && analysis ? (
                 <motion.div
@@ -610,20 +644,35 @@ function DashboardContent() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="card p-8"
+                  className="card overflow-hidden"
                 >
-                  <div className="text-center">
-                    <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto" />
-                    <p className="mt-5 text-ink-500 text-sm">Loading analysis...</p>
-                    <button
-                      type="button"
-                      onClick={() => triggerAnalysis(selectedDoc)}
-                      className="mt-6 px-5 py-2.5 bg-ink-800 text-ink-200 rounded-xl hover:bg-ink-700
-                               transition-colors font-medium text-sm flex items-center gap-2 mx-auto"
-                    >
-                      <PlayCircle className="w-4 h-4" />
-                      Run Analysis
-                    </button>
+                  <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
+                    <div className="skeleton h-6 w-40 rounded mb-2" />
+                    <div className="skeleton h-3 w-28 rounded" />
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <div className="skeleton h-28 w-full rounded-xl" />
+                    <div className="grid grid-cols-2 gap-3">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="skeleton h-20 rounded-lg" />
+                      ))}
+                    </div>
+                    <div className="space-y-3">
+                      <div className="skeleton h-3 w-28 rounded" />
+                      <div className="skeleton h-20 rounded-lg" />
+                      <div className="skeleton h-20 rounded-lg" />
+                    </div>
+                    <div className="pt-4 border-t border-ink-800/50">
+                      <button
+                        type="button"
+                        onClick={() => triggerAnalysis(selectedDoc)}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-ink-800 text-ink-200
+                                 font-medium rounded-xl hover:bg-ink-700 transition-colors text-sm"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        Run Analysis
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ) : (
@@ -644,6 +693,16 @@ function DashboardContent() {
           </div>
         </div>
       </main>
+
+      <WalkthroughOverlay
+        active={walkthrough.active}
+        step={walkthrough.step}
+        currentStep={walkthrough.currentStep}
+        totalSteps={walkthrough.totalSteps}
+        next={walkthrough.next}
+        prev={walkthrough.prev}
+        dismiss={walkthrough.dismiss}
+      />
     </div>
   )
 }

@@ -50,6 +50,8 @@ allowed_origins = [
     "https://contractclarity-app.vercel.app",
     "http://localhost:3000",
 ]
+if settings.cors_origins:
+    allowed_origins.extend(o.strip() for o in settings.cors_origins.split(",") if o.strip())
 if settings.environment == "development":
     allowed_origins.append("*")
 
