@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -10,6 +10,7 @@ import {
   ExternalLink, Eye, PlayCircle
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
+import { ToastProvider, useToast } from '@/lib/toast'
 
 type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
 
@@ -28,7 +29,16 @@ const riskGlow: Record<RiskLevel, string> = {
 }
 
 export default function Dashboard() {
+  return (
+    <ToastProvider>
+      <DashboardContent />
+    </ToastProvider>
+  )
+}
+
+function DashboardContent() {
   const router = useRouter()
+  const { error: showError, success: showSuccess } = useToast()
   const [documents, setDocuments] = useState<Document[]>([])
   const [stats, setStats] = useState<{
     documents_indexed: number
@@ -50,11 +60,7 @@ export default function Dashboard() {
   const [searching, setSearching] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [docsResponse, statsResponse] = await Promise.all([
         api.documents.list({ limit: 50 }),
@@ -62,23 +68,39 @@ export default function Dashboard() {
       ])
       setDocuments(docsResponse.documents)
       setStats(statsResponse)
-    } catch (error) {
-      console.error('Failed to load data:', error)
+    } catch (err) {
+      console.error('Failed to load data:', err)
+      showError('Failed to connect to the server. Please check the API is running.')
     } finally {
       setLoading(false)
     }
-  }
+  }, [showError])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
+    if (file.size > 50 * 1024 * 1024) {
+      showError('File is too large. Maximum size is 50MB.')
+      return
+    }
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      showError('Only PDF files are supported.')
+      return
+    }
+
     setUploading(true)
     try {
       await api.documents.upload(file)
+      showSuccess(`"${file.name}" uploaded successfully. Processing will begin shortly.`)
       await loadData()
-    } catch (error) {
-      console.error('Upload failed:', error)
+    } catch (err) {
+      console.error('Upload failed:', err)
+      showError(`Upload failed: ${err instanceof Error ? err.message : 'Server error'}`)
     } finally {
       setUploading(false)
       if (fileInputRef.current) {
@@ -93,8 +115,12 @@ export default function Dashboard() {
     try {
       const response = await api.search.query(searchQuery, { limit: 10 })
       setSearchResults(response.results)
-    } catch (error) {
-      console.error('Search failed:', error)
+      if (response.results.length === 0) {
+        showError('No results found. Try different search terms.')
+      }
+    } catch (err) {
+      console.error('Search failed:', err)
+      showError('Search failed. Please try again.')
     } finally {
       setSearching(false)
     }
@@ -105,8 +131,8 @@ export default function Dashboard() {
     try {
       const response = await api.analysis.summary(docId)
       setAnalysis(response)
-    } catch (error) {
-      console.error('Failed to load analysis:', error)
+    } catch (err) {
+      console.error('Failed to load analysis:', err)
       setAnalysis(null)
     }
   }
@@ -114,9 +140,11 @@ export default function Dashboard() {
   const triggerAnalysis = async (docId: string) => {
     try {
       await api.analysis.extract(docId)
+      showSuccess('Analysis started. This may take a few minutes.')
       setTimeout(() => loadAnalysis(docId), 2000)
-    } catch (error) {
-      console.error('Failed to trigger analysis:', error)
+    } catch (err) {
+      console.error('Failed to trigger analysis:', err)
+      showError('Failed to start analysis. Please try again.')
     }
   }
 
@@ -164,7 +192,7 @@ export default function Dashboard() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="Search contracts..."
-                  className="w-96 pl-11 pr-4 py-2.5 bg-ink-900/60 border border-ink-700/50 rounded-xl
+                  className="w-48 sm:w-64 lg:w-96 pl-11 pr-4 py-2.5 bg-ink-900/60 border border-ink-700/50 rounded-xl
                            text-sm text-ink-100 placeholder:text-ink-500
                            focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/10
                            transition-all duration-200"
@@ -217,7 +245,7 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-4 gap-5 mb-8"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-8"
         >
           <StatCard
             icon={<FileText className="w-5 h-5" />}
@@ -319,9 +347,9 @@ export default function Dashboard() {
         </AnimatePresence>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Document List - Enhanced */}
-          <div className="col-span-2">
+          <div className="lg:col-span-2">
             <div className="card overflow-hidden">
               <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                 <div className="flex items-center justify-between">
@@ -363,13 +391,22 @@ export default function Dashboard() {
                   documents.map((doc, i) => (
                     <motion.div
                       key={doc.id}
+                      role="button"
+                      tabIndex={0}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.02 }}
                       onMouseEnter={() => setHoveredDoc(doc.id)}
                       onMouseLeave={() => setHoveredDoc(null)}
                       onClick={() => loadAnalysis(doc.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          loadAnalysis(doc.id)
+                        }
+                      }}
                       className={`px-6 py-5 cursor-pointer transition-all duration-200 relative group
+                                focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
                                 ${selectedDoc === doc.id
                                   ? 'bg-ink-900/60 border-l-2 border-accent'
                                   : 'hover:bg-ink-900/30 border-l-2 border-transparent'
@@ -438,7 +475,7 @@ export default function Dashboard() {
           </div>
 
           {/* Risk Analysis Panel - Enhanced & Data Dense */}
-          <div className="col-span-1">
+          <div className="lg:col-span-1">
             <AnimatePresence mode="wait">
               {selectedDoc && analysis ? (
                 <motion.div

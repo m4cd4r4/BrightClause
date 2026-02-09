@@ -76,17 +76,22 @@ export default function SearchPage() {
 
   const highlightMatch = (text: string, searchQuery: string) => {
     if (!searchQuery.trim()) return text
-    const regex = new RegExp(`(${searchQuery.trim()})`, 'gi')
-    const parts = text.split(regex)
-    return parts.map((part, i) =>
-      regex.test(part) ? (
-        <mark key={i} className="bg-accent/30 text-accent-light px-0.5 rounded">
-          {part}
-        </mark>
-      ) : (
-        part
+    try {
+      const escaped = searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`(${escaped})`, 'gi')
+      const parts = text.split(regex)
+      return parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-accent/30 text-accent-light px-0.5 rounded">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
       )
-    )
+    } catch {
+      return text
+    }
   }
 
   const groupedResults = results.reduce((acc, result) => {
@@ -148,6 +153,7 @@ export default function SearchPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search for termination clauses, liability caps, change of control provisions..."
+                aria-label="Search contracts"
                 className="w-full pl-12 pr-4 py-4 bg-ink-900/50 border border-ink-800 rounded-xl
                          text-lg text-ink-100 placeholder:text-ink-500
                          focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/20
@@ -159,6 +165,7 @@ export default function SearchPage() {
                   type="button"
                   onClick={() => setQuery('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-ink-800 rounded"
+                  aria-label="Clear search query"
                 >
                   <X className="w-4 h-4 text-ink-500" />
                 </button>
@@ -403,7 +410,7 @@ export default function SearchPage() {
             className="mt-16 max-w-2xl mx-auto"
           >
             <h3 className="text-sm font-medium text-ink-400 mb-4 text-center">Example Searches</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 'termination for convenience',
                 'limitation of liability cap',

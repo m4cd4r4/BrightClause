@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -10,7 +10,7 @@ import {
   Filter, Download, Zap, RefreshCw, FileSpreadsheet, FileType, FileJson
 } from 'lucide-react'
 import { api, Document, Clause, AnalysisSummary, Entity } from '@/lib/api'
-import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON } from '@/lib/export'
+import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON } from '@/lib/export-lazy'
 
 type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
 
@@ -76,6 +76,16 @@ export default function DocumentDetailPage() {
   const [entities, setEntities] = useState<Entity[]>([])
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [exporting, setExporting] = useState<string | null>(null)
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     loadDocument()
@@ -94,7 +104,6 @@ export default function DocumentDetailPage() {
         const clausesRes = await api.analysis.clauses(documentId)
         setClauses(clausesRes)
       }
-      // Load entities for export
       const entitiesRes = await api.graph.entities(documentId).catch(() => [])
       setEntities(entitiesRes)
     } catch (error) {
@@ -108,20 +117,20 @@ export default function DocumentDetailPage() {
     setExtracting(true)
     try {
       await api.analysis.extract(documentId)
-      // Poll for completion
-      const checkInterval = setInterval(async () => {
+      // Poll for completion with proper cleanup
+      pollIntervalRef.current = setInterval(async () => {
         const analysisRes = await api.analysis.summary(documentId).catch(() => null)
         if (analysisRes && analysisRes.status === 'completed') {
-          clearInterval(checkInterval)
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+          if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
           setAnalysis(analysisRes)
           const clausesRes = await api.analysis.clauses(documentId)
           setClauses(clausesRes)
           setExtracting(false)
         }
       }, 3000)
-      // Timeout after 2 minutes
-      setTimeout(() => {
-        clearInterval(checkInterval)
+      pollTimeoutRef.current = setTimeout(() => {
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
         setExtracting(false)
       }, 120000)
     } catch (error) {
@@ -216,6 +225,7 @@ export default function DocumentDetailPage() {
               <button
                 onClick={() => router.back()}
                 className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
+                aria-label="Go back"
               >
                 <ArrowLeft className="w-5 h-5 text-ink-400" />
               </button>
@@ -323,10 +333,10 @@ export default function DocumentDetailPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-5 gap-4 mb-8"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8"
           >
             {/* Overall Risk */}
-            <div className={`card p-5 col-span-2 ${
+            <div className={`card p-5 col-span-2 md:col-span-3 lg:col-span-2 ${
               analysis.overall_risk === 'critical' ? 'risk-critical' :
               analysis.overall_risk === 'high' ? 'risk-high' : ''
             }`}>
@@ -346,12 +356,15 @@ export default function DocumentDetailPage() {
 
             {/* Risk Distribution */}
             {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
-              <div
+              <button
                 key={level}
-                className={`card p-5 cursor-pointer transition-all hover:scale-[1.02]
+                className={`card p-5 cursor-pointer transition-all hover:scale-[1.02] text-left w-full
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
                           ${selectedRiskLevel === level ? 'ring-2 ring-accent' : ''}
                           ${level === 'critical' || level === 'high' ? riskConfig[level].glow : ''}`}
                 onClick={() => setSelectedRiskLevel(selectedRiskLevel === level ? null : level)}
+                aria-pressed={selectedRiskLevel === level}
+                aria-label={`Filter by ${level} risk: ${analysis.risk_summary[level] || 0} clauses`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-xs font-medium uppercase tracking-wider ${riskConfig[level].color}`}>
@@ -365,7 +378,7 @@ export default function DocumentDetailPage() {
                   {analysis.risk_summary[level] || 0}
                 </p>
                 <p className="text-xs text-ink-500 mt-1">clauses</p>
-              </div>
+              </button>
             ))}
           </motion.div>
         ) : (
@@ -405,9 +418,9 @@ export default function DocumentDetailPage() {
 
         {/* Clauses Section */}
         {clauses.length > 0 && (
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Clause Type Sidebar */}
-            <div className="col-span-1">
+            <div className="lg:col-span-1">
               <div className="card sticky top-24">
                 <div className="px-4 py-3 border-b border-ink-800/50">
                   <h3 className="font-display font-semibold text-sm">Clause Types</h3>
@@ -443,7 +456,7 @@ export default function DocumentDetailPage() {
             </div>
 
             {/* Clauses List */}
-            <div className="col-span-3">
+            <div className="lg:col-span-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display text-lg font-semibold">
                   Extracted Clauses

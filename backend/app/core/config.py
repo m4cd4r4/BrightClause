@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = True
 
+    # Auth
+    api_key: str = ""  # Set in production; empty = auth disabled
+
     # Database
     database_url: str = "postgresql://contractclarity:contractclarity_dev@localhost:5433/contractclarity"
 

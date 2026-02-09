@@ -107,7 +107,7 @@ export default function LandingPage() {
 
         <div className="flex items-center gap-4">
           <a
-            href="https://github.com/yourusername/contractclarity"
+            href="https://github.com/m4cd4r4/ContractClarity"
             target="_blank"
             rel="noopener noreferrer"
             className="text-ink-400 hover:text-white transition-colors text-sm"
@@ -157,7 +157,7 @@ export default function LandingPage() {
       </AnimatePresence>
 
       {/* Progress bar */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-96 z-20">
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-64 sm:w-96 z-20">
         <div className="h-1 bg-ink-800/50 rounded-full overflow-hidden backdrop-blur-sm">
           <motion.div
             className="h-full bg-accent"

@@ -122,23 +122,32 @@ export default function GraphPage() {
     }
   }
 
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
+    }
+  }, [])
+
   const triggerExtraction = async () => {
     setExtracting(true)
     try {
       await api.graph.extract(documentId)
-      // Poll for completion
-      const checkInterval = setInterval(async () => {
+      pollIntervalRef.current = setInterval(async () => {
         const graph = await api.graph.get(documentId).catch(() => null)
         if (graph && graph.nodes.length > 0) {
-          clearInterval(checkInterval)
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+          if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
           setGraphData(graph)
-          // initializeGraph will be called by effect when graphData changes
           setExtracting(false)
         }
       }, 3000)
-      // Timeout after 2 minutes
-      setTimeout(() => {
-        clearInterval(checkInterval)
+      pollTimeoutRef.current = setTimeout(() => {
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
         setExtracting(false)
       }, 120000)
     } catch (error) {
@@ -289,8 +298,22 @@ export default function GraphPage() {
     // Draw with current ref values
     drawGraph(ctx, nodes, edges, width, height, currentZoom, currentPan, currentSelectedTypes, currentSelectedNode, currentHoveredNode)
 
+    // Check if simulation has settled (total kinetic energy near zero)
+    const totalEnergy = nodes.reduce((sum, n) => sum + n.vx * n.vx + n.vy * n.vy, 0)
+    if (totalEnergy < 0.01 && nodes.length > 0) {
+      // Settled - draw one last time and stop. Restart on interaction.
+      return
+    }
+
     animationRef.current = requestAnimationFrame(runSimulation)
   }, []) // No deps needed - we read from refs
+
+  // Restart simulation on zoom/pan/type filter changes
+  const kickSimulation = useCallback(() => {
+    if (!animationRef.current && nodesRef.current.length > 0) {
+      runSimulation()
+    }
+  }, [runSimulation])
 
   const drawGraph = (
     ctx: CanvasRenderingContext2D,
@@ -419,6 +442,7 @@ export default function GraphPage() {
       clickedNode.fx = clickedNode.x
       clickedNode.fy = clickedNode.y
       setSelectedNode(clickedNode)
+      kickSimulation()
     } else {
       setIsDragging(true)
       setDragStart({ x: e.clientX - currentPan.x, y: e.clientY - currentPan.y })
@@ -438,6 +462,7 @@ export default function GraphPage() {
     if (draggedNode) {
       draggedNode.fx = x
       draggedNode.fy = y
+      kickSimulation()
     } else if (isDragging) {
       setPan({
         x: e.clientX - dragStart.x,
@@ -586,6 +611,7 @@ export default function GraphPage() {
               <button
                 onClick={() => router.back()}
                 className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
+                aria-label="Go back"
               >
                 <ArrowLeft className="w-5 h-5 text-ink-400" />
               </button>
@@ -652,7 +678,7 @@ export default function GraphPage() {
 
       <div className="flex-1 flex">
         {/* Entity Type Filter */}
-        <aside className="w-64 border-r border-ink-800/50 p-4">
+        <aside className="hidden md:block w-64 border-r border-ink-800/50 p-4">
           <h3 className="text-sm font-medium text-ink-400 mb-4">Entity Types</h3>
           <div className="space-y-2">
             {Object.entries(entityTypeConfig).map(([type, config]) => {
@@ -805,6 +831,8 @@ export default function GraphPage() {
           {graphData && graphData.nodes.length > 0 ? (
             <canvas
               ref={canvasRef}
+              role="img"
+              aria-label={`Knowledge graph visualization showing ${graphData?.stats.total_entities || 0} entities and ${graphData?.stats.total_relationships || 0} relationships`}
               className="w-full h-full cursor-grab active:cursor-grabbing"
               onMouseDown={handleCanvasMouseDown}
               onMouseMove={handleCanvasMouseMove}

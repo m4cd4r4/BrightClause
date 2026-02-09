@@ -1,12 +1,13 @@
 """ContractClarity FastAPI application."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from app.core.config import get_settings
 from app.core.database import engine, Base
 from app.api import documents_router, search_router, health_router, analysis_router, graph_router
+from app.core.auth import verify_api_key
 
 # Import models so they're registered with Base
 from app.models import document  # noqa: F401
@@ -43,21 +44,28 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware – tightened for production
+allowed_origins = [
+    "https://contractclarity-app.vercel.app",
+    "http://localhost:3000",
+]
+if settings.environment == "development":
+    allowed_origins.append("*")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
+# Include routers (health is public; all others require API key)
 app.include_router(health_router)
-app.include_router(documents_router)
-app.include_router(search_router)
-app.include_router(analysis_router)
-app.include_router(graph_router)
+app.include_router(documents_router, dependencies=[Depends(verify_api_key)])
+app.include_router(search_router, dependencies=[Depends(verify_api_key)])
+app.include_router(analysis_router, dependencies=[Depends(verify_api_key)])
+app.include_router(graph_router, dependencies=[Depends(verify_api_key)])
 
 
 @app.get("/")
