@@ -8,6 +8,7 @@ import {
   Database, Brain, Eye, BarChart3, Lock, Layers,
   CheckCircle, ChevronRight, Github, ExternalLink
 } from 'lucide-react'
+import { HeroVisual } from './hero-visual'
 
 const features = [
   {
@@ -56,12 +57,6 @@ const clauseTypes = [
   'Payment Terms', 'Insurance', 'Audit Rights', 'Data Privacy',
 ]
 
-const stats = [
-  { value: '16+', label: 'Clause Types' },
-  { value: '4-Tier', label: 'OCR Pipeline' },
-  { value: '7', label: 'Entity Types' },
-  { value: '3', label: 'Search Modes' },
-]
 
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
@@ -161,20 +156,7 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          {/* Stats row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-20 max-w-3xl mx-auto"
-          >
-            {stats.map((stat, i) => (
-              <div key={i} className="text-center p-5 bg-ink-900/40 border border-ink-800/50 rounded-xl">
-                <p className="text-3xl font-bold font-mono text-accent">{stat.value}</p>
-                <p className="text-xs text-ink-500 font-mono uppercase tracking-wide mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </motion.div>
+          <HeroVisual />
         </div>
       </section>
 
