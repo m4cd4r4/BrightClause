@@ -109,7 +109,7 @@ export default function SearchPage() {
       <header className="border-b border-ink-800/50 bg-ink-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-[1400px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center">
                 <Shield className="w-5 h-5 text-ink-950" />
               </div>
@@ -120,7 +120,7 @@ export default function SearchPage() {
             </Link>
 
             <Link
-              href="/"
+              href="/dashboard"
               className="text-sm text-ink-400 hover:text-ink-200 transition-colors"
             >
               Back to Dashboard

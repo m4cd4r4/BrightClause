@@ -240,7 +240,7 @@ export default function DocumentDetailPage() {
           <FileText className="w-16 h-16 text-ink-700 mx-auto" />
           <h2 className="mt-4 text-xl font-display font-semibold">Document Not Found</h2>
           <p className="mt-2 text-ink-500">The requested document could not be found.</p>
-          <Link href="/" className="mt-6 btn-primary inline-block">
+          <Link href="/dashboard" className="mt-6 btn-primary inline-block">
             Return to Dashboard
           </Link>
         </div>
