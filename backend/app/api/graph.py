@@ -125,6 +125,205 @@ async def graph_stats(
     }
 
 
+@router.get("/cross-reference")
+async def cross_reference_entities(
+    min_documents: int = Query(2, ge=2, description="Minimum documents an entity must appear in"),
+    entity_type: str | None = Query(None, description="Filter by entity type"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Find entities that appear across multiple documents.
+
+    Returns entities grouped by normalized name that appear in at least
+    min_documents different documents.
+    """
+    from sqlalchemy.orm import aliased
+
+    # Query entities grouped by normalized_name with document count
+    base_query = (
+        select(
+            Entity.normalized_name,
+            Entity.entity_type,
+            func.count(func.distinct(Entity.document_id)).label("doc_count"),
+        )
+        .where(Entity.normalized_name.isnot(None))
+        .group_by(Entity.normalized_name, Entity.entity_type)
+        .having(func.count(func.distinct(Entity.document_id)) >= min_documents)
+        .order_by(func.count(func.distinct(Entity.document_id)).desc())
+    )
+
+    if entity_type:
+        base_query = base_query.where(Entity.entity_type == entity_type)
+
+    result = await db.execute(base_query)
+    cross_refs = result.fetchall()
+
+    # For each cross-reference, get the document details
+    entities_out = []
+    for row in cross_refs[:50]:  # Limit to 50
+        norm_name = row[0]
+        etype = row[1]
+        doc_count = row[2]
+
+        # Get the actual entities for this normalized name
+        detail_query = (
+            select(Entity)
+            .where(
+                Entity.normalized_name == norm_name,
+                Entity.entity_type == etype,
+            )
+            .order_by(Entity.document_id)
+        )
+        detail_result = await db.execute(detail_query)
+        detail_entities = detail_result.scalars().all()
+
+        # Group by document
+        doc_map: dict[str, dict] = {}
+        for e in detail_entities:
+            doc_id = str(e.document_id)
+            if doc_id not in doc_map:
+                doc_map[doc_id] = {"document_id": doc_id, "contexts": []}
+            if e.context:
+                doc_map[doc_id]["contexts"].append(e.context[:200])
+
+        # Get document filenames
+        doc_ids = [e.document_id for e in detail_entities]
+        if doc_ids:
+            doc_query = select(Document.id, Document.filename).where(Document.id.in_(doc_ids))
+            doc_result = await db.execute(doc_query)
+            doc_names = {str(r[0]): r[1] for r in doc_result.fetchall()}
+            for doc_id, info in doc_map.items():
+                info["filename"] = doc_names.get(doc_id, "Unknown")
+
+        entities_out.append({
+            "normalized_name": norm_name,
+            "entity_type": etype,
+            "document_count": doc_count,
+            "documents": list(doc_map.values()),
+        })
+
+    return {"entities": entities_out, "total": len(entities_out)}
+
+
+@router.get("/timeline/{document_id}")
+async def get_timeline(
+    document_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get a timeline of important dates from a document.
+
+    Extracts date entities, parses them, and returns sorted timeline events.
+    """
+    query = select(Document).where(Document.id == document_id)
+    result = await db.execute(query)
+    doc = result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Get all date entities for this document
+    date_query = (
+        select(Entity)
+        .where(Entity.document_id == document_id, Entity.entity_type == "date")
+        .order_by(Entity.name)
+    )
+    date_result = await db.execute(date_query)
+    date_entities = date_result.scalars().all()
+
+    # Also get related relationships for context
+    rel_query = (
+        select(Relationship)
+        .where(
+            Relationship.document_id == document_id,
+            Relationship.relationship_type.in_(["effective_date", "expiration_date"]),
+        )
+    )
+    rel_result = await db.execute(rel_query)
+    relationships = rel_result.scalars().all()
+
+    # Map entity IDs to relationship context
+    rel_context = {}
+    for r in relationships:
+        rel_context[r.target_entity_id] = r.relationship_type
+
+    # Build timeline events
+    import re
+    from datetime import datetime as dt
+
+    def try_parse_date(text: str) -> str | None:
+        """Try common date formats."""
+        text = text.strip()
+        for fmt in (
+            "%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%B %d, %Y", "%b %d, %Y",
+            "%d %B %Y", "%d %b %Y", "%Y-%m-%dT%H:%M:%S", "%m-%d-%Y",
+        ):
+            try:
+                return dt.strptime(text, fmt).date().isoformat()
+            except ValueError:
+                continue
+        # Try extracting a date-like pattern from text
+        match = re.search(r"(\d{4}[-/]\d{1,2}[-/]\d{1,2})", text)
+        if match:
+            try:
+                return dt.strptime(match.group(1).replace("/", "-"), "%Y-%m-%d").date().isoformat()
+            except ValueError:
+                pass
+        match = re.search(r"(\d{1,2}[-/]\d{1,2}[-/]\d{4})", text)
+        if match:
+            try:
+                return dt.strptime(match.group(1).replace("/", "-"), "%m-%d-%Y").date().isoformat()
+            except ValueError:
+                pass
+        return None
+
+    events = []
+    for entity in date_entities:
+        name_lower = (entity.name or "").lower()
+        rel_type = rel_context.get(entity.id, "")
+
+        if "effective" in name_lower or rel_type == "effective_date":
+            event_type = "effective"
+        elif "expir" in name_lower or "terminat" in name_lower or rel_type == "expiration_date":
+            event_type = "expiration"
+        elif "renew" in name_lower:
+            event_type = "renewal"
+        elif "payment" in name_lower or "due" in name_lower:
+            event_type = "payment"
+        elif "notice" in name_lower:
+            event_type = "notice"
+        elif "sign" in name_lower or "execut" in name_lower:
+            event_type = "execution"
+        else:
+            event_type = "other"
+
+        if event_type in ("effective", "expiration", "execution"):
+            importance = "high"
+        elif event_type in ("renewal", "payment"):
+            importance = "medium"
+        else:
+            importance = "low"
+
+        parsed_date = try_parse_date(entity.value or entity.name or "")
+
+        events.append({
+            "id": str(entity.id),
+            "date": entity.value or entity.name,
+            "parsed_date": parsed_date,
+            "label": entity.name,
+            "type": event_type,
+            "context": entity.context,
+            "importance": importance,
+            "page_number": entity.page_number,
+        })
+
+    events.sort(key=lambda e: (
+        0 if e["parsed_date"] else 1,
+        e["parsed_date"] or "",
+    ))
+
+    return {"document_id": str(document_id), "events": events, "total": len(events)}
+
+
 @router.get("/search/entity")
 async def search_entity(
     name: str = Query(..., min_length=2, description="Entity name to search"),

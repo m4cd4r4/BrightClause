@@ -7,13 +7,17 @@ import Link from 'next/link'
 import {
   FileText, AlertTriangle, Shield,
   Loader2, ChevronDown, ChevronRight, Network,
-  Download, Zap, FileSpreadsheet, FileType, FileJson
+  Download, Zap, FileSpreadsheet, FileType, FileJson, Lightbulb,
+  FileBarChart, X, CheckCircle, ClipboardCheck, BookOpen
 } from 'lucide-react'
-import { api, Document, Clause, AnalysisSummary, Entity } from '@/lib/api'
+import { api, Document, Clause, AnalysisSummary, Entity, ReportData } from '@/lib/api'
 import { useToast } from '@/lib/toast'
-import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON } from '@/lib/export-lazy'
+import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON, exportReport } from '@/lib/export-lazy'
 import { Navigation } from '@/lib/navigation'
 import { type RiskLevel, riskConfig } from '@/lib/risk'
+import { ChatPanel } from './chat-panel'
+import { Timeline } from './timeline'
+import { PdfViewer } from './pdf-viewer'
 
 const clauseTypeLabels: Record<string, string> = {
   termination: 'Termination',
@@ -50,6 +54,13 @@ export default function DocumentDetailPage() {
   const [entities, setEntities] = useState<Entity[]>([])
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [exporting, setExporting] = useState<string | null>(null)
+  const [explanations, setExplanations] = useState<Record<string, string>>({})
+  const [explaining, setExplaining] = useState<string | null>(null)
+  const [report, setReport] = useState<ReportData | null>(null)
+  const [generatingReport, setGeneratingReport] = useState(false)
+  const [showReport, setShowReport] = useState(false)
+  const [extractingObligations, setExtractingObligations] = useState(false)
+  const [viewMode, setViewMode] = useState<'analysis' | 'pdf'>('analysis')
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { error: showError, success: showSuccess } = useToast()
@@ -166,6 +177,57 @@ export default function DocumentDetailPage() {
     }
   }
 
+  const handleExplain = async (clauseId: string) => {
+    if (explaining || explanations[clauseId]) return
+    setExplaining(clauseId)
+    try {
+      const result = await api.analysis.explainClause(documentId, clauseId)
+      setExplanations(prev => ({ ...prev, [clauseId]: result.explanation }))
+    } catch {
+      showError('Failed to generate explanation. Please try again.')
+    } finally {
+      setExplaining(null)
+    }
+  }
+
+  const handleGenerateReport = async () => {
+    if (generatingReport) return
+    setGeneratingReport(true)
+    setShowReport(true)
+    try {
+      const result = await api.analysis.report(documentId)
+      setReport(result)
+    } catch {
+      showError('Failed to generate report. Please try again.')
+      setShowReport(false)
+    } finally {
+      setGeneratingReport(false)
+    }
+  }
+
+  const handleDownloadReport = async () => {
+    if (!report) return
+    try {
+      await exportReport(report)
+      showSuccess('Report downloaded successfully.')
+    } catch {
+      showError('Failed to download report.')
+    }
+  }
+
+  const handleExtractObligations = async () => {
+    if (extractingObligations) return
+    setExtractingObligations(true)
+    try {
+      const result = await api.obligations.extractForDocument(documentId)
+      showSuccess(result.message)
+    } catch {
+      showError('Failed to extract obligations.')
+    } finally {
+      setExtractingObligations(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -233,6 +295,47 @@ export default function DocumentDetailPage() {
           <Network className="w-4 h-4" />
           <span className="hidden sm:inline">Graph</span>
         </Link>
+
+        <button
+          type="button"
+          onClick={() => setViewMode(viewMode === 'pdf' ? 'analysis' : 'pdf')}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
+            viewMode === 'pdf'
+              ? 'bg-accent/20 text-accent border border-accent/30'
+              : 'bg-ink-800 text-ink-200 hover:bg-ink-700'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span className="hidden sm:inline">PDF</span>
+        </button>
+
+        <button
+          onClick={handleGenerateReport}
+          disabled={generatingReport || !analysis}
+          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
+                   hover:bg-ink-700 transition-colors disabled:opacity-50 text-sm"
+        >
+          {generatingReport ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <FileBarChart className="w-4 h-4" />
+          )}
+          <span className="hidden sm:inline">{generatingReport ? 'Generating...' : 'Report'}</span>
+        </button>
+
+        <button
+          onClick={handleExtractObligations}
+          disabled={extractingObligations || !analysis}
+          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
+                   hover:bg-ink-700 transition-colors disabled:opacity-50 text-sm"
+        >
+          {extractingObligations ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <ClipboardCheck className="w-4 h-4" />
+          )}
+          <span className="hidden sm:inline">{extractingObligations ? 'Extracting...' : 'Obligations'}</span>
+        </button>
 
         {/* Export Dropdown */}
         <div className="relative">
@@ -302,6 +405,19 @@ export default function DocumentDetailPage() {
       </Navigation>
 
       <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+        {/* PDF Viewer Mode */}
+        {viewMode === 'pdf' ? (
+          <PdfViewer
+            documentId={documentId}
+            clauses={clauses}
+            activeClauseId={expandedClauses.size === 1 ? Array.from(expandedClauses)[0] : null}
+            onClauseClick={(id) => {
+              setExpandedClauses(new Set([id]))
+              setViewMode('analysis')
+            }}
+          />
+        ) : (
+        <>
         {/* Risk Summary */}
         {analysis && analysis.clauses_extracted > 0 ? (
           <motion.div
@@ -426,6 +542,11 @@ export default function DocumentDetailPage() {
                       </button>
                     ))}
                 </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="card mt-4 p-4">
+                <Timeline documentId={documentId} />
               </div>
             </div>
 
@@ -564,6 +685,41 @@ export default function DocumentDetailPage() {
                                     </p>
                                   </div>
                                 </div>
+
+                                {/* Plain English Explanation */}
+                                {explanations[clause.id] ? (
+                                  <div>
+                                    <h4 className="text-xs font-medium text-accent uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                      <Lightbulb className="w-3 h-3" />
+                                      Plain English Explanation
+                                    </h4>
+                                    <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
+                                      <p className="text-sm text-ink-300 whitespace-pre-wrap leading-relaxed">
+                                        {explanations[clause.id]}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => handleExplain(clause.id)}
+                                    disabled={explaining === clause.id}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg
+                                             bg-accent/10 text-accent hover:bg-accent/20 transition-colors
+                                             text-sm font-medium disabled:opacity-50"
+                                  >
+                                    {explaining === clause.id ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Explaining...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Lightbulb className="w-4 h-4" />
+                                        Explain in Plain English
+                                      </>
+                                    )}
+                                  </button>
+                                )}
                               </div>
                             </motion.div>
                           )}
@@ -583,7 +739,156 @@ export default function DocumentDetailPage() {
             </div>
           </div>
         )}
+        </>
+        )}
       </main>
+      {/* Report Modal */}
+      <AnimatePresence>
+        {showReport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) setShowReport(false) }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-ink-950 border border-ink-800/50 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-ink-800/50">
+                <div className="flex items-center gap-3">
+                  <FileBarChart className="w-5 h-5 text-accent" />
+                  <h2 className="font-display text-lg font-semibold text-ink-100">Executive Summary Report</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  {report && (
+                    <button
+                      onClick={handleDownloadReport}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-lg
+                               hover:bg-accent/20 transition-colors text-sm font-medium"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download PDF
+                    </button>
+                  )}
+                  <button onClick={() => setShowReport(false)} className="p-1.5 text-ink-500 hover:text-ink-300">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+                {generatingReport && !report ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                    <p className="text-ink-400 text-sm">Generating executive summary...</p>
+                    <p className="text-ink-600 text-xs">This may take a moment as the AI analyzes your contract</p>
+                  </div>
+                ) : report ? (
+                  <>
+                    {/* Executive Summary */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                        Executive Summary
+                      </h3>
+                      <div className="p-4 bg-ink-900/50 rounded-lg border border-ink-800/50">
+                        <p className="text-sm text-ink-300 whitespace-pre-wrap leading-relaxed">
+                          {report.executive_summary}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Risk Overview */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                        Risk Overview
+                      </h3>
+                      <div className="grid grid-cols-4 gap-3">
+                        {(['critical', 'high', 'medium', 'low'] as const).map((level) => {
+                          const config = riskConfig[level]
+                          return (
+                            <div key={level} className="card p-3 text-center">
+                              <span className={`text-xs font-medium uppercase ${config.color}`}>{level}</span>
+                              <p className="text-xl font-mono font-bold text-ink-100 mt-1">
+                                {report.risk_overview[level]}
+                              </p>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Key Clauses */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                        Key Clauses ({report.key_clauses.length})
+                      </h3>
+                      <div className="space-y-2">
+                        {report.key_clauses.slice(0, 8).map((clause, i) => {
+                          const risk = riskConfig[clause.risk_level as RiskLevel] || riskConfig.low
+                          return (
+                            <div key={i} className="flex items-start gap-3 p-3 bg-ink-900/30 rounded-lg">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ${risk.color} ${risk.bg}/10 flex-shrink-0 mt-0.5`}>
+                                {clause.risk_level}
+                              </span>
+                              <div>
+                                <span className="text-sm font-medium text-ink-200">{clause.clause_type}</span>
+                                <p className="text-xs text-ink-400 mt-0.5 line-clamp-2">{clause.summary}</p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Recommendations */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                        Recommendations
+                      </h3>
+                      <div className="space-y-2">
+                        {report.recommendations.map((rec, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 bg-accent/5 rounded-lg border border-accent/10">
+                            <CheckCircle className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-ink-300">{rec}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Entities */}
+                    {report.entities_summary.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                          Entities Identified
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {report.entities_summary.map((entity, i) => (
+                            <div key={i} className="p-3 bg-ink-900/30 rounded-lg">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-medium text-ink-400">{entity.type}</span>
+                                <span className="text-xs font-mono text-ink-500">{entity.count}</span>
+                              </div>
+                              <p className="text-sm text-ink-300">{entity.examples.join(', ')}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : null}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ChatPanel documentId={documentId} />
     </div>
   )
 }

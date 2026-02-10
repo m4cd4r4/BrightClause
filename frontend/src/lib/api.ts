@@ -47,6 +47,23 @@ export interface Entity {
   context: string | null
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface ChatSource {
+  chunk_id: string
+  content: string
+  page_number: number | null
+  score: number
+}
+
+export interface ChatResponse {
+  answer: string
+  sources: ChatSource[]
+}
+
 export interface GraphData {
   document_id: string
   nodes: Array<{
@@ -89,6 +106,36 @@ export interface AnalysisSummary {
   }>
 }
 
+export interface ReportData {
+  executive_summary: string
+  document_info: {
+    filename: string
+    page_count: number | null
+    status: string
+    total_clauses: number
+    total_entities: number
+  }
+  risk_overview: {
+    critical: number
+    high: number
+    medium: number
+    low: number
+  }
+  key_clauses: Array<{
+    clause_type: string
+    risk_level: string
+    summary: string
+    risk_factors: string[]
+    page_number: number | null
+  }>
+  entities_summary: Array<{
+    type: string
+    count: number
+    examples: string[]
+  }>
+  recommendations: string[]
+}
+
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 30000)
@@ -121,6 +168,54 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
   } finally {
     clearTimeout(timeout)
   }
+}
+
+export interface TimelineEvent {
+  id: string
+  date: string
+  parsed_date: string | null
+  label: string
+  type: 'effective' | 'expiration' | 'renewal' | 'payment' | 'notice' | 'execution' | 'other'
+  context: string | null
+  importance: 'high' | 'medium' | 'low'
+  page_number: number | null
+}
+
+export interface ObligationItem {
+  id: string
+  description: string
+  responsible_party: string | null
+  due_date: string | null
+  obligation_type: string
+  status: string
+  clause_id: string | null
+  created_at: string
+}
+
+export interface DealItem {
+  id: string
+  name: string
+  description: string | null
+  created_at: string
+  document_count: number
+  documents: Array<{ id: string; filename: string; status: string }>
+}
+
+export interface DealDetail {
+  id: string
+  name: string
+  description: string | null
+  created_at: string
+  document_count: number
+  risk_summary: Record<string, number>
+  documents: Array<{
+    id: string
+    filename: string
+    status: string
+    file_size: number | null
+    page_count: number | null
+    clause_count: number
+  }>
 }
 
 export const api = {
@@ -156,6 +251,8 @@ export const api = {
     chunks: (id: string) => fetchAPI<{ chunks: Array<{ id: string; content: string; page_number: number }> }>(
       `/documents/${id}/chunks`
     ),
+    downloadUrl: (id: string) =>
+      fetchAPI<{ download_url: string; filename: string }>(`/documents/${id}/download-url`),
   },
 
   // Search
@@ -190,6 +287,22 @@ export const api = {
     clauseTypes: () => fetchAPI<{ clause_types: string[]; descriptions: Record<string, string> }>(
       '/analysis/clause-types'
     ),
+    explainClause: (documentId: string, clauseId: string) =>
+      fetchAPI<{ explanation: string; clause_type: string }>(
+        `/analysis/${documentId}/clauses/${clauseId}/explain`,
+        { method: 'POST' }
+      ),
+    report: (documentId: string) =>
+      fetchAPI<ReportData>(`/analysis/${documentId}/report`, { method: 'POST' }),
+  },
+
+  // Chat
+  chat: {
+    ask: (documentId: string, question: string, history: ChatMessage[] = []) =>
+      fetchAPI<ChatResponse>(`/chat/${documentId}`, {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      }),
   },
 
   // Knowledge Graph
@@ -213,5 +326,95 @@ export const api = {
       relationship_types: string[]
       entity_descriptions: Record<string, string>
     }>('/graph/types'),
+    timeline: (documentId: string) =>
+      fetchAPI<{ document_id: string; events: TimelineEvent[]; total: number }>(
+        `/graph/timeline/${documentId}`
+      ),
+    crossReference: (minDocuments = 2) =>
+      fetchAPI<{
+        entities: Array<{
+          normalized_name: string
+          entity_type: string
+          document_count: number
+          documents: Array<{
+            document_id: string
+            filename: string
+            contexts: string[]
+          }>
+        }>
+        total: number
+      }>(`/graph/cross-reference?min_documents=${minDocuments}`),
+  },
+
+  // Obligations
+  obligations: {
+    extractForDocument: (documentId: string) =>
+      fetchAPI<{ document_id: string; obligations_found: number; message: string }>(
+        `/analysis/${documentId}/obligations/extract`,
+        { method: 'POST' },
+      ),
+    forDocument: (documentId: string) =>
+      fetchAPI<{
+        document_id: string
+        filename: string
+        obligations: ObligationItem[]
+        total: number
+      }>(`/analysis/${documentId}/obligations`),
+    all: (opts?: { status?: string; obligation_type?: string; limit?: number }) => {
+      const params = new URLSearchParams()
+      if (opts?.status) params.set('status', opts.status)
+      if (opts?.obligation_type) params.set('obligation_type', opts.obligation_type)
+      if (opts?.limit) params.set('limit', opts.limit.toString())
+      return fetchAPI<{
+        obligations: (ObligationItem & { document_id: string; filename: string })[]
+        total: number
+      }>(`/analysis/obligations/all?${params}`)
+    },
+  },
+
+  // Deals
+  deals: {
+    list: () =>
+      fetchAPI<{
+        deals: DealItem[]
+        total: number
+      }>('/deals'),
+    get: (dealId: string) =>
+      fetchAPI<DealDetail>(`/deals/${dealId}`),
+    create: (name: string, description?: string) =>
+      fetchAPI<{ id: string; name: string }>('/deals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description }),
+      }),
+    addDocuments: (dealId: string, documentIds: string[]) =>
+      fetchAPI<{ deal_id: string; documents_added: number }>(`/deals/${dealId}/documents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document_ids: documentIds }),
+      }),
+    removeDocument: (dealId: string, documentId: string) =>
+      fetchAPI(`/deals/${dealId}/documents/${documentId}`, { method: 'DELETE' }),
+    delete: (dealId: string) =>
+      fetchAPI(`/deals/${dealId}`, { method: 'DELETE' }),
+  },
+
+  // Activity Feed
+  activity: {
+    list: (limit = 30, documentId?: string) => {
+      const params = new URLSearchParams({ limit: limit.toString() })
+      if (documentId) params.set('document_id', documentId)
+      return fetchAPI<{
+        activities: Array<{
+          id: string
+          document_id: string | null
+          action: string
+          details: Record<string, unknown>
+          created_at: string
+          filename: string | null
+        }>
+        total: number
+      }>(`/activity?${params}`)
+    },
   },
 }

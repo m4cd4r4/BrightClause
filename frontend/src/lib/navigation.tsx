@@ -2,19 +2,23 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Shield, LayoutDashboard, BarChart3, GitCompareArrows, Search, Menu, X } from 'lucide-react'
+import { Shield, LayoutDashboard, BarChart3, GitCompareArrows, Search, Menu, X, Sun, Moon, ClipboardCheck, Briefcase } from 'lucide-react'
 import { useState } from 'react'
+import { useTheme } from '@/lib/theme'
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/compare', label: 'Compare', icon: GitCompareArrows },
+  { href: '/obligations', label: 'Obligations', icon: ClipboardCheck },
+  { href: '/deals', label: 'Deals', icon: Briefcase },
   { href: '/search', label: 'Search', icon: Search },
 ]
 
 export function Navigation({ children }: { children?: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <header className="border-b border-ink-800/50 bg-ink-950/95 backdrop-blur-xl sticky top-0 z-50">
@@ -55,6 +59,15 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
           {/* Right side actions (passed as children) + mobile toggle */}
           <div className="flex items-center gap-3">
             {children}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 text-ink-400 hover:text-ink-200 hover:bg-ink-800/50 rounded-lg transition-colors"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}

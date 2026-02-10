@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,20 +10,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Deep editorial palette
+        // Deep editorial palette (themed via CSS variables with RGB for opacity support)
         ink: {
-          50: '#f7f7f8',
-          100: '#eeeef0',
-          200: '#d9d9de',
-          300: '#b8b8c1',
-          400: '#91919f',
-          500: '#737384',
-          600: '#5d5d6c',
-          700: '#4c4c58',
-          800: '#41414b',
-          900: '#393941',
-          925: '#282830',
-          950: '#18181b',
+          50: 'rgb(var(--ink-50) / <alpha-value>)',
+          100: 'rgb(var(--ink-100) / <alpha-value>)',
+          200: 'rgb(var(--ink-200) / <alpha-value>)',
+          300: 'rgb(var(--ink-300) / <alpha-value>)',
+          400: 'rgb(var(--ink-400) / <alpha-value>)',
+          500: 'rgb(var(--ink-500) / <alpha-value>)',
+          600: 'rgb(var(--ink-600) / <alpha-value>)',
+          700: 'rgb(var(--ink-700) / <alpha-value>)',
+          800: 'rgb(var(--ink-800) / <alpha-value>)',
+          900: 'rgb(var(--ink-900) / <alpha-value>)',
+          925: 'rgb(var(--ink-925) / <alpha-value>)',
+          950: 'rgb(var(--ink-950) / <alpha-value>)',
         },
         // Risk severity colors
         risk: {

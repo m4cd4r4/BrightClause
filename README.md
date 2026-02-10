@@ -4,13 +4,13 @@
 
 **AI-Powered Contract Analysis for M&A Due Diligence**
 
-[![Playwright Tests](https://img.shields.io/badge/E2E_Tests-passing-brightgreen?style=flat-square)](./frontend/tests)
 [![Next.js](https://img.shields.io/badge/Next.js-14.1-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20+%20pgvector-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 
-[Live Demo](https://contractclarity-app.vercel.app) | [API](http://45.77.233.102:8003/docs) | [Documentation](#quick-start)
+[Live Demo](https://frontend-jade-seven-48.vercel.app) | [API Docs](http://45.77.233.102:8003/docs) | [Quick Start](#quick-start)
 
 </div>
 
@@ -18,19 +18,31 @@
 
 ## Overview
 
-ContractClarity transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, and explore entity relationships through an interactive knowledge graph.
+ContractClarity transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph.
 
-**Part of the Clarity Suite** - BloodClarity, RadioClarity
+**Part of the Clarity Suite** &mdash; [BloodClarity](https://bloodclarity.com) &middot; RadioClarity
 
 ### Key Capabilities
 
 | Feature | Description |
 |---------|-------------|
 | **4-Tier OCR** | PyMuPDF, Tesseract, PaddleOCR, Vision LLM fallback |
-| **Clause Extraction** | 20+ clause types with AI-powered risk scoring |
-| **Knowledge Graph** | Entity extraction with relationship mapping |
+| **Clause Extraction** | 16+ clause types with AI-powered risk scoring |
+| **Contract Q&A Chat** | RAG-powered chat — ask questions about any document in natural language |
+| **Plain-English Translator** | One-click clause explanation in simple, non-legal language |
+| **Executive Reports** | AI-generated executive summaries with risk overview and recommendations |
+| **Timeline Extraction** | Automatic extraction and visualization of key contract dates |
+| **Cross-Document Entities** | Entity resolution across your entire document portfolio |
+| **Obligation Tracker** | AI extracts obligations, parties, and deadlines with status tracking |
+| **Deal Grouping** | Group contracts into deals for aggregate risk analysis |
+| **Knowledge Graph** | Entity extraction with interactive relationship visualization |
 | **Hybrid Search** | Semantic + keyword search with configurable weights |
 | **Risk Assessment** | 4-level scoring (Critical, High, Medium, Low) |
+| **Document Comparison** | Side-by-side risk and clause comparison matrix |
+| **PDF Viewer** | In-app PDF display with clause navigation sidebar |
+| **Dark/Light Mode** | Full theme toggle with localStorage persistence |
+| **Activity Feed** | Audit log tracking uploads, analysis, chat, and exports |
+| **Multi-Format Export** | Excel, Word, PDF, CSV, JSON |
 
 ---
 
@@ -39,19 +51,27 @@ ContractClarity transforms contract review from weeks to minutes. Upload PDFs, e
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          Frontend (Next.js 14)                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────────────────┐│
-│  │Dashboard │  │ Document │  │  Search  │  │   Knowledge Graph         ││
-│  │          │  │  Detail  │  │          │  │   Visualization           ││
-│  └──────────┘  └──────────┘  └──────────┘  └───────────────────────────┘│
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────┐  ┌─────────┐│
+│  │ Landing  │  │Dashboard │  │ Document │  │  Compare  │  │Analytics││
+│  │  Page    │  │+ Activity│  │Detail+Chat│  │  Matrix   │  │+CrossRef││
+│  └──────────┘  └──────────┘  └──────────┘  └───────────┘  └─────────┘│
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────────────────┐│
+│  │  Search  │  │Obligations│  │  Deals  │  │  Knowledge Graph Viz   ││
+│  └──────────┘  └──────────┘  └──────────┘  └────────────────────────┘│
 └────────────────────────────────┬────────────────────────────────────────┘
-                                 │
+                                 │  /api/* proxy (no mixed-content,
+                                 │  backend IP hidden, API key server-side)
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        Backend API (FastAPI)                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────────────────┐│
-│  │Documents │  │  Search  │  │ Analysis │  │   Knowledge Graph API     ││
-│  │   API    │  │   API    │  │   API    │  │                           ││
-│  └──────────┘  └──────────┘  └──────────┘  └───────────────────────────┘│
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐│
+│  │Documents │  │  Search  │  │ Analysis │  │   Chat   │  │   Graph    ││
+│  │   API    │  │   API    │  │   API    │  │  (RAG)   │  │   API      ││
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └────────────┘│
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────────────────────────────┐│
+│  │  Deals   │  │ Activity │  │         Obligation Extraction            ││
+│  │   API    │  │   API    │  │                                          ││
+│  └──────────┘  └──────────┘  └──────────────────────────────────────────┘│
 └────────────────────────────────┬────────────────────────────────────────┘
                                  │
          ┌───────────────────────┼───────────────────────┐
@@ -102,7 +122,7 @@ Upload PDF
 ┌───────────────┐   ┌───────────────┐
 │    Clause     │   │    Entity     │
 │  Extraction   │   │  Extraction   │
-│  (15+ types)  │   │  (7 types)    │
+│  (16+ types)  │   │  (7 types)    │
 └───────────────┘   └───────────────┘
     │                      │
     ▼                      ▼
@@ -121,7 +141,7 @@ Upload PDF
 |------------|---------|
 | **FastAPI** | Async Python web framework |
 | **PostgreSQL + pgvector** | Vector database for semantic search |
-| **SQLAlchemy 2.0** | Async ORM |
+| **SQLAlchemy 2.0** | Async ORM with eager loading |
 | **Celery + Redis** | Background task processing |
 | **MinIO** | S3-compatible object storage |
 | **Ollama** | Local LLM inference (llama3.2, nomic-embed-text) |
@@ -131,10 +151,9 @@ Upload PDF
 |------------|---------|
 | **Next.js 14** | React framework with App Router |
 | **TypeScript** | Type safety |
-| **TailwindCSS** | Utility-first styling |
-| **Framer Motion** | Animations |
-| **React Query** | Data fetching & caching |
-| **Playwright** | Cross-browser E2E testing |
+| **TailwindCSS** | Utility-first styling with custom ink/accent palette |
+| **Framer Motion** | Page transitions & entrance animations |
+| **Playwright** | Cross-browser E2E testing (Chrome, Firefox, WebKit) |
 
 ---
 
@@ -172,7 +191,7 @@ npm run dev
 | Service | URL |
 |---------|-----|
 | Frontend (local) | http://localhost:3000 |
-| Frontend (prod) | https://contractclarity-app.vercel.app |
+| Frontend (prod) | https://frontend-jade-seven-48.vercel.app |
 | API Docs (local) | http://localhost:8003/docs |
 | API (prod) | http://45.77.233.102:8003 |
 | MinIO Console | http://localhost:9001 |
@@ -188,8 +207,18 @@ npm run dev
 | `POST` | `/documents/upload` | Upload PDF contract |
 | `GET` | `/documents` | List all documents |
 | `GET` | `/documents/{id}` | Get document details |
+| `GET` | `/documents/{id}/download-url` | Presigned PDF download URL |
+| `PATCH` | `/documents/{id}` | Rename document |
 | `DELETE` | `/documents/{id}` | Delete document |
 | `GET` | `/documents/{id}/chunks` | Get text chunks |
+
+### Chat API (RAG)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/chat/{id}` | Ask a question about a document |
+
+Accepts `question` and `history` array. Returns AI answer with source chunk citations.
 
 ### Search API
 
@@ -198,15 +227,20 @@ npm run dev
 | `GET` | `/search?q={query}` | Hybrid semantic + keyword search |
 | `GET` | `/search/stats` | Index statistics |
 
-**Parameters:** `limit`, `mode` (hybrid/semantic/keyword), `semantic_weight`
+**Parameters:** `limit`, `mode` (hybrid/semantic/keyword), `document_id`, `semantic_weight`
 
 ### Analysis API
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/analysis/{id}/extract` | Trigger clause extraction |
+| `POST` | `/analysis/{id}/report` | Generate AI executive summary |
+| `POST` | `/analysis/{id}/clauses/{clause_id}/explain` | Plain-English clause explanation |
+| `POST` | `/analysis/{id}/obligations/extract` | AI obligation extraction |
+| `GET` | `/analysis/{id}/obligations` | List obligations for document |
+| `GET` | `/analysis/obligations/all` | Cross-document obligation list |
 | `GET` | `/analysis/{id}/summary` | Get risk summary |
-| `GET` | `/analysis/{id}/clauses` | Get extracted clauses |
+| `GET` | `/analysis/{id}/clauses` | Get extracted clauses (with page numbers) |
 | `GET` | `/analysis/clause-types` | List clause types |
 
 ### Knowledge Graph API
@@ -215,7 +249,29 @@ npm run dev
 |--------|----------|-------------|
 | `POST` | `/graph/{id}/extract` | Trigger entity extraction |
 | `GET` | `/graph/{id}` | Get graph nodes & edges |
-| `GET` | `/graph/search/entity?name={name}` | Cross-document entity search |
+| `GET` | `/graph/{id}/entities` | Get entities by type |
+| `GET` | `/graph/{id}/timeline` | Extract timeline events |
+| `GET` | `/graph/cross-reference` | Cross-document entity resolution |
+| `GET` | `/graph/stats` | Graph statistics |
+| `GET` | `/graph/types` | Entity & relationship types |
+
+### Deals API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/deals` | Create a deal |
+| `GET` | `/deals` | List all deals |
+| `GET` | `/deals/{id}` | Deal detail with aggregate risk |
+| `POST` | `/deals/{id}/documents` | Add documents to deal |
+| `DELETE` | `/deals/{id}/documents/{doc_id}` | Remove document from deal |
+| `POST` | `/deals/{id}/upload` | Batch upload to deal |
+| `DELETE` | `/deals/{id}` | Delete deal |
+
+### Activity API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/activity` | Recent activity feed (audit log) |
 
 ---
 
@@ -230,7 +286,8 @@ npm run dev
 | **Liability** | Indemnification, Limitation of Liability, Warranty |
 | **Term** | Termination, Renewal, Notice Periods |
 | **Competition** | Non-Compete, Non-Solicitation |
-| **Financial** | Payment Terms, Audit Rights |
+| **Financial** | Payment Terms, Audit Rights, Insurance |
+| **Compliance** | Governing Law, Dispute Resolution, Force Majeure |
 
 ### Risk Levels
 
@@ -249,35 +306,71 @@ npm run dev
 ContractClarity/
 ├── backend/
 │   ├── app/
-│   │   ├── api/              # Route handlers
-│   │   │   ├── documents.py
-│   │   │   ├── search.py
-│   │   │   ├── analysis.py
-│   │   │   └── graph.py
-│   │   ├── core/             # Config, database
-│   │   ├── models/           # SQLAlchemy models
-│   │   ├── services/         # Business logic
-│   │   │   ├── ocr_pipeline.py
-│   │   │   ├── chunking.py
-│   │   │   ├── embeddings.py
+│   │   ├── api/                  # Route handlers
+│   │   │   ├── documents.py      # Upload, list, download, delete
+│   │   │   ├── search.py         # Hybrid vector search
+│   │   │   ├── analysis.py       # Extraction, reports, obligations
+│   │   │   ├── graph.py          # Knowledge graph, timeline, cross-ref
+│   │   │   ├── chat.py           # RAG Q&A
+│   │   │   ├── deals.py          # Deal management
+│   │   │   ├── activity.py       # Audit log
+│   │   │   └── health.py
+│   │   ├── core/                 # Config, database, auth
+│   │   ├── models/               # SQLAlchemy models
+│   │   │   ├── document.py       # Document, Chunk, Clause, Obligation, Deal
+│   │   │   ├── knowledge_graph.py # Entity, Relationship
+│   │   │   └── activity.py       # Activity audit log
+│   │   ├── services/             # Business logic
+│   │   │   ├── ocr_pipeline.py   # 4-tier OCR
+│   │   │   ├── pdf_extractor.py  # PDF text extraction
+│   │   │   ├── chunking.py       # Semantic chunking
+│   │   │   ├── embeddings.py     # Vector embeddings
 │   │   │   ├── clause_extraction.py
-│   │   │   └── entity_extraction.py
-│   │   └── tasks/            # Celery tasks
+│   │   │   ├── entity_extraction.py
+│   │   │   ├── hybrid_search.py  # Semantic + keyword
+│   │   │   └── storage.py        # MinIO file storage
+│   │   ├── tasks/                # Celery async tasks
+│   │   ├── main.py               # FastAPI entry point
+│   │   └── worker.py             # Celery worker
 │   └── Dockerfile
 ├── frontend/
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.tsx                    # Dashboard
-│   │   │   ├── search/page.tsx             # Search
-│   │   │   └── documents/[id]/
-│   │   │       ├── page.tsx                # Document detail
-│   │   │       └── graph/page.tsx          # Knowledge graph
-│   │   └── lib/api.ts                      # API client
-│   └── tests/
-│       └── dashboard.spec.ts               # Playwright E2E
+│   │   │   ├── page.tsx                      # Landing page
+│   │   │   ├── hero-visual.tsx               # Animated product mockup
+│   │   │   ├── layout.tsx                    # Root layout + ThemeProvider
+│   │   │   ├── providers.tsx                 # Context providers
+│   │   │   ├── error.tsx                     # Error boundary
+│   │   │   ├── dashboard/page.tsx            # Document management + activity feed
+│   │   │   ├── search/page.tsx               # Hybrid search
+│   │   │   ├── compare/page.tsx              # Side-by-side comparison
+│   │   │   ├── analytics/page.tsx            # Portfolio analytics + cross-ref
+│   │   │   ├── obligations/page.tsx          # Obligation & deadline tracker
+│   │   │   ├── deals/page.tsx                # Deal list
+│   │   │   ├── deals/[id]/page.tsx           # Deal detail + aggregate risk
+│   │   │   ├── documents/[id]/page.tsx       # Document detail + clauses
+│   │   │   ├── documents/[id]/chat-panel.tsx # RAG Q&A sidebar
+│   │   │   ├── documents/[id]/pdf-viewer.tsx # PDF viewer + clause nav
+│   │   │   ├── documents/[id]/timeline.tsx   # Timeline visualization
+│   │   │   ├── documents/[id]/graph/page.tsx # Knowledge graph
+│   │   │   └── api/[...path]/route.ts        # Backend proxy
+│   │   └── lib/
+│   │       ├── api.ts                        # Typed API client
+│   │       ├── risk.ts                       # Centralized risk utilities
+│   │       ├── toast.tsx                     # Toast notification system
+│   │       ├── navigation.tsx                # Shared navigation (7 routes)
+│   │       ├── theme.tsx                     # Dark/light mode provider
+│   │       ├── walkthrough.tsx               # Guided onboarding
+│   │       ├── export.ts                     # Export (Excel/Word/PDF/CSV/JSON)
+│   │       └── export-lazy.ts                # Lazy-loaded export deps
+│   ├── tests/
+│   │   ├── dashboard.spec.ts
+│   │   ├── document-detail.spec.ts
+│   │   └── knowledge-graph.spec.ts
+│   └── next.config.js
 ├── docker-compose.yml
 ├── docs/
-│   └── DEMO.md                             # Demo walkthrough
+│   └── DEMO.md
 └── README.md
 ```
 
@@ -290,12 +383,12 @@ ContractClarity/
 | Token | Value | Usage |
 |-------|-------|-------|
 | `ink-950` | `#0a0a0b` | Background |
-| `ink-900` | `#18181b` | Cards |
-| `accent` | `#c9a227` | Legal gold (primary) |
-| `critical` | `#ef4444` | Red - Critical risk |
-| `high` | `#f97316` | Orange - High risk |
-| `medium` | `#f59e0b` | Amber - Medium risk |
-| `low` | `#10b981` | Emerald - Low risk |
+| `ink-900` | `#18181b` | Cards, surfaces |
+| `accent` | `#c9a227` | Legal gold (primary actions) |
+| `critical` | `#ef4444` | Red &mdash; Critical risk |
+| `high` | `#f97316` | Orange &mdash; High risk |
+| `medium` | `#f59e0b` | Amber &mdash; Medium risk |
+| `low` | `#10b981` | Emerald &mdash; Low risk |
 
 ### Typography
 
@@ -303,7 +396,7 @@ ContractClarity/
 |------|-------|
 | **Cormorant Garamond** | Display headings |
 | **DM Sans** | Body text |
-| **JetBrains Mono** | Code, data labels |
+| **JetBrains Mono** | Code, data labels, clause references |
 
 ---
 
@@ -315,13 +408,13 @@ ContractClarity/
 cd frontend
 
 # Run all E2E tests
-npm test
+npx playwright test
 
 # With Playwright UI
-npm run test:ui
+npx playwright test --ui
 
 # Headed mode (visible browser)
-npm run test:headed
+npx playwright test --headed
 ```
 
 ### Environment Variables
@@ -364,19 +457,37 @@ Public contract datasets for testing:
 
 ### Completed
 - [x] PDF upload with 4-tier OCR pipeline
-- [x] Clause extraction with risk scoring (16 clause types)
+- [x] Clause extraction with risk scoring (16+ clause types)
 - [x] Knowledge graph visualization (interactive canvas with zoom/pan/filters)
-- [x] Hybrid semantic search
-- [x] Comprehensive E2E test suite (Chrome, Firefox, WebKit)
+- [x] Hybrid semantic + keyword search
+- [x] E2E test suite with Playwright (Chrome, Firefox, WebKit)
 - [x] Production deployment (Vercel frontend + VPS backend)
 - [x] Celery async job processing for extraction
-- [x] Export to Excel/Word/PDF/CSV/JSON
+- [x] Export to Excel, Word, PDF, CSV, JSON
+- [x] Document comparison matrix (side-by-side risk & clause diff)
+- [x] Portfolio analytics dashboard
+- [x] API proxy layer (hidden backend, server-side API key)
+- [x] Animated hero visual with product mockup
+- [x] Guided walkthrough & onboarding
+- [x] Drag-and-drop upload with inline rename
+- [x] Centralized risk utilities & toast notifications
+- [x] Clause source tracking (page number & chunk index)
+- [x] Contract Q&A Chat (RAG with source citations)
+- [x] Plain-English clause translator
+- [x] AI executive summary report generation
+- [x] Timeline extraction and visualization
+- [x] Cross-document entity resolution
+- [x] Dark/light mode with theme toggle
+- [x] Activity feed / audit log
+- [x] Obligation & deadline tracker
+- [x] Deal grouping with aggregate risk analysis
+- [x] In-app PDF viewer with clause navigation
 
 ### Planned
-- [ ] Comparison matrix (multiple contracts)
+- [ ] Browser-only privacy mode (pdf.js + WebLLM, no server required)
 - [ ] Custom extraction templates
-- [ ] Deal room (transaction grouping)
 - [ ] Playbook compliance checking
+- [ ] Multi-user auth & role-based access
 
 ---
 
@@ -388,6 +499,6 @@ MIT License - See [LICENSE](./LICENSE) for details.
 
 ## Author
 
-**Macdara** - [GitHub](https://github.com/m4cd4r4)
+**Macdara** &mdash; [GitHub](https://github.com/m4cd4r4)
 
 Built with enterprise-grade engineering practices to demonstrate production AI/ML systems.

@@ -1,7 +1,12 @@
 'use client'
 
 import { ToastProvider } from '@/lib/toast'
+import { ThemeProvider } from '@/lib/theme'
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <ToastProvider>{children}</ToastProvider>
+  return (
+    <ThemeProvider>
+      <ToastProvider>{children}</ToastProvider>
+    </ThemeProvider>
+  )
 }

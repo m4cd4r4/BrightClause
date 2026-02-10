@@ -1,4 +1,4 @@
-import type { Document as ContractDocument, AnalysisSummary, Clause, Entity } from './api'
+import type { Document as ContractDocument, AnalysisSummary, Clause, Entity, ReportData } from './api'
 
 export async function exportToExcel(
   document: ContractDocument,
@@ -46,4 +46,9 @@ export async function exportToJSON(
 ): Promise<void> {
   const { exportToJSON: fn } = await import('./export')
   return fn(document, analysis, clauses, entities)
+}
+
+export async function exportReport(report: ReportData): Promise<void> {
+  const { exportReport: fn } = await import('./export')
+  return fn(report)
 }

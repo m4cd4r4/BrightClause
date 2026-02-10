@@ -7,7 +7,8 @@ import {
   FileText, Search, Upload, AlertTriangle, CheckCircle,
   Clock, Database, Zap, ChevronRight, X, Loader2,
   FileWarning, Shield, Network, TrendingUp, BarChart3,
-  Eye, PlayCircle, Pencil, Check
+  Eye, PlayCircle, Pencil, Check, Activity,
+  MessageCircle, FileBarChart, Trash2, RotateCcw
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -27,6 +28,21 @@ const riskGlow: Record<RiskLevel, string> = {
   high: 'shadow-[0_0_15px_rgba(249,115,22,0.2)]',
   medium: 'shadow-[0_0_10px_rgba(245,158,11,0.15)]',
   low: 'shadow-none',
+}
+
+function formatRelativeTime(iso: string): string {
+  const now = Date.now()
+  const then = new Date(iso).getTime()
+  const diff = Math.max(0, now - then)
+  const seconds = Math.floor(diff / 1000)
+  if (seconds < 60) return 'just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d ago`
+  return new Date(iso).toLocaleDateString()
 }
 
 export default function DashboardPage() {
@@ -58,6 +74,14 @@ function DashboardContent() {
   const [renamingDoc, setRenamingDoc] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [dragOver, setDragOver] = useState(false)
+  const [activities, setActivities] = useState<Array<{
+    id: string
+    document_id: string | null
+    action: string
+    details: Record<string, unknown>
+    created_at: string
+    filename: string | null
+  }>>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -65,12 +89,14 @@ function DashboardContent() {
 
   const loadData = useCallback(async () => {
     try {
-      const [docsResponse, statsResponse] = await Promise.all([
+      const [docsResponse, statsResponse, activityResponse] = await Promise.all([
         api.documents.list({ limit: 50 }),
         api.search.stats(),
+        api.activity.list(15).catch(() => ({ activities: [], total: 0 })),
       ])
       setDocuments(docsResponse.documents)
       setStats(statsResponse)
+      setActivities(activityResponse.activities)
     } catch (err) {
       console.error('Failed to load data:', err)
       showError('Failed to connect to the server. Please check the API is running.')
@@ -830,6 +856,84 @@ function DashboardContent() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Activity Feed */}
+        {activities.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-6 sm:mt-8"
+          >
+            <div className="card overflow-hidden">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-ink-800/50 bg-ink-925">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-accent" />
+                  <h2 className="font-display text-lg font-semibold text-ink-50">Recent Activity</h2>
+                  <span className="text-[11px] text-ink-500 font-mono ml-auto">{activities.length} events</span>
+                </div>
+              </div>
+              <div className="divide-y divide-ink-800/30 max-h-[400px] overflow-y-auto">
+                {activities.map((act, i) => (
+                  <motion.div
+                    key={act.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03 }}
+                    className="px-4 sm:px-6 py-3 flex items-start gap-3 hover:bg-ink-900/30 transition-colors"
+                  >
+                    <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
+                      act.action === 'uploaded' ? 'bg-emerald-500/10 text-emerald-400' :
+                      act.action === 'deleted' ? 'bg-red-500/10 text-red-400' :
+                      act.action === 'chat_question' ? 'bg-blue-500/10 text-blue-400' :
+                      act.action === 'extraction_started' ? 'bg-amber-500/10 text-amber-400' :
+                      act.action === 'report_generated' ? 'bg-purple-500/10 text-purple-400' :
+                      'bg-ink-800/50 text-ink-400'
+                    }`}>
+                      {act.action === 'uploaded' && <Upload className="w-3.5 h-3.5" />}
+                      {act.action === 'deleted' && <Trash2 className="w-3.5 h-3.5" />}
+                      {act.action === 'chat_question' && <MessageCircle className="w-3.5 h-3.5" />}
+                      {act.action === 'extraction_started' && <Zap className="w-3.5 h-3.5" />}
+                      {act.action === 'report_generated' && <FileBarChart className="w-3.5 h-3.5" />}
+                      {!['uploaded', 'deleted', 'chat_question', 'extraction_started', 'report_generated'].includes(act.action) && (
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-ink-200">
+                        <span className="font-medium text-ink-100 capitalize">{act.action.replace(/_/g, ' ')}</span>
+                        {act.filename && (
+                          <>
+                            {' — '}
+                            {act.document_id ? (
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/documents/${act.document_id}`)}
+                                className="text-accent hover:text-accent-light transition-colors"
+                              >
+                                {act.filename}
+                              </button>
+                            ) : (
+                              <span className="text-ink-400">{act.filename}</span>
+                            )}
+                          </>
+                        )}
+                        {act.action === 'chat_question' && typeof act.details?.question === 'string' && (
+                          <span className="text-ink-400 ml-1 italic">
+                            &quot;{act.details.question.slice(0, 80)}{act.details.question.length > 80 ? '...' : ''}&quot;
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-[11px] text-ink-500 font-mono mt-0.5">
+                        {formatRelativeTime(act.created_at)}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </main>
 
       <WalkthroughOverlay

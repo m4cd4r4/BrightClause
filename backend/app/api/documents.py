@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.core.config import get_settings
 from app.models.document import Document
 from app.services.storage import upload_document as minio_upload, delete_document as minio_delete, get_document_url
+from app.api.activity import log_activity
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 settings = get_settings()
@@ -97,6 +98,9 @@ async def upload_document(
         # Queue Celery task for processing
         from app.tasks.document_tasks import process_document
         process_document.delay(str(doc.id))
+
+        # Log activity
+        await log_activity(db, "uploaded", doc.id, {"filename": doc.filename, "file_size": doc.file_size})
 
         return DocumentResponse(
             id=doc.id,
@@ -209,6 +213,26 @@ async def get_document(
     )
 
 
+@router.get("/{document_id}/download-url")
+async def get_download_url(
+    document_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get a presigned download URL for the document PDF."""
+    query = select(Document).where(Document.id == document_id)
+    result = await db.execute(query)
+    doc = result.scalar_one_or_none()
+
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    try:
+        url = get_document_url(doc.id)
+        return {"download_url": url, "filename": doc.filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate download URL: {str(e)}")
+
+
 class RenameRequest(BaseModel):
     """Rename a document."""
     filename: str
@@ -262,9 +286,13 @@ async def delete_document(
     except Exception:
         pass  # Continue even if MinIO delete fails
 
+    filename = doc.filename
+
     # Delete from database (cascades to chunks and clauses)
     await db.delete(doc)
     await db.commit()
+
+    await log_activity(db, "deleted", None, {"filename": filename, "document_id": str(document_id)})
 
     return {"status": "deleted", "document_id": str(document_id)}
 

@@ -6,12 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from app.core.config import get_settings
 from app.core.database import engine, Base
-from app.api import documents_router, search_router, health_router, analysis_router, graph_router
+from app.api import documents_router, search_router, health_router, analysis_router, graph_router, chat_router, activity_router, deals_router
 from app.core.auth import verify_api_key
 
 # Import models so they're registered with Base
 from app.models import document  # noqa: F401
 from app.models import knowledge_graph  # noqa: F401
+from app.models import activity  # noqa: F401
 
 settings = get_settings()
 
@@ -69,6 +70,9 @@ app.include_router(documents_router, dependencies=[Depends(verify_api_key)])
 app.include_router(search_router, dependencies=[Depends(verify_api_key)])
 app.include_router(analysis_router, dependencies=[Depends(verify_api_key)])
 app.include_router(graph_router, dependencies=[Depends(verify_api_key)])
+app.include_router(chat_router, dependencies=[Depends(verify_api_key)])
+app.include_router(activity_router, dependencies=[Depends(verify_api_key)])
+app.include_router(deals_router, dependencies=[Depends(verify_api_key)])
 
 
 @app.get("/")

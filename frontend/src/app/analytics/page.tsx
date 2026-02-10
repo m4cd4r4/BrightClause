@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
   BarChart3, Shield, AlertTriangle, CheckCircle, FileText,
-  TrendingUp, Activity, Loader2, ChevronRight, Eye
+  TrendingUp, Activity, Loader2, ChevronRight, Eye, GitBranch
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -22,6 +22,13 @@ export default function AnalyticsPage() {
   const [analyses, setAnalyses] = useState<Map<string, AnalysisSummary>>(new Map())
   const [loading, setLoading] = useState(true)
   const [loadingAnalyses, setLoadingAnalyses] = useState(false)
+  const [crossRefs, setCrossRefs] = useState<Array<{
+    normalized_name: string
+    entity_type: string
+    document_count: number
+    documents: Array<{ document_id: string; filename: string; contexts: string[] }>
+  }>>([])
+  const [expandedEntity, setExpandedEntity] = useState<string | null>(null)
   const { error: showError } = useToast()
 
   useEffect(() => {
@@ -46,6 +53,14 @@ export default function AnalyticsPage() {
         }
       })
       setAnalyses(summaries)
+
+      // Load cross-document entity references
+      try {
+        const crossRefData = await api.graph.crossReference(2)
+        setCrossRefs(crossRefData.entities)
+      } catch {
+        // Cross-reference is optional, don't fail the page
+      }
     } catch (err) {
       console.error('Failed to load analytics data:', err)
       showError('Failed to load analytics data. Please try again.')
@@ -449,6 +464,80 @@ export default function AnalyticsPage() {
                 </div>
               </motion.div>
             </div>
+
+            {/* Cross-Document Entity References */}
+            {crossRefs.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.38 }}
+                className="card overflow-hidden mb-8"
+              >
+                <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
+                  <div className="flex items-center gap-3">
+                    <GitBranch className="w-5 h-5 text-accent" />
+                    <div>
+                      <h2 className="font-display text-lg font-semibold text-ink-50">Cross-Document Entities</h2>
+                      <p className="text-[11px] text-ink-500 mt-0.5 font-mono">
+                        {crossRefs.length} entities appearing in 2+ contracts
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="divide-y divide-ink-800/20">
+                  {crossRefs.slice(0, 20).map((entity, i) => (
+                    <motion.div
+                      key={`${entity.normalized_name}-${entity.entity_type}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 + i * 0.02 }}
+                    >
+                      <button
+                        onClick={() => setExpandedEntity(
+                          expandedEntity === entity.normalized_name ? null : entity.normalized_name
+                        )}
+                        className="w-full px-6 py-4 text-left hover:bg-ink-900/20 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-ink-800/50 text-ink-400">
+                              {entity.entity_type}
+                            </span>
+                            <span className="text-sm font-medium text-ink-200">{entity.normalized_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono text-accent">{entity.document_count} docs</span>
+                            <ChevronRight className={`w-4 h-4 text-ink-600 transition-transform ${
+                              expandedEntity === entity.normalized_name ? 'rotate-90' : ''
+                            }`} />
+                          </div>
+                        </div>
+                      </button>
+                      {expandedEntity === entity.normalized_name && (
+                        <div className="px-6 pb-4 space-y-2">
+                          {entity.documents.map(doc => (
+                            <div key={doc.document_id} className="pl-4 border-l-2 border-ink-800/50">
+                              <Link
+                                href={`/documents/${doc.document_id}`}
+                                className="text-xs font-medium text-ink-300 hover:text-accent transition-colors flex items-center gap-1.5"
+                              >
+                                <FileText className="w-3 h-3" />
+                                {doc.filename}
+                              </Link>
+                              {doc.contexts.length > 0 && (
+                                <p className="text-[11px] text-ink-500 mt-1 line-clamp-2">
+                                  {doc.contexts[0]}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             {/* Risk by Document - Summary Table */}
             <motion.div

@@ -1,20 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
-  CheckCircle, ChevronRight, Github, ExternalLink
+  CheckCircle, ChevronRight, Github, ExternalLink,
+  MessageCircle, Lightbulb, ClipboardCheck, Calendar,
+  Briefcase, Sun, Activity, Play
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
 
+const DemoVideoModal = lazy(() =>
+  import('@/components/DemoVideoModal').then(m => ({ default: m.DemoVideoModal }))
+)
+
 const features = [
   {
-    icon: <FileText className="w-6 h-6" />,
-    title: '4-Tier OCR Pipeline',
-    description: 'PyMuPDF, Tesseract, PaddleOCR, and Vision LLM fallback ensures text extraction from any PDF quality.',
+    icon: <MessageCircle className="w-6 h-6" />,
+    title: 'Chat with Your Contract',
+    description: 'Ask questions in plain English. RAG-powered Q&A retrieves relevant clauses and generates contextual answers with source citations.',
   },
   {
     icon: <Zap className="w-6 h-6" />,
@@ -22,14 +28,34 @@ const features = [
     description: '16+ clause types automatically identified and classified: termination, indemnification, IP, non-compete, and more.',
   },
   {
+    icon: <Lightbulb className="w-6 h-6" />,
+    title: 'Plain-English Translator',
+    description: 'One click to translate any legal clause into simple language anyone can understand. No law degree required.',
+  },
+  {
     icon: <Shield className="w-6 h-6" />,
     title: 'Risk Assessment',
     description: 'Each clause scored Critical / High / Medium / Low with specific risk factors and AI-generated summaries.',
   },
   {
-    icon: <Search className="w-6 h-6" />,
-    title: 'Hybrid Vector Search',
-    description: 'Semantic + keyword search powered by pgvector embeddings. Find relevant clauses using natural language.',
+    icon: <ClipboardCheck className="w-6 h-6" />,
+    title: 'Obligation Tracker',
+    description: 'AI extracts obligations, responsible parties, and deadlines from clauses. Track status as pending, completed, or overdue.',
+  },
+  {
+    icon: <BarChart3 className="w-6 h-6" />,
+    title: 'Executive Reports',
+    description: 'AI-generated executive summaries with risk overview, key clauses, and actionable recommendations. Export as PDF.',
+  },
+  {
+    icon: <Calendar className="w-6 h-6" />,
+    title: 'Timeline Extraction',
+    description: 'Automatically extracts key dates — effective, expiration, renewal, payment — and displays them on an interactive timeline.',
+  },
+  {
+    icon: <Briefcase className="w-6 h-6" />,
+    title: 'Deal Grouping',
+    description: 'Group related contracts into deals for aggregate risk analysis, batch uploads, and portfolio-level insights.',
   },
   {
     icon: <Network className="w-6 h-6" />,
@@ -37,17 +63,27 @@ const features = [
     description: 'Entity extraction and relationship mapping. Visualize parties, dates, amounts, and obligations as an interactive graph.',
   },
   {
-    icon: <BarChart3 className="w-6 h-6" />,
-    title: 'Export & Reporting',
-    description: 'Export full analysis as PDF, Excel, Word, CSV, or JSON for integration with your due diligence workflow.',
+    icon: <Search className="w-6 h-6" />,
+    title: 'Hybrid Vector Search',
+    description: 'Semantic + keyword search powered by pgvector embeddings. Find relevant clauses using natural language.',
+  },
+  {
+    icon: <FileText className="w-6 h-6" />,
+    title: 'PDF Viewer & Export',
+    description: 'In-app PDF viewing with clause navigation. Export analysis as PDF, Excel, Word, CSV, or JSON.',
+  },
+  {
+    icon: <Sun className="w-6 h-6" />,
+    title: 'Dark & Light Mode',
+    description: 'Full theme toggle with persistent preferences. Professional interface that adapts to your working environment.',
   },
 ]
 
 const techStack = [
-  { category: 'Frontend', items: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Canvas API'] },
-  { category: 'Backend', items: ['FastAPI', 'SQLAlchemy 2.0', 'Celery', 'Pydantic'] },
-  { category: 'AI / ML', items: ['Ollama (llama3.2)', 'pgvector', 'Nomic Embed', 'Tesseract OCR'] },
-  { category: 'Infrastructure', items: ['PostgreSQL', 'Redis', 'MinIO (S3)', 'Docker Compose'] },
+  { category: 'Frontend', items: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Dark/Light Theming'] },
+  { category: 'Backend', items: ['FastAPI', 'SQLAlchemy 2.0', 'Celery', 'Pydantic', '8 API Routers'] },
+  { category: 'AI / ML', items: ['Ollama (llama3.2)', 'RAG Pipeline', 'pgvector', 'Nomic Embed', 'Tesseract OCR'] },
+  { category: 'Infrastructure', items: ['PostgreSQL 16', 'Redis 7', 'MinIO (S3)', 'Docker Compose'] },
 ]
 
 const clauseTypes = [
@@ -60,6 +96,7 @@ const clauseTypes = [
 
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
+  const [showVideo, setShowVideo] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
@@ -130,8 +167,8 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-lg sm:text-xl text-ink-400 leading-relaxed mb-10 max-w-2xl mx-auto">
-              Upload contracts. Extract clauses. Assess risk. Visualize entity relationships.
-              End-to-end AI pipeline from PDF ingestion to interactive knowledge graph.
+              Upload contracts. Chat with them in plain English. Extract clauses, assess risk,
+              track obligations, and generate executive reports — all powered by AI.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -143,16 +180,16 @@ export default function LandingPage() {
                 Explore the Demo
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <a
-                href="https://github.com/m4cd4r4/ContractClarity"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-8 py-4 bg-ink-900 border border-ink-700 rounded-xl font-semibold text-lg
-                         text-ink-200 hover:bg-ink-800 hover:border-ink-600 transition-all"
+              <button
+                onClick={() => setShowVideo(true)}
+                className="group flex items-center gap-3 px-8 py-4 bg-ink-900 border border-ink-700 rounded-xl font-semibold text-lg
+                         text-ink-200 hover:bg-ink-800 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all"
               >
-                <Github className="w-5 h-5" />
-                View Source
-              </a>
+                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
+                  <Play className="w-4 h-4 text-accent ml-0.5" />
+                </div>
+                Watch Demo
+              </button>
             </div>
           </motion.div>
 
@@ -171,17 +208,18 @@ export default function LandingPage() {
           >
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-ink-400 max-w-xl mx-auto">
-              End-to-end pipeline from PDF upload to risk assessment in five stages
+              End-to-end pipeline from PDF upload to actionable insights in six stages
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
               { step: '01', title: 'Upload', desc: 'PDF stored in MinIO (S3)', icon: <FileText className="w-5 h-5" /> },
               { step: '02', title: 'Extract', desc: '4-tier OCR pipeline', icon: <Layers className="w-5 h-5" /> },
-              { step: '03', title: 'Chunk & Embed', desc: 'pgvector embeddings', icon: <Database className="w-5 h-5" /> },
-              { step: '04', title: 'Analyze', desc: 'LLM clause extraction', icon: <Brain className="w-5 h-5" /> },
-              { step: '05', title: 'Visualize', desc: 'Risk + knowledge graph', icon: <Eye className="w-5 h-5" /> },
+              { step: '03', title: 'Embed', desc: 'pgvector embeddings', icon: <Database className="w-5 h-5" /> },
+              { step: '04', title: 'Analyze', desc: 'Clauses, risk, entities', icon: <Brain className="w-5 h-5" /> },
+              { step: '05', title: 'Chat', desc: 'RAG-powered Q&A', icon: <MessageCircle className="w-5 h-5" /> },
+              { step: '06', title: 'Act', desc: 'Reports, obligations, deals', icon: <Eye className="w-5 h-5" /> },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -197,8 +235,8 @@ export default function LandingPage() {
                 <div className="text-[10px] font-mono text-accent uppercase tracking-widest mb-2">{item.step}</div>
                 <h3 className="font-display text-lg font-semibold mb-1">{item.title}</h3>
                 <p className="text-sm text-ink-500">{item.desc}</p>
-                {i < 4 && (
-                  <ChevronRight className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-700" />
+                {i < 5 && (
+                  <ChevronRight className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-700" />
                 )}
               </motion.div>
             ))}
@@ -221,7 +259,7 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {features.map((feature, i) => (
               <motion.div
                 key={i}
@@ -334,10 +372,10 @@ export default function LandingPage() {
               </h2>
               <div className="space-y-4">
                 {[
-                  { icon: <Lock className="w-5 h-5" />, title: 'API Key Authentication', desc: 'Server-side proxy hides backend IP and API credentials from the client' },
-                  { icon: <Database className="w-5 h-5" />, title: 'Async Task Processing', desc: 'Celery workers handle OCR, embedding, and analysis without blocking the API' },
-                  { icon: <Layers className="w-5 h-5" />, title: 'Docker Compose Deployment', desc: '6 containerized services: API, Worker, PostgreSQL, Redis, MinIO, Ollama' },
-                  { icon: <Search className="w-5 h-5" />, title: 'Vector Search', desc: 'pgvector extension enables semantic similarity search across all document chunks' },
+                  { icon: <MessageCircle className="w-5 h-5" />, title: 'RAG-Powered Chat', desc: 'Retrieval-augmented generation combines vector search with LLM inference for contextual Q&A' },
+                  { icon: <Database className="w-5 h-5" />, title: 'Async Task Processing', desc: 'Celery workers handle OCR, embedding, and AI analysis without blocking the API' },
+                  { icon: <Activity className="w-5 h-5" />, title: 'Full Audit Trail', desc: 'Every action logged — uploads, analysis, chat questions, exports — with timestamps and context' },
+                  { icon: <Lock className="w-5 h-5" />, title: 'Secure Architecture', desc: 'Server-side API proxy hides backend IP. Docker Compose with 6 containerized services' },
                 ].map((item, i) => (
                   <motion.div
                     key={i}
@@ -368,12 +406,12 @@ export default function LandingPage() {
               <div className="text-ink-500 mb-4"># Architecture</div>
               <pre className="text-ink-300 leading-relaxed overflow-x-auto whitespace-pre">{`┌─────────────────────────────────────┐
 │          Next.js Frontend           │
-│    (Vercel / TypeScript / React)    │
+│  Dashboard · Chat · Deals · Search  │
 └──────────────┬──────────────────────┘
                │  API Proxy (server-side)
 ┌──────────────▼──────────────────────┐
 │          FastAPI Backend            │
-│    (Python / SQLAlchemy / Auth)     │
+│  8 API routers · RAG · Extraction   │
 ├─────────┬───────────┬───────────────┤
 │ Celery  │ pgvector  │    MinIO      │
 │ Workers │ Embeddings│  (S3 Storage) │
@@ -401,7 +439,7 @@ export default function LandingPage() {
               See It in Action
             </h2>
             <p className="text-ink-400 text-lg mb-10 max-w-lg mx-auto">
-              14 real contracts pre-loaded with AI analysis. Explore clause extraction, risk assessment, and knowledge graph visualization.
+              Upload a contract and chat with it. Explore clause extraction, risk assessment, obligation tracking, deal grouping, and knowledge graph visualization.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -446,6 +484,13 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Demo Video Modal */}
+      {showVideo && (
+        <Suspense fallback={null}>
+          <DemoVideoModal open={showVideo} onClose={() => setShowVideo(false)} />
+        </Suspense>
+      )}
     </div>
   )
 }

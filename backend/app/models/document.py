@@ -3,11 +3,19 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
-from sqlalchemy import String, Integer, Float, Text, ForeignKey, DateTime, func
+from sqlalchemy import String, Integer, Float, Text, ForeignKey, DateTime, func, Table, Column
 from sqlalchemy.dialects.postgresql import UUID as PgUUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 from app.core.database import Base
+
+# Many-to-many association table for deals and documents
+deal_documents = Table(
+    "deal_documents",
+    Base.metadata,
+    Column("deal_id", PgUUID(as_uuid=True), ForeignKey("deals.id", ondelete="CASCADE"), primary_key=True),
+    Column("document_id", PgUUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE"), primary_key=True),
+)
 
 
 class Document(Base):
@@ -39,6 +47,32 @@ class Document(Base):
     )
     entities: Mapped[list["Entity"]] = relationship(
         back_populates="document", cascade="all, delete-orphan"
+    )
+    obligations: Mapped[list["Obligation"]] = relationship(
+        back_populates="document", cascade="all, delete-orphan"
+    )
+    deals: Mapped[list["Deal"]] = relationship(
+        secondary=deal_documents, back_populates="documents"
+    )
+
+
+class Deal(Base):
+    """A deal or project grouping multiple documents."""
+
+    __tablename__ = "deals"
+
+    id: Mapped[UUID] = mapped_column(
+        PgUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    # Relationships
+    documents: Mapped[list["Document"]] = relationship(
+        secondary=deal_documents, back_populates="deals"
     )
 
 
@@ -94,3 +128,33 @@ class Clause(Base):
     # Relationships
     document: Mapped["Document"] = relationship(back_populates="clauses")
     chunk: Mapped[Optional["Chunk"]] = relationship(back_populates="clauses")
+
+
+class Obligation(Base):
+    """Extracted obligation or deadline from a contract."""
+
+    __tablename__ = "obligations"
+
+    id: Mapped[UUID] = mapped_column(
+        PgUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
+    document_id: Mapped[UUID] = mapped_column(
+        PgUUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE")
+    )
+    clause_id: Mapped[Optional[UUID]] = mapped_column(
+        PgUUID(as_uuid=True), ForeignKey("clauses.id", ondelete="SET NULL"), nullable=True
+    )
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    responsible_party: Mapped[Optional[str]] = mapped_column(String(200))
+    due_date: Mapped[Optional[str]] = mapped_column(String(100))
+    obligation_type: Mapped[str] = mapped_column(
+        String(50), default="general"
+    )  # payment, delivery, notification, compliance, reporting, general
+    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending, completed, overdue
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    # Relationships
+    document: Mapped["Document"] = relationship(back_populates="obligations")
+    clause: Mapped[Optional["Clause"]] = relationship()
