@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
 from app.core.database import get_db
 from app.models.document import Document, Clause
@@ -27,6 +28,8 @@ class ClauseResponse(BaseModel):
     risk_level: str | None
     confidence: float | None
     risk_factors: list[str] = []
+    page_number: int | None = None
+    chunk_index: int | None = None
 
     class Config:
         from_attributes = True
@@ -195,7 +198,11 @@ async def get_document_clauses(
 
     Optionally filter by clause type or risk level.
     """
-    query = select(Clause).where(Clause.document_id == document_id)
+    query = (
+        select(Clause)
+        .where(Clause.document_id == document_id)
+        .options(selectinload(Clause.chunk))
+    )
 
     if clause_type:
         query = query.where(Clause.clause_type == clause_type)
@@ -216,6 +223,8 @@ async def get_document_clauses(
             risk_level=c.risk_level,
             confidence=c.confidence,
             risk_factors=c.clause_metadata.get("risk_factors", []),
+            page_number=c.chunk.page_number if c.chunk else None,
+            chunk_index=c.chunk.chunk_index if c.chunk else None,
         )
         for c in clauses
     ]

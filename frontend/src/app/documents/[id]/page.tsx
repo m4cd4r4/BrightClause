@@ -495,6 +495,11 @@ export default function DocumentDetailPage() {
                                       {(clause.confidence * 100).toFixed(0)}% confidence
                                     </span>
                                   )}
+                                  {clause.page_number != null && (
+                                    <span className="text-xs text-ink-600 font-mono">
+                                      p.{clause.page_number}
+                                    </span>
+                                  )}
                                 </div>
                                 {clause.summary && (
                                   <p className="text-sm text-ink-400 mt-1 line-clamp-1">{clause.summary}</p>
@@ -542,9 +547,17 @@ export default function DocumentDetailPage() {
 
                                 {/* Original Content */}
                                 <div>
-                                  <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2">
-                                    Original Text
-                                  </h4>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider">
+                                      Original Text
+                                    </h4>
+                                    {clause.page_number != null && (
+                                      <span className="text-[11px] text-ink-500 font-mono">
+                                        Page {clause.page_number}
+                                        {clause.chunk_index != null && ` · Chunk ${clause.chunk_index + 1}`}
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className="p-4 bg-ink-900/50 rounded-lg border border-ink-800/50">
                                     <p className="text-sm text-ink-300 font-mono whitespace-pre-wrap">
                                       {clause.content}

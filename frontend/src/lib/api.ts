@@ -33,6 +33,8 @@ export interface Clause {
   risk_level: string | null
   confidence: number | null
   risk_factors: string[]
+  page_number: number | null
+  chunk_index: number | null
 }
 
 export interface Entity {
