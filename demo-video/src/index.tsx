@@ -1,13 +1,13 @@
 import { Composition, registerRoot } from "remotion";
-import { ContractClarityDemo } from "./ContractClarityDemo";
+import { ClauseLensDemo } from "./ClauseLensDemo";
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition
-        id="ContractClarityDemo"
-        component={ContractClarityDemo}
-        durationInFrames={1350} // 45 seconds at 30fps
+        id="ClauseLensDemo"
+        component={ClauseLensDemo}
+        durationInFrames={1000} // ~33s at 30fps (scenes - transition overlaps)
         fps={30}
         width={1920}
         height={1080}

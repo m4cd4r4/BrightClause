@@ -1,4 +1,4 @@
-# ContractClarity - Project Plan
+# ClauseLens - Project Plan
 
 **Version:** 3.1
 **Created:** 2026-01-29
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-ContractClarity is a **production-quality** AI-powered contract analysis platform for M&A due diligence. It demonstrates enterprise-grade RAG systems, knowledge graphs, and LLM-powered document analysis - built to production standards even though regulatory barriers (SOC 2, compliance) prevent immediate enterprise sales.
+ClauseLens is a **production-quality** AI-powered contract analysis platform for M&A due diligence. It demonstrates enterprise-grade RAG systems, knowledge graphs, and LLM-powered document analysis - built to production standards even though regulatory barriers (SOC 2, compliance) prevent immediate enterprise sales.
 
 **This is a full product, not a demo.**
 
@@ -21,7 +21,7 @@ ContractClarity is a **production-quality** AI-powered contract analysis platfor
 
 **Secondary Goals:**
 - Fine-tune custom models for legal document understanding
-- Part of the "Clarity Suite" branding (BloodClarity, RadioClarity)
+- Part of the "Lens Suite" branding (TaxLens, PetLens)
 - Potential SMB revenue stream (solo lawyers, small firms)
 
 **What We're Building:**
@@ -152,13 +152,13 @@ This demonstrates real skills without requiring user trust or security complianc
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FRONTEND (React)                         │
-│                     contractclarity.com                         │
+│                     clauselens.com                         │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    API GATEWAY (FastAPI)                        │
-│                   api.contractclarity.com                       │
+│                   api.clauselens.com                       │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
 │  │   Auth      │  │   Upload    │  │   Analysis Pipeline     │ │
 │  │   (JWT)     │  │   Handler   │  │   (Async Workers)       │ │
@@ -245,10 +245,10 @@ This demonstrates real skills without requiring user trust or security complianc
 - ollama (11434)      - LLM inference (shared)
 ```
 
-**ContractClarity Services (New):**
+**ClauseLens Services (New):**
 ```
-- contractclarity-backend (8002)   - FastAPI application
-- contractclarity-worker           - Celery worker (async jobs)
+- clauselens-backend (8002)   - FastAPI application
+- clauselens-worker           - Celery worker (async jobs)
 - minio (9000/9001)                - S3-compatible document storage
 - tesseract                        - OCR (installed on host)
 - paddleocr                        - Complex OCR (Python package)
@@ -288,14 +288,14 @@ This demonstrates real skills without requiring user trust or security complianc
 ```nginx
 # nginx configuration
 server {
-    server_name contractclarity.com;
+    server_name clauselens.com;
 
     location / {
         # Option A: Proxy to Vercel
-        proxy_pass https://contractclarity.vercel.app;
+        proxy_pass https://clauselens.vercel.app;
 
         # Option B: Self-hosted frontend
-        # root /var/www/contractclarity;
+        # root /var/www/clauselens;
     }
 
     location /api {
@@ -309,12 +309,12 @@ server {
 ```yaml
 # Added to existing docker-compose.yml
 services:
-  contractclarity-backend:
-    build: ./contractclarity/backend
+  clauselens-backend:
+    build: ./clauselens/backend
     ports:
       - "8002:8000"
     environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/contractclarity
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/clauselens
       - REDIS_URL=redis://redis:6379/1
       - OLLAMA_URL=http://ollama:11434
       - MINIO_ENDPOINT=minio:9000
@@ -323,11 +323,11 @@ services:
       - redis
       - ollama
 
-  contractclarity-worker:
-    build: ./contractclarity/backend
+  clauselens-worker:
+    build: ./clauselens/backend
     command: celery -A app.worker worker -l info
     environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/contractclarity
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/clauselens
       - REDIS_URL=redis://redis:6379/1
       - OLLAMA_URL=http://ollama:11434
     depends_on:
@@ -354,7 +354,7 @@ services:
 
 ### Already Paid
 - VPS: ~AU$60/mo (shared with Donnacha, Chlann, etc.)
-- Domain: ~$12/year (contractclarity.com - need to register)
+- Domain: ~$12/year (clauselens.com - need to register)
 
 ### External Costs (Optional)
 | Service | When Needed | Cost |
@@ -948,7 +948,7 @@ Build it properly. Quality over speed. Each milestone produces something usable.
 | Demo crashes during interview | Medium | High | Test thoroughly, have backup demo video |
 | LLM gives bad output | High | Medium | Cherry-pick demo documents, have fallback examples |
 | Run out of time before interview | Medium | Medium | Prioritize core pipeline over polish |
-| NOHUP doesn't respond | Medium | Low | ContractClarity is valuable regardless, apply to other jobs |
+| NOHUP doesn't respond | Medium | Low | ClauseLens is valuable regardless, apply to other jobs |
 
 ### Scope Creep Risks
 
@@ -977,34 +977,33 @@ Build it properly. Quality over speed. Each milestone produces something usable.
 
 ---
 
-## Relationship to Clarity Suite
+## Relationship to Lens Suite
 
 ### Brand Consistency
 
 | Product | Domain | Focus | Shared |
 |---------|--------|-------|--------|
-| BloodClarity | bloodclarity.com | Blood tests | UI patterns, Auth |
-| RadioClarity | radioclarity.com | Radiology | Architecture, ML pipeline |
-| ContractClarity | contractclarity.com | Contracts | All of above + legal focus |
+| ClauseLens | clauselens.com | Contracts | Legal focus, M&A |
+| TaxLens | taxlens.com | Tax documents | Tax analysis |
+| PetLens | petlens.com | Veterinary records | Pet health |
 
 ### Shared Components (Future)
 
-- **Auth system:** Single sign-on across Clarity products
+- **Auth system:** Single sign-on across Lens products
 - **UI library:** Shared shadcn components
 - **ML pipeline:** Document → Extract → Summarize pattern
 - **Infrastructure:** Shared VPS, shared services
 
 ### Cross-Promotion
 
-- Mention other Clarity products in each app
-- "From the makers of BloodClarity"
-- Unified landing page (clarityai.com? or keep separate)
+- Mention other Lens products in each app
+- Unified landing page (keep separate per product)
 
 ---
 
 ## NOHUP Application Synergy
 
-### Why ContractClarity Helps NOHUP Application
+### Why ClauseLens Helps NOHUP Application
 
 1. **Directly relevant to their clients**
    - M&A teams at investment banks (their target)
@@ -1023,7 +1022,7 @@ Build it properly. Quality over speed. Each milestone produces something usable.
    - Practical application of AI to business problems
 
 4. **Talking points for interview**
-   - "I'm building ContractClarity specifically because..."
+   - "I'm building ClauseLens specifically because..."
    - "I learned about M&A due diligence workflows while..."
    - "This is the kind of work I want to do with NOHUP..."
 
@@ -1033,7 +1032,7 @@ Add to NOHUP proposal:
 ```
 CURRENT PROJECT:
 
-I'm building ContractClarity - an AI-powered contract analysis tool for
+I'm building ClauseLens - an AI-powered contract analysis tool for
 M&A due diligence. It uses RAG for semantic search, extracts key clauses,
 and translates legal language to plain English.
 
@@ -1041,7 +1040,7 @@ This directly aligns with your work for investment banks and PE firms -
 I'm building it because I'm genuinely fascinated by how AI can streamline
 deal workflows.
 
-GitHub: https://github.com/m4cd4r4/ContractClarity (in development)
+GitHub: https://github.com/m4cd4r4/ClauseLens (in development)
 ```
 
 ---
@@ -1050,14 +1049,14 @@ GitHub: https://github.com/m4cd4r4/ContractClarity (in development)
 
 ### Priority #1: Apply to NOHUP (TODAY)
 
-**ContractClarity is Plan B. NOHUP application is Plan A.**
+**ClauseLens is Plan B. NOHUP application is Plan A.**
 
 1. [ ] Apply to NOHUP job on Upwork (proposal is ready in daily log)
 2. [ ] Update Upwork profile (if not done)
 
 ### If NOHUP Responds with Interview
 
-**Fast-track ContractClarity to have something to show:**
+**Fast-track ClauseLens to have something to show:**
 
 Week 1 (before interview if possible):
 - [ ] Git repo with basic structure
@@ -1070,7 +1069,7 @@ Week 1 (before interview if possible):
 **Build full 4-week demo:**
 
 Week 1:
-- [ ] Initialize Git repo at I:\Scratch\ContractClarity
+- [ ] Initialize Git repo at I:\Scratch\ClauseLens
 - [ ] Docker compose (postgres + pgvector + ollama)
 - [ ] FastAPI skeleton
 - [ ] PDF upload + PyMuPDF extraction
@@ -1097,7 +1096,7 @@ Week 4:
 
 ### What NOT to Do
 
-- ❌ Register contractclarity.com domain yet (wait until demo works)
+- ❌ Register clauselens.com domain yet (wait until demo works)
 - ❌ Set up production infrastructure
 - ❌ Build authentication
 - ❌ Build OCR pipeline (native PDFs only)
@@ -1165,7 +1164,7 @@ Respond in JSON format:
 | ContractPodAi | $$$ | CLM focus, integrations | Broad, not M&A focused |
 | DocuSign CLM | $$ | Brand recognition | Weak AI, basic extraction |
 
-### ContractClarity Differentiation
+### ClauseLens Differentiation
 
 1. **Self-hosted option** - Own your data, no vendor lock-in
 2. **Open-source (potentially)** - Transparency, customization
@@ -1203,7 +1202,7 @@ If fine-tuning needed:
 | 1.0 | 2026-01-29 | Initial plan |
 | 2.0 | 2026-01-29 | Major revision: Reframed as portfolio demo, not commercial product. Reduced scope from 8 weeks to 4 weeks. Removed enterprise market focus. Added honest assessment of market reality. |
 | 3.0 | 2026-01-31 | Full implementation complete. Restored 8-week scope. Added production deployment details. |
-| 3.1 | 2026-02-01 | MVP complete. E2E test suite passing. Fixed Knowledge Graph (zoom, filters, node size). Deployed to Vercel (contractclarity-app.vercel.app). |
+| 3.1 | 2026-02-01 | MVP complete. E2E test suite passing. Fixed Knowledge Graph (zoom, filters, node size). Deployed to Vercel (clauselens-app.vercel.app). |
 
 ---
 

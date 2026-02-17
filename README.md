@@ -1,4 +1,4 @@
-# ContractClarity
+# ClauseLens
 
 <div align="center">
 
@@ -18,9 +18,9 @@
 
 ## Overview
 
-ContractClarity transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph.
+ClauseLens transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph.
 
-**Part of the Clarity Suite** &mdash; [BloodClarity](https://bloodclarity.com) &middot; RadioClarity
+**Part of the Lens Suite** &mdash; ClauseLens &middot; TaxLens &middot; PetLens
 
 ### Key Capabilities
 
@@ -167,15 +167,15 @@ Upload PDF
 ### 1. Clone & Start Services
 
 ```bash
-git clone https://github.com/m4cd4r4/ContractClarity.git
-cd ContractClarity
+git clone https://github.com/m4cd4r4/ClauseLens.git
+cd ClauseLens
 
 # Start all backend services
 docker-compose up -d
 
 # Pull required Ollama models
-docker exec contractclarity-ollama ollama pull llama3.2
-docker exec contractclarity-ollama ollama pull nomic-embed-text
+docker exec clauselens-ollama ollama pull llama3.2
+docker exec clauselens-ollama ollama pull nomic-embed-text
 ```
 
 ### 2. Start Frontend
@@ -303,7 +303,7 @@ Accepts `question` and `history` array. Returns AI answer with source chunk cita
 ## Project Structure
 
 ```
-ContractClarity/
+ClauseLens/
 ├── backend/
 │   ├── app/
 │   │   ├── api/                  # Route handlers
@@ -421,15 +421,15 @@ npx playwright test --headed
 
 ```bash
 # Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/contractclarity
+DATABASE_URL=postgresql://user:pass@localhost:5432/clauselens
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
 
 # MinIO
 MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=contractclarity
-MINIO_SECRET_KEY=contractclarity_dev
+MINIO_ACCESS_KEY=clauselens
+MINIO_SECRET_KEY=clauselens_dev
 
 # Ollama
 OLLAMA_URL=http://localhost:11434

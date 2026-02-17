@@ -57,7 +57,7 @@ export function HeroVisual() {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="mt-16 max-w-5xl mx-auto relative"
+      className="relative"
     >
       <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
 
@@ -72,7 +72,7 @@ export function HeroVisual() {
           </div>
           <div className="flex-1 flex justify-center">
             <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[10px] text-ink-500 font-mono">
-              contractclarity.app/documents/acme-techstart-ma
+              clauselens.com/documents/acme-techstart-ma
             </div>
           </div>
         </div>
