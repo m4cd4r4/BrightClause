@@ -28,6 +28,23 @@ export const fonts = {
   mono: "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace",
 };
 
+export const springs = {
+  smooth: { damping: 200 },
+  snappy: { damping: 20, stiffness: 200 },
+  bouncy: { damping: 8 },
+  heavy: { damping: 15, stiffness: 80, mass: 2 },
+  logo: { damping: 12, stiffness: 80 },
+  panel: { damping: 15, stiffness: 100 },
+};
+
+export const STAGGER = {
+  fast: 5,
+  normal: 8,
+  slow: 12,
+};
+
+export const TRANSITION_FRAMES = 15;
+
 export const centered: CSSProperties = {
   display: "flex",
   flexDirection: "column",

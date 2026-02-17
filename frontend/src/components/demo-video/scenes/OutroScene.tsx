@@ -77,7 +77,7 @@ export const OutroScene: React.FC = () => {
         margin: 0, opacity: titleProgress, transform: `translateY(${titleY}px)`,
         letterSpacing: "-0.01em", lineHeight: 1,
       }}>
-        Contract<span style={{ color: colors.accent }}>Clarity</span>
+        Clause<span style={{ color: colors.accent }}>Lens</span>
       </h1>
 
       {/* Subtitle */}
@@ -119,7 +119,7 @@ export const OutroScene: React.FC = () => {
       <div style={{ position: "absolute", bottom: 40,
         fontFamily: fonts.mono, fontSize: 13, color: colors.textDim, opacity: footerOpacity,
       }}>
-        Part of the Clarity Suite — BloodClarity · RadioClarity · ContractClarity
+        AI-Powered Contract Intelligence — clauselens.com
       </div>
     </AbsoluteFill>
   );

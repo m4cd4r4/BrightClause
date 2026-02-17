@@ -1,93 +1,122 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
-import { colors, fonts, centered } from "../styles";
+import {
+  AbsoluteFill,
+  useCurrentFrame,
+  interpolate,
+  spring,
+  useVideoConfig,
+} from "remotion";
+import { colors, fonts, centered, springs, STAGGER } from "../styles";
+import { AnimatedBackground } from "../components/AnimatedBackground";
+import { ShieldLogo } from "../components/ShieldLogo";
+import { GlowOrb } from "../components/GlowOrb";
+import { FadeInSlide } from "../components/FadeInSlide";
+
+const PILLS = [
+  "Chat with Contracts",
+  "Risk Assessment",
+  "Obligation Tracking",
+  "Deal Grouping",
+];
 
 export const IntroScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
 
-  const glowScale = interpolate(frame, [0, 40], [0.3, 1.2], { extrapolateRight: "clamp" });
-  const glowOpacity = interpolate(frame, [0, 20, 100, 150], [0, 0.5, 0.5, 0.25], {
-    extrapolateRight: "clamp",
+  const titleProgress = spring({
+    frame: frame - 15,
+    fps,
+    config: springs.smooth,
   });
-
-  const logoScale = spring({ frame, fps, config: { damping: 12, stiffness: 80 } });
-
-  const titleProgress = spring({ frame: frame - 20, fps, config: { damping: 200 } });
   const titleY = interpolate(titleProgress, [0, 1], [40, 0]);
 
-  const subProgress = spring({ frame: frame - 40, fps, config: { damping: 200 } });
-
-  const pillsOpacity = interpolate(frame, [60, 80], [0, 1], { extrapolateRight: "clamp" });
-  const pillsY = interpolate(frame, [60, 80], [20, 0], { extrapolateRight: "clamp" });
-
-  const scanY = interpolate(frame, [0, 150], [-100, 1200], { extrapolateRight: "clamp" });
-  const scanOpacity = interpolate(frame, [0, 10, 140, 150], [0, 0.06, 0.06, 0], {
-    extrapolateRight: "clamp",
-  });
+  // Exit animation in final 25 frames
+  const exitProgress = interpolate(
+    frame,
+    [durationInFrames - 25, durationInFrames],
+    [0, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+  const exitScale = interpolate(exitProgress, [0, 1], [1, 0.95]);
+  const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg, ...centered }}>
-      {/* Grid */}
-      <div style={{ position: "absolute", inset: 0, opacity: 0.02,
-        backgroundImage: `linear-gradient(to right, ${colors.accent} 1px, transparent 1px),
-          linear-gradient(to bottom, ${colors.accent} 1px, transparent 1px)`,
-        backgroundSize: "80px 80px",
-      }} />
+    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+      <AnimatedBackground showParticles showGrid showScanLine />
+      <GlowOrb pulse y="42%" maxOpacity={0.45} />
 
-      {/* Scan line */}
-      <div style={{ position: "absolute", left: 0, right: 0, top: scanY, height: 2,
-        background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
-        opacity: scanOpacity,
-      }} />
-
-      {/* Glow */}
-      <div style={{ position: "absolute", left: "50%", top: "42%", width: 500, height: 500,
-        borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}40 0%, transparent 70%)`,
-        transform: `translate(-50%, -50%) scale(${glowScale})`, opacity: glowOpacity,
-      }} />
-
-      {/* Shield */}
-      <div style={{ transform: `scale(${logoScale})`, marginBottom: 40 }}>
-        <div style={{ width: 110, height: 110, borderRadius: 24,
-          background: `linear-gradient(145deg, ${colors.accent} 0%, #8b6914 100%)`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: `0 30px 80px ${colors.accent}50, 0 0 0 1px ${colors.accent}30`,
-        }}>
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"
-              fill="rgba(6,6,10,0.5)" stroke="white" strokeWidth="1.5" />
-            <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      <div
+        style={{
+          ...centered,
+          transform: `scale(${exitScale})`,
+          opacity: exitOpacity,
+        }}
+      >
+        {/* Shield */}
+        <div style={{ marginBottom: 40 }}>
+          <ShieldLogo size={110} />
         </div>
-      </div>
 
-      {/* Title */}
-      <h1 style={{ fontFamily: fonts.display, fontSize: 82, fontWeight: 600, color: colors.text,
-        margin: 0, opacity: titleProgress, transform: `translateY(${titleY}px)`,
-        letterSpacing: "-0.01em", lineHeight: 1,
-      }}>
-        Contract<span style={{ color: colors.accent }}>Clarity</span>
-      </h1>
+        {/* Title */}
+        <h1
+          style={{
+            fontFamily: fonts.display,
+            fontSize: 82,
+            fontWeight: 600,
+            color: colors.text,
+            margin: 0,
+            opacity: titleProgress,
+            transform: `translateY(${titleY}px)`,
+            letterSpacing: "-0.01em",
+            lineHeight: 1,
+          }}
+        >
+          Clause<span style={{ color: colors.accent }}>Lens</span>
+        </h1>
 
-      {/* Subtitle */}
-      <p style={{ fontFamily: fonts.body, fontSize: 26, color: colors.textSoft,
-        margin: "20px 0 0 0", opacity: subProgress, fontWeight: 400,
-      }}>
-        AI-Powered Contract Analysis for M&A Due Diligence
-      </p>
+        {/* Subtitle */}
+        <FadeInSlide delay={30} slideDistance={20}>
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 26,
+              color: colors.textSoft,
+              margin: "20px 0 0 0",
+              fontWeight: 400,
+            }}
+          >
+            AI-Powered Contract Analysis for M&A Due Diligence
+          </p>
+        </FadeInSlide>
 
-      {/* Pills */}
-      <div style={{ display: "flex", gap: 16, marginTop: 56, opacity: pillsOpacity,
-        transform: `translateY(${pillsY}px)`,
-      }}>
-        {["Chat with Contracts", "Risk Assessment", "Obligation Tracking", "Deal Grouping"].map((item) => (
-          <div key={item} style={{ padding: "10px 20px", backgroundColor: colors.bgCard,
-            borderRadius: 8, border: `1px solid ${colors.border}`,
-            fontFamily: fonts.mono, fontSize: 14, color: colors.textSoft,
-          }}>
-            {item}
-          </div>
-        ))}
+        {/* Pills — staggered entrance */}
+        <div style={{ display: "flex", gap: 16, marginTop: 56 }}>
+          {PILLS.map((item, i) => {
+            const pillProgress = spring({
+              frame: frame - 45 - i * STAGGER.fast,
+              fps,
+              config: springs.snappy,
+            });
+            const pillY = interpolate(pillProgress, [0, 1], [15, 0]);
+            return (
+              <div
+                key={item}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: colors.bgCard,
+                  borderRadius: 8,
+                  border: `1px solid ${colors.border}`,
+                  fontFamily: fonts.mono,
+                  fontSize: 14,
+                  color: colors.textSoft,
+                  opacity: pillProgress,
+                  transform: `translateY(${pillY}px)`,
+                }}
+              >
+                {item}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </AbsoluteFill>
   );

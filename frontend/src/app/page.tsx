@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, lazy, Suspense } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
@@ -12,8 +12,8 @@ import {
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
 
-const DemoVideoModal = lazy(() =>
-  import('@/components/DemoVideoModal').then(m => ({ default: m.DemoVideoModal }))
+const HeroVideoPlayer = lazy(() =>
+  import('@/components/HeroVideoPlayer').then(m => ({ default: m.HeroVideoPlayer }))
 )
 
 const features = [
@@ -97,11 +97,19 @@ const clauseTypes = [
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
   const [showVideo, setShowVideo] = useState(false)
+  const [showHeroVideo, setShowHeroVideo] = useState(false)
+  const [heroVideoDismissed, setHeroVideoDismissed] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Auto-show video over hero after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowHeroVideo(true), 2000)
+    return () => clearTimeout(timer)
   }, [])
 
   return (
@@ -114,12 +122,12 @@ export default function LandingPage() {
               <Shield className="w-5 h-5 text-ink-950" />
             </div>
             <div>
-              <span className="font-display text-xl font-bold tracking-tight">ContractClarity</span>
+              <span className="font-display text-xl font-bold tracking-tight">ClauseLens</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/m4cd4r4/ContractClarity"
+              href="https://github.com/m4cd4r4/ClauseLens"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-ink-400 hover:text-ink-200 transition-colors"
@@ -180,20 +188,51 @@ export default function LandingPage() {
                 Explore the Demo
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <button
-                onClick={() => setShowVideo(true)}
-                className="group flex items-center gap-3 px-8 py-4 bg-ink-900 border border-ink-700 rounded-xl font-semibold text-lg
-                         text-ink-200 hover:bg-ink-800 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all"
-              >
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
-                  <Play className="w-4 h-4 text-accent ml-0.5" />
-                </div>
-                Watch Demo
-              </button>
+              {heroVideoDismissed && (
+                <button
+                  onClick={() => { setHeroVideoDismissed(false); setShowHeroVideo(true) }}
+                  className="group flex items-center gap-3 px-8 py-4 bg-ink-900 border border-ink-700 rounded-xl font-semibold text-lg
+                           text-ink-200 hover:bg-ink-800 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all"
+                >
+                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
+                    <Play className="w-4 h-4 text-accent ml-0.5" />
+                  </div>
+                  Watch Demo
+                </button>
+              )}
             </div>
           </motion.div>
 
-          <HeroVisual />
+          {/* Hero visual / video crossfade */}
+          <div className="relative mt-16 max-w-5xl mx-auto">
+            <AnimatePresence mode="wait">
+              {showHeroVideo && !heroVideoDismissed ? (
+                <motion.div
+                  key="video"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Suspense fallback={<HeroVisual />}>
+                    <HeroVideoPlayer
+                      onDismiss={() => { setHeroVideoDismissed(true); setShowHeroVideo(false) }}
+                    />
+                  </Suspense>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="static"
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <HeroVisual />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 
@@ -451,7 +490,7 @@ export default function LandingPage() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <a
-                href="https://github.com/m4cd4r4/ContractClarity"
+                href="https://github.com/m4cd4r4/ClauseLens"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-ink-400 hover:text-ink-200 transition-colors"
@@ -470,12 +509,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
             <Shield className="w-4 h-4 text-accent/50" />
-            <span>ContractClarity</span>
+            <span>ClauseLens</span>
             <span className="text-ink-700">·</span>
             <span>Built by Macdara</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-ink-500">
-            <a href="https://github.com/m4cd4r4/ContractClarity" target="_blank" rel="noopener noreferrer" className="hover:text-ink-300 transition-colors">
+            <a href="https://github.com/m4cd4r4/ClauseLens" target="_blank" rel="noopener noreferrer" className="hover:text-ink-300 transition-colors">
               GitHub
             </a>
             <Link href="/dashboard" className="hover:text-ink-300 transition-colors">
@@ -485,12 +524,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Demo Video Modal */}
-      {showVideo && (
-        <Suspense fallback={null}>
-          <DemoVideoModal open={showVideo} onClose={() => setShowVideo(false)} />
-        </Suspense>
-      )}
     </div>
   )
 }

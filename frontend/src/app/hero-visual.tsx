@@ -72,7 +72,7 @@ export function HeroVisual() {
           </div>
           <div className="flex-1 flex justify-center">
             <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[10px] text-ink-500 font-mono">
-              contractclarity.app/documents/acme-techstart-ma
+              clauselens.com/documents/acme-techstart-ma
             </div>
           </div>
         </div>
