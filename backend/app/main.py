@@ -47,8 +47,7 @@ app = FastAPI(
 
 # CORS middleware – tightened for production
 allowed_origins = [
-    "https://frontend-jade-seven-48.vercel.app",
-    "https://contractclarity-app.vercel.app",
+    "https://clauselens-app.vercel.app",
     "http://localhost:3000",
 ]
 if settings.cors_origins:

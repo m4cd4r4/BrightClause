@@ -10,7 +10,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 
-[Live Demo](https://frontend-jade-seven-48.vercel.app) | [API Docs](http://45.77.233.102:8003/docs) | [Quick Start](#quick-start)
+[Live Demo](https://clauselens-app.vercel.app) | [API Docs](http://45.77.233.102:8002/docs) | [Quick Start](#quick-start)
+
+<img src="docs/demo-preview.gif" alt="ClauseLens Demo" width="800" />
 
 </div>
 
@@ -191,9 +193,9 @@ npm run dev
 | Service | URL |
 |---------|-----|
 | Frontend (local) | http://localhost:3000 |
-| Frontend (prod) | https://frontend-jade-seven-48.vercel.app |
-| API Docs (local) | http://localhost:8003/docs |
-| API (prod) | http://45.77.233.102:8003 |
+| Frontend (prod) | https://clauselens-app.vercel.app |
+| API Docs (local) | http://localhost:8002/docs |
+| API (prod) | http://45.77.233.102:8002 |
 | MinIO Console | http://localhost:9001 |
 
 ---
