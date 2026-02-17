@@ -6,15 +6,15 @@ import { ClauseLensDemo } from './demo-video/ClauseLensDemo'
 import { Play, Pause, SkipBack, Maximize2, Minimize2, X } from 'lucide-react'
 
 const SCENES = [
-  { name: 'Intro', from: 0, duration: 150 },
-  { name: 'Problem', from: 150, duration: 210 },
-  { name: 'Chat', from: 360, duration: 210 },
-  { name: 'Risk', from: 570, duration: 210 },
-  { name: 'Obligations', from: 780, duration: 210 },
-  { name: 'Deals', from: 990, duration: 210 },
-  { name: 'Outro', from: 1200, duration: 150 },
+  { name: 'Intro', from: 0, duration: 110 },
+  { name: 'Problem', from: 110, duration: 155 },
+  { name: 'Chat', from: 265, duration: 185 },
+  { name: 'Risk', from: 450, duration: 155 },
+  { name: 'Obligations', from: 605, duration: 140 },
+  { name: 'Deals', from: 745, duration: 145 },
+  { name: 'Outro', from: 890, duration: 110 },
 ] as const
-const TOTAL_FRAMES = 1350
+const TOTAL_FRAMES = 1000
 
 interface HeroVideoPlayerProps {
   onDismiss: () => void
@@ -57,16 +57,19 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
     const onPause = () => setIsPlaying(false)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onFrame = (e: any) => setCurrentFrame(e.detail.frame as number)
+    const onEnded = () => onDismiss()
 
     player.addEventListener('play', onPlay)
     player.addEventListener('pause', onPause)
     player.addEventListener('frameupdate', onFrame)
+    player.addEventListener('ended', onEnded)
     return () => {
       player.removeEventListener('play', onPlay)
       player.removeEventListener('pause', onPause)
       player.removeEventListener('frameupdate', onFrame)
+      player.removeEventListener('ended', onEnded)
     }
-  }, [])
+  }, [onDismiss])
 
   const handleTogglePlay = useCallback(() => {
     const player = playerRef.current
@@ -148,10 +151,9 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             component={ClauseLensDemo}
             compositionWidth={1920}
             compositionHeight={1080}
-            durationInFrames={1350}
+            durationInFrames={1000}
             fps={30}
             autoPlay
-            loop
             style={{
               width: '100%',
               height: isFullscreen ? '100%' : undefined,

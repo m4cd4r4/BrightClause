@@ -96,7 +96,6 @@ const clauseTypes = [
 
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
-  const [showVideo, setShowVideo] = useState(false)
   const [showHeroVideo, setShowHeroVideo] = useState(false)
   const [heroVideoDismissed, setHeroVideoDismissed] = useState(false)
 
@@ -203,32 +202,30 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          {/* Hero visual / video crossfade */}
-          <div className="relative mt-16 max-w-5xl mx-auto">
-            <AnimatePresence mode="wait">
-              {showHeroVideo && !heroVideoDismissed ? (
+          {/* Hero visual / video dissolve */}
+          <div className="relative mt-16 max-w-5xl mx-auto grid" style={{ gridTemplate: '1fr / 1fr' }}>
+            {/* Static visual — always rendered, establishes container size */}
+            <div style={{ gridArea: '1 / 1' }}>
+              <HeroVisual />
+            </div>
+
+            {/* Video overlay — fades in on top, auto-dissolves when finished */}
+            <AnimatePresence>
+              {showHeroVideo && !heroVideoDismissed && (
                 <motion.div
                   key="video"
+                  style={{ gridArea: '1 / 1' }}
+                  className="z-10"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
+                  exit={{ opacity: 0, transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] } }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <Suspense fallback={<HeroVisual />}>
+                  <Suspense fallback={null}>
                     <HeroVideoPlayer
                       onDismiss={() => { setHeroVideoDismissed(true); setShowHeroVideo(false) }}
                     />
                   </Suspense>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="static"
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <HeroVisual />
                 </motion.div>
               )}
             </AnimatePresence>

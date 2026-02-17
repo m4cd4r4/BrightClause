@@ -57,7 +57,7 @@ export function HeroVisual() {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="mt-16 max-w-5xl mx-auto relative"
+      className="relative"
     >
       <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
 
