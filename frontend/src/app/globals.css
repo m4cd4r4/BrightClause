@@ -189,6 +189,12 @@ body {
   100% { background-position: 200% 0; }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
 .skeleton {
   background: linear-gradient(
     90deg,
