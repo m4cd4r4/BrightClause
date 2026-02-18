@@ -1,1 +1,1 @@
-# ContractClarity Backend
+# ClauseLens Backend

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://45.77.233.102:8003'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://45.77.233.102:8002'
 const BACKEND_API_KEY = process.env.BACKEND_API_KEY || ''
 
 async function proxy(

@@ -158,7 +158,7 @@ A guided demonstration of ClauseLens's AI-powered contract analysis capabilities
 
 > "Let me show you what's under the hood."
 
-**Open**: http://45.77.233.102:8003/docs (FastAPI Swagger UI)
+**Open**: http://45.77.233.102:8002/docs (FastAPI Swagger UI)
 
 **Point out:**
 - **Clean API design** - RESTful endpoints
@@ -214,7 +214,7 @@ Queue:    Redis
 Before starting:
 
 - [ ] Frontend accessible at https://clauselens-app.vercel.app (or http://localhost:3000 locally)
-- [ ] Backend accessible at http://45.77.233.102:8003 (or http://localhost:8003 locally)
+- [ ] Backend accessible at http://45.77.233.102:8002 (or http://localhost:8002 locally)
 - [ ] At least one contract uploaded and processed
 - [ ] Clause extraction completed on demo document
 - [ ] Entity extraction completed (for knowledge graph)

@@ -1,4 +1,4 @@
-"""ContractClarity FastAPI application."""
+"""ClauseLens FastAPI application."""
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="ContractClarity API",
+    title="ClauseLens API",
     description="AI-powered contract analysis for M&A due diligence",
     version="0.1.0",
     lifespan=lifespan,
@@ -47,7 +47,7 @@ app = FastAPI(
 
 # CORS middleware – tightened for production
 allowed_origins = [
-    "https://clauselens-app.vercel.app",
+    "https://frontend-jade-seven-48.vercel.app",
     "http://localhost:3000",
 ]
 if settings.cors_origins:
@@ -78,7 +78,7 @@ app.include_router(deals_router, dependencies=[Depends(verify_api_key)])
 async def root():
     """Root endpoint."""
     return {
-        "name": "ContractClarity API",
+        "name": "ClauseLens API",
         "version": "0.1.0",
         "status": "running",
         "docs": "/docs",

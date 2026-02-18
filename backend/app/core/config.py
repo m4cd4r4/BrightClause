@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Application
-    app_name: str = "ContractClarity"
+    app_name: str = "ClauseLens"
     environment: str = "development"
     debug: bool = True
 
@@ -16,10 +16,10 @@ class Settings(BaseSettings):
     api_key: str = ""  # Set in production; empty = auth disabled
 
     # CORS
-    cors_origins: str = ""  # Comma-separated extra origins (e.g. "https://contractclarity.com,https://www.contractclarity.com")
+    cors_origins: str = ""  # Comma-separated extra origins (e.g. "https://clauselens.com,https://www.clauselens.com")
 
     # Database
-    database_url: str = "postgresql://contractclarity:contractclarity_dev@localhost:5433/contractclarity"
+    database_url: str = "postgresql://clauselens:clauselens_dev@localhost:5433/clauselens"
 
     # Redis / Celery
     redis_url: str = "redis://localhost:6380/0"
@@ -28,8 +28,8 @@ class Settings(BaseSettings):
 
     # MinIO (S3-compatible storage)
     minio_endpoint: str = "localhost:9000"
-    minio_access_key: str = "contractclarity"
-    minio_secret_key: str = "contractclarity_dev"
+    minio_access_key: str = "clauselens"
+    minio_secret_key: str = "clauselens_dev"
     minio_bucket: str = "contracts"
     minio_secure: bool = False  # Use HTTPS in production
 

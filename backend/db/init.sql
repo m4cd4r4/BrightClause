@@ -1,4 +1,4 @@
--- Initialize ContractClarity database
+-- Initialize ClauseLens database
 
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
