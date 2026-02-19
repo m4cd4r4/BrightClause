@@ -8,6 +8,7 @@
     "preview": "remotion preview"
   },
   "dependencies": {
+    "@google/genai": "^1.42.0",
     "@remotion/cli": "^4.0.0",
     "@remotion/light-leaks": "^4.0.423",
     "@remotion/player": "^4.0.0",

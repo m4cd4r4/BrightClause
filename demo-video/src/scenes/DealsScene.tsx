@@ -10,6 +10,7 @@ import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { AnimatedCounter } from "../components/AnimatedCounter";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const deals = [
   { name: "Acme Corp Acquisition", docs: 12, risk: "High", progress: 78, clauses: 88, obligations: 15 },
@@ -59,6 +60,17 @@ export const DealsScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
+      {/* Real deals page screenshot as depth layer */}
+      <ScreenshotReveal
+        src="assets/screenshot-deals.png"
+        delay={0}
+        startScale={0.6}
+        endScale={0.63}
+        opacity={0.08}
+        blur={6}
+        borderRadius={16}
+        y={30}
+      />
       <GlowOrb color={colors.accent} size={400} x="50%" y="50%" maxOpacity={0.08} delay={10} />
 
       <SceneBadge title="Deal Grouping" subtitle="Batch Upload & Aggregate Analysis" />

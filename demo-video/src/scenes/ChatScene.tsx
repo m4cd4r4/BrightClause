@@ -8,6 +8,7 @@ import {
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const userQuestion = "What are the termination rights in this contract?";
 
@@ -67,6 +68,28 @@ export const ChatScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
+      {/* AI-generated atmospheric background */}
+      <ScreenshotReveal
+        src="assets/chat-bg.png"
+        delay={0}
+        startScale={1.05}
+        endScale={1.1}
+        opacity={0.1}
+        blur={14}
+        borderRadius={0}
+        shadow={false}
+      />
+      {/* Subtle product screenshot behind chat window */}
+      <ScreenshotReveal
+        src="assets/screenshot-risk.png"
+        delay={0}
+        startScale={0.7}
+        endScale={0.72}
+        opacity={0.08}
+        blur={6}
+        borderRadius={12}
+        y={40}
+      />
       <GlowOrb color={colors.blue} size={350} x="50%" y="50%" maxOpacity={0.12} delay={5} />
 
       <SceneBadge title="Contract Q&A" subtitle="RAG-Powered Chat — Ask Anything" />

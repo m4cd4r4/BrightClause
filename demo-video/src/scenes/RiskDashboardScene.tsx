@@ -10,6 +10,7 @@ import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { AnimatedCounter } from "../components/AnimatedCounter";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const riskData = [
   { level: "Critical", count: 3, color: colors.critical, pct: 3 },
@@ -83,6 +84,28 @@ export const RiskDashboardScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
+      {/* AI-generated atmospheric background */}
+      <ScreenshotReveal
+        src="assets/risk-bg.png"
+        delay={0}
+        startScale={1.05}
+        endScale={1.1}
+        opacity={0.1}
+        blur={14}
+        borderRadius={0}
+        shadow={false}
+      />
+      {/* Real risk panel screenshot as atmospheric backdrop */}
+      <ScreenshotReveal
+        src="assets/screenshot-risk.png"
+        delay={0}
+        startScale={0.65}
+        endScale={0.68}
+        opacity={0.1}
+        blur={5}
+        borderRadius={16}
+        y={20}
+      />
       <GlowOrb color={colors.accent} size={300} x="30%" y="45%" maxOpacity={0.1} delay={15} />
 
       <SceneBadge title="Risk Dashboard" subtitle="Portfolio-Wide Risk Analysis" />

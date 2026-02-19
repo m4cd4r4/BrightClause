@@ -33,11 +33,10 @@ export const BrightClauseDemo: React.FC = () => {
           <IntroScene />
         </TransitionSeries.Sequence>
 
-        {/* Intro → Problem: fade */}
-        <TransitionSeries.Transition
-          presentation={fade()}
-          timing={linearTiming({ durationInFrames: FADE_T })}
-        />
+        {/* Intro → Problem: light leak (dramatic tone shift) */}
+        <TransitionSeries.Overlay durationInFrames={25}>
+          <LightLeak seed={7} hueShift={30} />
+        </TransitionSeries.Overlay>
 
         {/* Problem */}
         <TransitionSeries.Sequence durationInFrames={PROBLEM} premountFor={30}>
@@ -55,7 +54,7 @@ export const BrightClauseDemo: React.FC = () => {
           <ChatScene />
         </TransitionSeries.Sequence>
 
-        {/* Chat → Risk: fade */}
+        {/* Chat → Risk: fade (data reveal) */}
         <TransitionSeries.Transition
           presentation={fade()}
           timing={linearTiming({ durationInFrames: FADE_T })}
