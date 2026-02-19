@@ -4,7 +4,7 @@ import path from 'path';
 const testPdf = path.resolve('I:/Scratch/ContractClarity/sample-contracts/scribd-downloads/479112394-Business-Acquisition-Agreement.pdf');
 
 async function testUpload() {
-  console.log('🔍 Testing ContractClarity upload...');
+  console.log('🔍 Testing BrightClause upload...');
   console.log('PDF:', testPdf);
 
   const browser = await chromium.launch({ headless: false });
