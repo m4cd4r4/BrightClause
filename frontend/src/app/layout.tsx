@@ -27,7 +27,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://brightclause-app.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://brightclause.com'),
   title: 'BrightClause | AI-Powered Contract Analysis for M&A Due Diligence',
   description: 'Upload contracts, extract clauses, assess risk levels, and visualize entity relationships with AI-powered analysis. Supporting 16 clause types, 4-tier OCR, and knowledge graph visualization.',
   openGraph: {

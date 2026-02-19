@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const LIVE_URL = 'https://frontend-jade-seven-48.vercel.app'
+const LIVE_URL = 'https://brightclause.com'
 
 // Bypass access code gate + onboarding tour before each test
 test.beforeEach(async ({ page }) => {
