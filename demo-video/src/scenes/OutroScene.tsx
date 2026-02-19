@@ -74,7 +74,7 @@ export const OutroScene: React.FC = () => {
               fontWeight: 400,
             }}
           >
-            AI-Powered Contract Analysis for M&A Due Diligence
+            AI-Powered Contract Intelligence
           </p>
         </FadeInSlide>
 

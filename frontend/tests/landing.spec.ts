@@ -17,8 +17,7 @@ test.describe('BrightClause Landing Page', () => {
     const hero = page.locator('h1')
     await expect(hero).toBeVisible()
     await expect(hero).toContainText('AI-Powered')
-    await expect(hero).toContainText('Contract Analysis')
-    await expect(hero).toContainText('M&A Due Diligence')
+    await expect(hero).toContainText('Contract Intelligence')
   })
 
   test('should display hero description paragraph', async ({ page }) => {

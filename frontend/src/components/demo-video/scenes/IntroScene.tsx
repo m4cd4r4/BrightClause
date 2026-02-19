@@ -73,7 +73,7 @@ export const IntroScene: React.FC = () => {
       <p style={{ fontFamily: fonts.body, fontSize: 26, color: colors.textSoft,
         margin: "20px 0 0 0", opacity: subProgress, fontWeight: 400,
       }}>
-        AI-Powered Contract Analysis for M&A Due Diligence
+        AI-Powered Contract Intelligence
       </p>
 
       {/* Pills */}

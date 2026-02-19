@@ -23,7 +23,7 @@ A guided demonstration of BrightClause's AI-powered contract analysis capabiliti
 
 ### Talking Points
 
-> "This is BrightClause - an AI-powered contract analysis platform for M&A due diligence. In a typical M&A deal, legal teams spend weeks reviewing hundreds of contracts manually. BrightClause reduces that to minutes."
+> "This is BrightClause - an AI-powered contract intelligence platform. Legal teams spend weeks reviewing hundreds of contracts manually. BrightClause reduces that to minutes with enhanced reading, clause extraction, and risk analysis."
 
 **Point out:**
 - **Stats cards** - Documents indexed, text chunks, clauses extracted, ready for review
@@ -205,7 +205,7 @@ Queue:    Redis
 
 ### "Can it handle different contract types?"
 
-> "The clause types are configurable. Currently it's optimized for M&A due diligence (SaaS agreements, service contracts, leases), but the extraction prompts can be customized for any domain."
+> "The clause types are configurable. Currently it covers SaaS agreements, service contracts, leases, and more. The extraction prompts can be customized for any contract domain."
 
 ---
 
@@ -273,7 +273,7 @@ cd frontend && npm test
 
 If short on time:
 
-1. **Dashboard** (15s) - "AI contract analysis for M&A"
+1. **Dashboard** (15s) - "AI contract intelligence"
 2. **Click document** (15s) - "Instant risk assessment"
 3. **Risk panel** (30s) - "Critical clauses highlighted"
 4. **Knowledge Graph** (30s) - "Entity relationships visualized"

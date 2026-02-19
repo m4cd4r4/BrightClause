@@ -84,7 +84,7 @@ export function HeroVisual() {
             <div className="flex items-start justify-between mb-5">
               <div>
                 <p className="text-[10px] text-ink-500 uppercase tracking-wider font-mono mb-1">Document Analysis</p>
-                <p className="text-sm font-medium text-ink-200">Acme Corp &ndash; TechStart Acquisition Agreement</p>
+                <p className="text-sm font-medium text-ink-200">Acme Corp &ndash; TechStart Service Agreement</p>
               </div>
               <span className="px-2.5 py-1 rounded-lg bg-orange-500/15 text-orange-400 text-[10px] font-mono font-bold uppercase tracking-wide
                              shadow-[0_0_12px_rgba(249,115,22,0.15)] border border-orange-500/20 shrink-0 ml-4">

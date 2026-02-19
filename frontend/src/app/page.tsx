@@ -169,8 +169,7 @@ export default function LandingPage() {
           >
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
               AI-Powered{' '}
-              <span className="text-accent">Contract Analysis</span>{' '}
-              for M&A Due Diligence
+              <span className="text-accent">Contract Intelligence</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-ink-400 leading-relaxed mb-10 max-w-2xl mx-auto">
@@ -327,7 +326,7 @@ export default function LandingPage() {
           >
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">16+ Clause Types</h2>
             <p className="text-ink-400 max-w-xl mx-auto">
-              AI identifies and classifies clause types common in M&A contracts
+              AI identifies and classifies clause types across commercial contracts
             </p>
           </motion.div>
 

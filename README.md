@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**AI-Powered Contract Analysis for M&A Due Diligence**
+**AI-Powered Contract Intelligence**
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.1-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -20,7 +20,7 @@
 
 ## Overview
 
-BrightClause transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph.
+BrightClause transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph. Enhanced reading and analysis for any commercial contract.
 
 **Part of the Lens Suite** &mdash; BrightClause &middot; TaxLens &middot; PetLens
 
@@ -450,8 +450,8 @@ MAX_FILE_SIZE=52428800
 
 Public contract datasets for testing:
 - [CUAD Dataset](https://github.com/TheAtticusProject/cuad) - 13K labeled clauses
-- [SEC EDGAR](https://www.sec.gov/cgi-bin/browse-edgar) - Public M&A filings
-- [MAUD Dataset](https://www.mauldataset.org/) - 152 merger agreements
+- [SEC EDGAR](https://www.sec.gov/cgi-bin/browse-edgar) - Public commercial filings
+- [MAUD Dataset](https://www.mauldataset.org/) - 152 labeled agreements
 
 ---
 

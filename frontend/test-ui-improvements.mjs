@@ -52,7 +52,7 @@ async function runTests() {
       const title = await page.locator('h1').textContent();
       if (!title.includes('BrightClause')) throw new Error('Title not found');
 
-      const subtitle = await page.locator('text=M&A Due Diligence Platform').isVisible();
+      const subtitle = await page.locator('text=Contract Intelligence').isVisible();
       if (!subtitle) throw new Error('Subtitle not visible');
     });
 

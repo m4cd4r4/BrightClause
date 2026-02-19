@@ -83,7 +83,7 @@ export const OutroScene: React.FC = () => {
       {/* Subtitle */}
       <p style={{ fontFamily: fonts.body, fontSize: 22, color: colors.textSoft,
         margin: "16px 0 0 0", opacity: subProgress, fontWeight: 400 }}>
-        AI-Powered Contract Analysis for M&A Due Diligence
+        AI-Powered Contract Intelligence
       </p>
 
       {/* CTA buttons */}
