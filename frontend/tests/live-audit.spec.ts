@@ -5,7 +5,6 @@ const LIVE_URL = 'https://brightclause.com'
 // Bypass access code gate + onboarding tour before each test
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    sessionStorage.setItem('brightclause_admin_access', 'true')
     localStorage.setItem('bc_walkthrough_seen', 'true')
   })
 })

@@ -11,7 +11,6 @@ import {
   Briefcase, Sun, Activity, Play
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
-import { AdminGate } from '@/components/AdminGate'
 
 const HeroVideoPlayer = lazy(() =>
   import('@/components/HeroVideoPlayer').then(m => ({ default: m.HeroVideoPlayer }))
@@ -113,7 +112,6 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <AdminGate>
     <div className="min-h-screen bg-ink-950 text-ink-100">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/50 bg-ink-950/90 backdrop-blur-xl">
@@ -524,6 +522,5 @@ export default function LandingPage() {
       </footer>
 
     </div>
-    </AdminGate>
   )
 }
