@@ -66,7 +66,7 @@ export const IntroScene: React.FC = () => {
         margin: 0, opacity: titleProgress, transform: `translateY(${titleY}px)`,
         letterSpacing: "-0.01em", lineHeight: 1,
       }}>
-        Clause<span style={{ color: colors.accent }}>Lens</span>
+        Bright<span style={{ color: colors.accent }}>Clause</span>
       </h1>
 
       {/* Subtitle */}

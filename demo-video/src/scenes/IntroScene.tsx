@@ -70,7 +70,7 @@ export const IntroScene: React.FC = () => {
             lineHeight: 1,
           }}
         >
-          Clause<span style={{ color: colors.accent }}>Lens</span>
+          Bright<span style={{ color: colors.accent }}>Clause</span>
         </h1>
 
         {/* Subtitle */}
