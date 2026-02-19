@@ -1,5 +1,5 @@
 /**
- * ContractClarity UI Improvement Tests
+ * BrightClause UI Improvement Tests
  * Tests the improved dashboard, document interactions, and navigation
  */
 
@@ -16,7 +16,7 @@ function log(message) {
 async function runTests() {
   console.log('');
   console.log('═'.repeat(70));
-  console.log('🧪 ContractClarity UI Improvement Tests');
+  console.log('🧪 BrightClause UI Improvement Tests');
   console.log('═'.repeat(70));
   console.log('');
 
@@ -50,7 +50,7 @@ async function runTests() {
     // Test 1: Header elements
     await test('Header displays correctly', async () => {
       const title = await page.locator('h1').textContent();
-      if (!title.includes('ContractClarity')) throw new Error('Title not found');
+      if (!title.includes('BrightClause')) throw new Error('Title not found');
 
       const subtitle = await page.locator('text=M&A Due Diligence Platform').isVisible();
       if (!subtitle) throw new Error('Subtitle not visible');

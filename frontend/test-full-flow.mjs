@@ -11,7 +11,7 @@ if (!fs.existsSync(screenshotsDir)) {
 }
 
 async function testFullFlow() {
-  console.log('🚀 ContractClarity Full Flow Test\n');
+  console.log('🚀 BrightClause Full Flow Test\n');
   console.log('═'.repeat(60));
 
   const browser = await chromium.launch({

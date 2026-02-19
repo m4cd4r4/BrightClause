@@ -10,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 
-[Live Demo](https://brightclause-app.vercel.app) | [API Docs](http://45.77.233.102:8002/docs) | [Quick Start](#quick-start)
+[Live Demo](https://brightclause.com) | [API Docs](http://45.77.233.102:8002/docs) | [Quick Start](#quick-start)
 
 <img src="docs/demo-preview.gif" alt="BrightClause Demo" width="800" />
 
@@ -193,7 +193,7 @@ npm run dev
 | Service | URL |
 |---------|-----|
 | Frontend (local) | http://localhost:3000 |
-| Frontend (prod) | https://brightclause-app.vercel.app |
+| Frontend (prod) | https://brightclause.com |
 | API Docs (local) | http://localhost:8002/docs |
 | API (prod) | http://45.77.233.102:8002 |
 | MinIO Console | http://localhost:9001 |

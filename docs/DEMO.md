@@ -19,7 +19,7 @@ A guided demonstration of BrightClause's AI-powered contract analysis capabiliti
 
 ## Step 1: Dashboard Overview
 
-**Open**: https://brightclause-app.vercel.app (or http://localhost:3000 for local dev)
+**Open**: https://brightclause.com (or http://localhost:3000 for local dev)
 
 ### Talking Points
 
@@ -213,7 +213,7 @@ Queue:    Redis
 
 Before starting:
 
-- [ ] Frontend accessible at https://brightclause-app.vercel.app (or http://localhost:3000 locally)
+- [ ] Frontend accessible at https://brightclause.com (or http://localhost:3000 locally)
 - [ ] Backend accessible at http://45.77.233.102:8002 (or http://localhost:8002 locally)
 - [ ] At least one contract uploaded and processed
 - [ ] Clause extraction completed on demo document
