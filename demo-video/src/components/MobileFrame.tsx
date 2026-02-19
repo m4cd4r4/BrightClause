@@ -14,15 +14,6 @@ interface MobileFrameProps {
   showBranding?: boolean;
 }
 
-const DESKTOP_W = 1920;
-const DESKTOP_H = 1080;
-const MOBILE_W = 1080;
-// Scale by height to fill more vertical space (clips sides of desktop)
-const SCENE_TARGET_H = 850;
-const SCENE_SCALE = SCENE_TARGET_H / DESKTOP_H; // ~0.787
-const SCENE_SCALED_W = DESKTOP_W * SCENE_SCALE; // ~1511 (wider than mobile, clips sides)
-const BADGE_CLIP = 50; // Clip top to hide duplicate SceneBadge
-
 export const MobileFrame: React.FC<MobileFrameProps> = ({
   children,
   label,
@@ -42,12 +33,12 @@ export const MobileFrame: React.FC<MobileFrameProps> = ({
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
-  // Vertically center the scene within available space
-  const topArea = showBranding ? 220 : 80;
-  const bottomArea = 160;
-  const availableH = 1920 - topArea - bottomArea;
-  const sceneH = SCENE_TARGET_H - BADGE_CLIP;
-  const sceneTop = topArea + Math.max(0, (availableH - sceneH) / 2);
+  // Layout areas
+  const brandingH = showBranding ? 140 : 0;
+  const labelH = 60;
+  const ctaH = 120;
+  const contentTop = brandingH + labelH;
+  const contentBottom = ctaH;
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
@@ -59,7 +50,7 @@ export const MobileFrame: React.FC<MobileFrameProps> = ({
             top: 0,
             left: 0,
             right: 0,
-            height: 160,
+            height: brandingH,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -98,9 +89,10 @@ export const MobileFrame: React.FC<MobileFrameProps> = ({
       <div
         style={{
           position: "absolute",
-          top: showBranding ? 170 : 40,
+          top: showBranding ? brandingH : 20,
           left: 40,
           right: 40,
+          height: labelH,
           display: "flex",
           alignItems: "center",
           gap: 12,
@@ -136,30 +128,19 @@ export const MobileFrame: React.FC<MobileFrameProps> = ({
         )}
       </div>
 
-      {/* Desktop scene scaled up, centered horizontally, clips sides */}
+      {/* Native content area — children render at full mobile resolution */}
       <div
         style={{
           position: "absolute",
-          top: sceneTop,
+          top: contentTop,
           left: 0,
-          width: MOBILE_W,
-          height: sceneH,
+          right: 0,
+          bottom: contentBottom,
           overflow: "hidden",
-          borderRadius: 12,
           opacity: exitOpacity,
-          boxShadow: `0 10px 40px rgba(0,0,0,0.5), 0 0 80px ${colors.accentGlow}`,
         }}
       >
-        <div
-          style={{
-            width: DESKTOP_W,
-            height: DESKTOP_H,
-            transform: `scale(${SCENE_SCALE}) translateX(${-(DESKTOP_W - MOBILE_W / SCENE_SCALE) / 2}px) translateY(${-BADGE_CLIP / SCENE_SCALE}px)`,
-            transformOrigin: "top left",
-          }}
-        >
-          {children}
-        </div>
+        {children}
       </div>
 
       {/* Bottom CTA */}
@@ -169,7 +150,7 @@ export const MobileFrame: React.FC<MobileFrameProps> = ({
           bottom: 0,
           left: 0,
           right: 0,
-          height: 160,
+          height: ctaH,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",

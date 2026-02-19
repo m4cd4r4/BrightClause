@@ -17,22 +17,14 @@ export const OutroScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Title
   const titleProgress = spring({ frame: frame - 15, fps, config: springs.smooth });
   const titleY = interpolate(titleProgress, [0, 1], [30, 0]);
 
-  // CTA buttons
   const ctaProgress = spring({ frame: frame - 45, fps, config: springs.snappy });
   const ctaY = interpolate(ctaProgress, [0, 1], [15, 0]);
 
-  // CTA pulse glow
-  const ctaGlow = interpolate(
-    frame % 60,
-    [0, 30, 60],
-    [4, 16, 4]
-  );
+  const ctaGlow = interpolate(frame % 60, [0, 30, 60], [4, 16, 4]);
 
-  // Footer
   const footerOpacity = interpolate(frame, [80, 100], [0, 1], { extrapolateRight: "clamp" });
 
   return (
@@ -41,16 +33,14 @@ export const OutroScene: React.FC = () => {
       <GlowOrb pulse y="40%" maxOpacity={0.5} maxScale={1.5} />
 
       <div style={{ ...centered }}>
-        {/* Shield */}
         <div style={{ marginBottom: 28 }}>
-          <ShieldLogo size={90} />
+          <ShieldLogo size={100} />
         </div>
 
-        {/* Title */}
         <h1
           style={{
             fontFamily: fonts.display,
-            fontSize: 68,
+            fontSize: 82,
             fontWeight: 600,
             color: colors.text,
             margin: 0,
@@ -63,12 +53,11 @@ export const OutroScene: React.FC = () => {
           Bright<span style={{ color: colors.accent }}>Clause</span>
         </h1>
 
-        {/* Subtitle */}
         <FadeInSlide delay={30} slideDistance={15}>
           <p
             style={{
               fontFamily: fonts.body,
-              fontSize: 22,
+              fontSize: 28,
               color: colors.textSoft,
               margin: "16px 0 0 0",
               fontWeight: 400,
@@ -78,7 +67,6 @@ export const OutroScene: React.FC = () => {
           </p>
         </FadeInSlide>
 
-        {/* URL */}
         <div
           style={{
             marginTop: 40,
@@ -89,7 +77,7 @@ export const OutroScene: React.FC = () => {
           <span
             style={{
               fontFamily: fonts.mono,
-              fontSize: 22,
+              fontSize: 28,
               fontWeight: 500,
               color: colors.accent,
               letterSpacing: "0.02em",
@@ -100,7 +88,6 @@ export const OutroScene: React.FC = () => {
           </span>
         </div>
 
-        {/* Feature pills — sine wave stagger */}
         <div style={{ display: "flex", gap: 12, marginTop: 36 }}>
           {PILLS.map((item, i) => {
             const waveDelay = 65 + Math.sin(i * 0.8) * 5;
@@ -114,12 +101,12 @@ export const OutroScene: React.FC = () => {
               <div
                 key={item}
                 style={{
-                  padding: "6px 14px",
+                  padding: "8px 16px",
                   backgroundColor: colors.bgCard,
                   borderRadius: 6,
                   border: `1px solid ${colors.border}`,
                   fontFamily: fonts.mono,
-                  fontSize: 12,
+                  fontSize: 15,
                   color: colors.textDim,
                   opacity: pillProgress,
                   transform: `translateY(${pillY}px)`,
@@ -132,7 +119,6 @@ export const OutroScene: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <div
         style={{
           position: "absolute",
@@ -141,7 +127,7 @@ export const OutroScene: React.FC = () => {
           right: 0,
           textAlign: "center",
           fontFamily: fonts.mono,
-          fontSize: 13,
+          fontSize: 16,
           color: colors.textDim,
           opacity: footerOpacity,
         }}

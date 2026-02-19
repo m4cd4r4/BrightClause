@@ -80,14 +80,14 @@ export const IntroScene: React.FC = () => {
       >
         {/* Shield */}
         <div style={{ marginBottom: 40 }}>
-          <ShieldLogo size={110} />
+          <ShieldLogo size={120} />
         </div>
 
         {/* Title */}
         <h1
           style={{
             fontFamily: fonts.display,
-            fontSize: 82,
+            fontSize: 96,
             fontWeight: 600,
             color: colors.text,
             margin: 0,
@@ -106,7 +106,7 @@ export const IntroScene: React.FC = () => {
           <p
             style={{
               fontFamily: fonts.body,
-              fontSize: 26,
+              fontSize: 32,
               color: colors.textSoft,
               margin: "20px 0 0 0",
               fontWeight: 400,
@@ -136,7 +136,7 @@ export const IntroScene: React.FC = () => {
                   borderRadius: 8,
                   border: `1px solid ${colors.border}`,
                   fontFamily: fonts.mono,
-                  fontSize: 14,
+                  fontSize: 18,
                   color: colors.textSoft,
                   opacity: pillProgress,
                   transform: `translateY(${pillY}px)`,

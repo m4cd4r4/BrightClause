@@ -4,7 +4,6 @@ import { fade } from "@remotion/transitions/fade";
 import { slide } from "@remotion/transitions/slide";
 import { LightLeak } from "@remotion/light-leaks";
 import { MobileFrame } from "./components/MobileFrame";
-import { IntroScene } from "./scenes/IntroScene";
 import { ProblemScene } from "./scenes/ProblemScene";
 import { ChatScene } from "./scenes/ChatScene";
 import { RiskDashboardScene } from "./scenes/RiskDashboardScene";
@@ -35,7 +34,6 @@ const MobileIntro: React.FC = () => {
 
   const titleProgress = spring({ frame: frame - 15, fps, config: springs.smooth });
   const titleY = interpolate(titleProgress, [0, 1], [40, 0]);
-  const subtitleProgress = spring({ frame: frame - 35, fps, config: springs.smooth });
 
   const exitOpacity = interpolate(
     frame,
@@ -63,13 +61,13 @@ const MobileIntro: React.FC = () => {
         }}
       >
         <div style={{ marginBottom: 32 }}>
-          <ShieldLogo size={120} />
+          <ShieldLogo size={140} />
         </div>
 
         <h1
           style={{
             fontFamily: fonts.display,
-            fontSize: 72,
+            fontSize: 84,
             fontWeight: 600,
             color: colors.text,
             margin: 0,
@@ -88,7 +86,7 @@ const MobileIntro: React.FC = () => {
           <p
             style={{
               fontFamily: fonts.body,
-              fontSize: 28,
+              fontSize: 34,
               color: colors.textSoft,
               margin: "24px 0 0 0",
               fontWeight: 400,
@@ -105,10 +103,10 @@ const MobileIntro: React.FC = () => {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 14,
+            gap: 16,
             marginTop: 56,
             justifyContent: "center",
-            maxWidth: 600,
+            maxWidth: 700,
           }}
         >
           {PILLS.map((item, i) => {
@@ -122,13 +120,13 @@ const MobileIntro: React.FC = () => {
               <div
                 key={item}
                 style={{
-                  padding: "12px 22px",
+                  padding: "14px 26px",
                   backgroundColor: `${colors.bgCard}cc`,
                   backdropFilter: "blur(8px)",
                   borderRadius: 10,
                   border: `1px solid ${colors.border}`,
                   fontFamily: fonts.mono,
-                  fontSize: 16,
+                  fontSize: 20,
                   color: colors.textSoft,
                   opacity: pillProgress,
                   transform: `translateY(${pillY}px)`,
@@ -173,13 +171,13 @@ const MobileOutro: React.FC = () => {
         }}
       >
         <div style={{ marginBottom: 28 }}>
-          <ShieldLogo size={100} />
+          <ShieldLogo size={120} />
         </div>
 
         <h1
           style={{
             fontFamily: fonts.display,
-            fontSize: 62,
+            fontSize: 74,
             fontWeight: 600,
             color: colors.text,
             margin: 0,
@@ -197,7 +195,7 @@ const MobileOutro: React.FC = () => {
           <p
             style={{
               fontFamily: fonts.body,
-              fontSize: 24,
+              fontSize: 30,
               color: colors.textSoft,
               margin: "20px 0 0 0",
               fontWeight: 400,
@@ -218,7 +216,7 @@ const MobileOutro: React.FC = () => {
           <span
             style={{
               fontFamily: fonts.mono,
-              fontSize: 26,
+              fontSize: 30,
               fontWeight: 500,
               color: colors.accent,
               letterSpacing: "0.02em",
@@ -238,7 +236,7 @@ const MobileOutro: React.FC = () => {
           right: 0,
           textAlign: "center",
           fontFamily: fonts.mono,
-          fontSize: 15,
+          fontSize: 18,
           color: colors.textDim,
           opacity: footerOpacity,
         }}
@@ -262,10 +260,10 @@ export const BrightClauseDemoMobile: React.FC = () => {
           <LightLeak seed={7} hueShift={30} />
         </TransitionSeries.Overlay>
 
-        {/* Problem — desktop scene in mobile frame */}
+        {/* Problem — native mobile layout */}
         <TransitionSeries.Sequence durationInFrames={PROBLEM} premountFor={30}>
           <MobileFrame label="The Problem" sublabel="Legal jargon is impenetrable">
-            <ProblemScene />
+            <ProblemScene mobile />
           </MobileFrame>
         </TransitionSeries.Sequence>
 
@@ -274,10 +272,10 @@ export const BrightClauseDemoMobile: React.FC = () => {
           timing={linearTiming({ durationInFrames: SLIDE_T })}
         />
 
-        {/* Chat */}
+        {/* Chat — native mobile layout */}
         <TransitionSeries.Sequence durationInFrames={CHAT} premountFor={30}>
           <MobileFrame label="Contract Q&A" sublabel="RAG-Powered Chat">
-            <ChatScene />
+            <ChatScene mobile />
           </MobileFrame>
         </TransitionSeries.Sequence>
 
@@ -286,10 +284,10 @@ export const BrightClauseDemoMobile: React.FC = () => {
           timing={linearTiming({ durationInFrames: FADE_T })}
         />
 
-        {/* Risk Dashboard */}
+        {/* Risk Dashboard — native mobile layout */}
         <TransitionSeries.Sequence durationInFrames={RISK} premountFor={30}>
-          <MobileFrame label="Risk Analysis" sublabel="88 Clauses Analyzed">
-            <RiskDashboardScene />
+          <MobileFrame label="Risk Analysis" sublabel="88 Clauses Analyzed" showBranding={false}>
+            <RiskDashboardScene mobile />
           </MobileFrame>
         </TransitionSeries.Sequence>
 
@@ -298,10 +296,10 @@ export const BrightClauseDemoMobile: React.FC = () => {
           timing={linearTiming({ durationInFrames: FADE_T })}
         />
 
-        {/* Obligations */}
+        {/* Obligations — native mobile card layout */}
         <TransitionSeries.Sequence durationInFrames={OBLIGATIONS} premountFor={30}>
-          <MobileFrame label="Obligations" sublabel="Deadline Tracking">
-            <ObligationsScene />
+          <MobileFrame label="Obligations" sublabel="Deadline Tracking" showBranding={false}>
+            <ObligationsScene mobile />
           </MobileFrame>
         </TransitionSeries.Sequence>
 
@@ -310,10 +308,10 @@ export const BrightClauseDemoMobile: React.FC = () => {
           timing={linearTiming({ durationInFrames: FADE_T })}
         />
 
-        {/* Deals */}
+        {/* Deals — native mobile stacked cards */}
         <TransitionSeries.Sequence durationInFrames={DEALS} premountFor={30}>
-          <MobileFrame label="Deal Room" sublabel="3 Active Deals">
-            <DealsScene />
+          <MobileFrame label="Deal Room" sublabel="3 Active Deals" showBranding={false}>
+            <DealsScene mobile />
           </MobileFrame>
         </TransitionSeries.Sequence>
 

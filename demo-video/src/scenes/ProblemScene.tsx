@@ -20,7 +20,11 @@ const legalJargon = [
 
 const simpleMeaning = "Their total liability is capped at the acquisition price.";
 
-export const ProblemScene: React.FC = () => {
+interface ProblemSceneProps {
+  mobile?: boolean;
+}
+
+export const ProblemScene: React.FC<ProblemSceneProps> = ({ mobile }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -28,7 +32,6 @@ export const ProblemScene: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  // Gold highlight line scanning over text before blur
   const highlightY = interpolate(frame, [30, 60], [0, 120], {
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.quad),
@@ -69,7 +72,6 @@ export const ProblemScene: React.FC = () => {
     config: springs.snappy,
   });
 
-  // 3D perspective entrance
   const leftCardRotate = interpolate(frame, [0, 25], [6, 0], {
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.quad),
@@ -79,7 +81,6 @@ export const ProblemScene: React.FC = () => {
     easing: Easing.out(Easing.quad),
   });
 
-  // Exit
   const exitOpacity = interpolate(
     frame,
     [durationInFrames - 25, durationInFrames],
@@ -87,9 +88,15 @@ export const ProblemScene: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
+  // Font sizes: desktop vs mobile
+  const sz = mobile
+    ? { label: 24, jargon: 34, meaning: 48, risk: 24, arrow: 60, arrowLabel: 22 }
+    : { label: 15, jargon: 24, meaning: 38, risk: 16, arrow: 48, arrowLabel: 14 };
+
+  const pad = mobile ? 40 : 100;
+
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* AI-generated atmospheric background */}
       <ScreenshotReveal
         src="assets/problem-bg.png"
         delay={0}
@@ -100,31 +107,31 @@ export const ProblemScene: React.FC = () => {
         borderRadius={0}
         shadow={false}
       />
-      <GlowOrb color={colors.critical} size={400} x="25%" y="50%" maxOpacity={0.15} delay={10} />
-      <GlowOrb color={colors.low} size={400} x="75%" y="50%" maxOpacity={0.15} delay={110} />
+      <GlowOrb color={colors.critical} size={mobile ? 300 : 400} x="25%" y={mobile ? "25%" : "50%"} maxOpacity={0.15} delay={10} />
+      <GlowOrb color={colors.low} size={mobile ? 300 : 400} x="75%" y={mobile ? "75%" : "50%"} maxOpacity={0.15} delay={110} />
 
-      <SceneBadge title="The Problem" subtitle="Legal jargon is impenetrable" />
+      <SceneBadge title="The Problem" subtitle="Legal jargon is impenetrable" mobile={mobile} />
 
       <div
         style={{
           ...centered,
-          flexDirection: "row",
-          gap: 80,
-          maxWidth: 1600,
-          padding: "0 100px",
+          flexDirection: mobile ? "column" : "row",
+          gap: mobile ? 40 : 80,
+          maxWidth: mobile ? undefined : 1600,
+          padding: mobile ? `20px ${pad}px` : `0 ${pad}px`,
         }}
       >
         {/* Legal jargon block */}
-        <div style={{ flex: 1, opacity: textOpacity, perspective: "800px" }}>
+        <div style={{ flex: mobile ? undefined : 1, width: mobile ? "100%" : undefined, opacity: textOpacity, perspective: "800px" }}>
           <div
             style={{
               opacity: beforeOpacity,
               fontFamily: fonts.mono,
-              fontSize: 12,
+              fontSize: sz.label,
               color: colors.critical,
               textTransform: "uppercase",
               letterSpacing: "0.15em",
-              marginBottom: 16,
+              marginBottom: mobile ? 20 : 16,
             }}
           >
             What you read
@@ -134,7 +141,7 @@ export const ProblemScene: React.FC = () => {
               backgroundColor: colors.bgCard,
               borderRadius: 14,
               border: `1px solid ${colors.border}`,
-              padding: 36,
+              padding: mobile ? 40 : 36,
               opacity: jargonOpacity,
               filter: `blur(${blurAmount}px)`,
               transform: `rotateX(${leftCardRotate}deg)`,
@@ -143,7 +150,6 @@ export const ProblemScene: React.FC = () => {
               overflow: "hidden",
             }}
           >
-            {/* Scanning highlight */}
             <div
               style={{
                 position: "absolute",
@@ -161,7 +167,7 @@ export const ProblemScene: React.FC = () => {
                 key={i}
                 style={{
                   fontFamily: fonts.body,
-                  fontSize: 20,
+                  fontSize: sz.jargon,
                   color: colors.textSoft,
                   lineHeight: 1.8,
                   margin: 0,
@@ -180,23 +186,24 @@ export const ProblemScene: React.FC = () => {
         <div
           style={{
             opacity: arrowOpacity,
-            transform: `scale(${Math.max(0, arrowScale)})`,
+            transform: `scale(${Math.max(0, arrowScale)}) ${mobile ? "rotate(90deg)" : ""}`,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: 12,
           }}
         >
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="2">
+          <svg width={sz.arrow} height={sz.arrow} viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="2">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
           <span
             style={{
               fontFamily: fonts.mono,
-              fontSize: 11,
+              fontSize: sz.arrowLabel,
               color: colors.accent,
               textTransform: "uppercase",
               letterSpacing: "0.2em",
+              transform: mobile ? "rotate(-90deg)" : undefined,
             }}
           >
             AI
@@ -204,16 +211,16 @@ export const ProblemScene: React.FC = () => {
         </div>
 
         {/* Simple English */}
-        <div style={{ flex: 1, opacity: simpleProgress, perspective: "800px" }}>
+        <div style={{ flex: mobile ? undefined : 1, width: mobile ? "100%" : undefined, opacity: simpleProgress, perspective: "800px" }}>
           <div
             style={{
               opacity: afterOpacity,
               fontFamily: fonts.mono,
-              fontSize: 12,
+              fontSize: sz.label,
               color: colors.low,
               textTransform: "uppercase",
               letterSpacing: "0.15em",
-              marginBottom: 16,
+              marginBottom: mobile ? 20 : 16,
             }}
           >
             What it actually means
@@ -223,7 +230,7 @@ export const ProblemScene: React.FC = () => {
               backgroundColor: colors.bgCard,
               borderRadius: 14,
               border: `1px solid ${colors.low}30`,
-              padding: 36,
+              padding: mobile ? 40 : 36,
               boxShadow: `0 0 40px ${colors.low}10`,
               transform: `rotateX(${rightCardRotate}deg)`,
               transformOrigin: "center bottom",
@@ -232,7 +239,7 @@ export const ProblemScene: React.FC = () => {
             <p
               style={{
                 fontFamily: fonts.display,
-                fontSize: 32,
+                fontSize: sz.meaning,
                 color: colors.text,
                 lineHeight: 1.5,
                 margin: 0,
@@ -244,13 +251,13 @@ export const ProblemScene: React.FC = () => {
             <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 8 }}>
               <div
                 style={{
-                  width: 8,
-                  height: 8,
+                  width: mobile ? 10 : 8,
+                  height: mobile ? 10 : 8,
                   borderRadius: "50%",
                   backgroundColor: colors.low,
                 }}
               />
-              <span style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.low }}>
+              <span style={{ fontFamily: fonts.mono, fontSize: sz.risk, color: colors.low }}>
                 Low Risk — Standard market term
               </span>
             </div>

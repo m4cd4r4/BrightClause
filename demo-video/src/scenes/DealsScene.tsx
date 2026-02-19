@@ -24,15 +24,17 @@ const riskColorMap: Record<string, string> = {
   Low: colors.low,
 };
 
-export const DealsScene: React.FC = () => {
+interface DealsSceneProps {
+  mobile?: boolean;
+}
+
+export const DealsScene: React.FC<DealsSceneProps> = ({ mobile }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Cards with 3D tilt entrance
   const getCardProgress = (i: number) =>
     spring({ frame: frame - 10 - i * STAGGER.slow, fps, config: springs.panel });
 
-  // Progress bar with eased fill
   const getProgress = (i: number, target: number) => {
     const start = 30 + i * STAGGER.slow;
     return interpolate(frame, [start, start + 35], [0, target], {
@@ -42,15 +44,12 @@ export const DealsScene: React.FC = () => {
     });
   };
 
-  // Sequential glow sweep across cards
   const glowSweepProgress = interpolate(frame, [60, 140], [0, 3], {
     extrapolateRight: "clamp",
   });
 
-  // File icons
   const fileIconsOpacity = interpolate(frame, [70, 85], [0, 1], { extrapolateRight: "clamp" });
 
-  // Exit
   const exitOpacity = interpolate(
     frame,
     [durationInFrames - 25, durationInFrames],
@@ -58,9 +57,15 @@ export const DealsScene: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
+  // Font sizes
+  const sz = mobile
+    ? { dealName: 38, riskBadge: 22, progressLabel: 20, progressPct: 24, statCount: 40, statLabel: 16 }
+    : { dealName: 32, riskBadge: 15, progressLabel: 14, progressPct: 16, statCount: 34, statLabel: 13 };
+
+  const sidePad = mobile ? 32 : 80;
+
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Real deals page screenshot as depth layer */}
       <ScreenshotReveal
         src="assets/screenshot-deals.png"
         delay={0}
@@ -71,30 +76,31 @@ export const DealsScene: React.FC = () => {
         borderRadius={16}
         y={30}
       />
-      <GlowOrb color={colors.accent} size={400} x="50%" y="50%" maxOpacity={0.08} delay={10} />
+      <GlowOrb color={colors.accent} size={mobile ? 300 : 400} x="50%" y="50%" maxOpacity={0.08} delay={10} />
 
-      <SceneBadge title="Deal Grouping" subtitle="Batch Upload & Aggregate Analysis" />
+      <SceneBadge title="Deal Grouping" subtitle="Batch Upload & Aggregate Analysis" mobile={mobile} />
 
       <div
         style={{
           position: "absolute",
-          left: 80,
-          right: 80,
-          top: 130,
-          bottom: 60,
+          left: sidePad,
+          right: sidePad,
+          top: mobile ? 0 : 130,
+          bottom: mobile ? 0 : 60,
           display: "flex",
-          gap: 28,
+          flexDirection: mobile ? "column" : "row",
+          gap: mobile ? 36 : 28,
+          justifyContent: mobile ? "center" : undefined,
+          alignItems: mobile ? undefined : "center",
         }}
       >
         {deals.map((deal, i) => {
           const progress = getCardProgress(i);
           const riskCol = riskColorMap[deal.risk];
 
-          // 3D tilt: starts tilted, settles flat
-          const rotateY = interpolate(progress, [0, 1], [8, 0]);
+          const rotateY = mobile ? 0 : interpolate(progress, [0, 1], [8, 0]);
           const scale = Math.max(0, progress);
 
-          // Glow sweep effect
           const glowDistance = Math.abs(glowSweepProgress - i);
           const glowIntensity = interpolate(glowDistance, [0, 0.8], [0.15, 0], {
             extrapolateRight: "clamp",
@@ -104,73 +110,80 @@ export const DealsScene: React.FC = () => {
             <div
               key={deal.name}
               style={{
-                flex: 1,
-                perspective: "800px",
+                flex: mobile ? undefined : 1,
+                perspective: mobile ? undefined : "800px",
               }}
             >
               <div
                 style={{
-                  transform: `scale(${scale}) rotateY(${rotateY}deg)`,
+                  transform: mobile ? `scale(${scale})` : `scale(${scale}) rotateY(${rotateY}deg)`,
                   transformOrigin: "center center",
                   backgroundColor: colors.bgCard,
                   borderRadius: 16,
                   border: `1px solid ${colors.border}`,
                   display: "flex",
-                  flexDirection: "column",
+                  flexDirection: mobile ? "row" : "column",
                   overflow: "hidden",
-                  height: "100%",
+                  height: undefined,
                   boxShadow: glowIntensity > 0
                     ? `0 0 30px ${colors.accent}${Math.floor(glowIntensity * 255).toString(16).padStart(2, "0")}`
                     : "none",
                 }}
               >
                 {/* Accent stripe */}
-                <div style={{ height: 4, backgroundColor: riskCol }} />
+                {mobile ? (
+                  <div style={{ width: 6, backgroundColor: riskCol }} />
+                ) : (
+                  <div style={{ height: 4, backgroundColor: riskCol }} />
+                )}
 
                 <div
                   style={{
-                    padding: "28px 28px 24px 28px",
+                    padding: mobile ? "36px 32px" : "28px 28px 24px 28px",
                     display: "flex",
                     flexDirection: "column",
                     flex: 1,
                   }}
                 >
-                  <h3
-                    style={{
-                      fontFamily: fonts.display,
-                      fontSize: 26,
-                      color: colors.text,
-                      fontWeight: 600,
-                      margin: 0,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {deal.name}
-                  </h3>
-
-                  {/* Risk badge */}
-                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: riskCol }} />
-                    <span
+                  <div style={{ display: "flex", alignItems: mobile ? "center" : undefined, gap: mobile ? 16 : undefined, flexDirection: mobile ? "row" : "column" }}>
+                    <h3
                       style={{
-                        fontFamily: fonts.mono,
-                        fontSize: 12,
-                        color: riskCol,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
+                        fontFamily: fonts.display,
+                        fontSize: sz.dealName,
+                        color: colors.text,
+                        fontWeight: 600,
+                        margin: 0,
+                        lineHeight: 1.2,
+                        flex: mobile ? 1 : undefined,
                       }}
                     >
-                      {deal.risk} Risk
-                    </span>
-                  </div>
+                      {deal.name}
+                    </h3>
 
-                  {/* Progress bar */}
-                  <div style={{ marginTop: 24 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    {/* Risk badge */}
+                    <div style={{ marginTop: mobile ? 0 : 12, display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                      <div style={{ width: mobile ? 10 : 8, height: mobile ? 10 : 8, borderRadius: "50%", backgroundColor: riskCol }} />
                       <span
                         style={{
                           fontFamily: fonts.mono,
-                          fontSize: 11,
+                          fontSize: sz.riskBadge,
+                          color: riskCol,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.1em",
+                        }}
+                      >
+                        {deal.risk} Risk
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div style={{ marginTop: mobile ? 28 : 24 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                      <span
+                        style={{
+                          fontFamily: fonts.mono,
+                          fontSize: sz.progressLabel,
                           color: colors.textDim,
                           textTransform: "uppercase",
                           letterSpacing: "0.1em",
@@ -181,7 +194,7 @@ export const DealsScene: React.FC = () => {
                       <span
                         style={{
                           fontFamily: fonts.mono,
-                          fontSize: 13,
+                          fontSize: sz.progressPct,
                           color: colors.accent,
                           fontVariantNumeric: "tabular-nums",
                         }}
@@ -189,7 +202,7 @@ export const DealsScene: React.FC = () => {
                         {Math.floor(getProgress(i, deal.progress))}%
                       </span>
                     </div>
-                    <div style={{ height: 6, backgroundColor: colors.bgCardHover, borderRadius: 3 }}>
+                    <div style={{ height: mobile ? 10 : 6, backgroundColor: colors.bgCardHover, borderRadius: 3 }}>
                       <div
                         style={{
                           height: "100%",
@@ -204,8 +217,8 @@ export const DealsScene: React.FC = () => {
                   {/* Stats */}
                   <div
                     style={{
-                      marginTop: "auto",
-                      paddingTop: 24,
+                      marginTop: mobile ? 28 : 24,
+                      paddingTop: mobile ? 28 : 24,
                       display: "flex",
                       gap: 20,
                       borderTop: `1px solid ${colors.border}`,
@@ -222,13 +235,13 @@ export const DealsScene: React.FC = () => {
                             target={stat.value}
                             delay={25 + i * STAGGER.slow}
                             color={stat.color}
-                            fontSize={28}
+                            fontSize={sz.statCount}
                           />
                         </div>
                         <div
                           style={{
                             fontFamily: fonts.mono,
-                            fontSize: 10,
+                            fontSize: sz.statLabel,
                             color: colors.textDim,
                             textTransform: "uppercase",
                             letterSpacing: "0.1em",
@@ -242,39 +255,41 @@ export const DealsScene: React.FC = () => {
                   </div>
                 </div>
 
-                {/* File icons footer */}
-                <div
-                  style={{
-                    padding: "12px 28px",
-                    backgroundColor: colors.bgCardHover,
-                    borderTop: `1px solid ${colors.border}`,
-                    opacity: fileIconsOpacity,
-                    display: "flex",
-                    gap: 6,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {Array.from({ length: Math.min(deal.docs, 8) }).map((_, j) => (
-                    <div
-                      key={j}
-                      style={{
-                        width: 28,
-                        height: 34,
-                        borderRadius: 4,
-                        backgroundColor: colors.bg,
-                        border: `1px solid ${colors.border}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.textDim} strokeWidth="1.5">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14,2 14,8 20,8" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
+                {/* File icons footer - desktop only */}
+                {!mobile && (
+                  <div
+                    style={{
+                      padding: "12px 28px",
+                      backgroundColor: colors.bgCardHover,
+                      borderTop: `1px solid ${colors.border}`,
+                      opacity: fileIconsOpacity,
+                      display: "flex",
+                      gap: 6,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {Array.from({ length: Math.min(deal.docs, 8) }).map((_, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          width: 28,
+                          height: 34,
+                          borderRadius: 4,
+                          backgroundColor: colors.bg,
+                          border: `1px solid ${colors.border}`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={colors.textDim} strokeWidth="1.5">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14,2 14,8 20,8" />
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );

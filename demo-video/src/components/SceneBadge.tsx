@@ -4,11 +4,15 @@ import { colors, fonts, springs } from "../styles";
 interface SceneBadgeProps {
   title: string;
   subtitle: string;
+  mobile?: boolean;
 }
 
-export const SceneBadge: React.FC<SceneBadgeProps> = ({ title, subtitle }) => {
+export const SceneBadge: React.FC<SceneBadgeProps> = ({ title, subtitle, mobile }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+
+  // In mobile mode, MobileFrame provides labels — don't render
+  if (mobile) return null;
 
   const progress = spring({ frame, fps, config: springs.smooth });
   const x = interpolate(progress, [0, 1], [-20, 0]);
@@ -32,7 +36,7 @@ export const SceneBadge: React.FC<SceneBadgeProps> = ({ title, subtitle }) => {
           backgroundColor: colors.accentGlow,
           borderRadius: 4,
           fontFamily: fonts.mono,
-          fontSize: 13,
+          fontSize: 16,
           color: colors.accent,
           textTransform: "uppercase",
           letterSpacing: "0.15em",
@@ -44,7 +48,7 @@ export const SceneBadge: React.FC<SceneBadgeProps> = ({ title, subtitle }) => {
         style={{
           color: colors.textDim,
           fontFamily: fonts.body,
-          fontSize: 16,
+          fontSize: 20,
         }}
       >
         {subtitle}
