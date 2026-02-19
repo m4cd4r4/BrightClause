@@ -6,8 +6,8 @@ from datetime import datetime, timezone
 from celery import shared_task
 from sqlalchemy import select
 from app.worker import celery_app
-from app.core.database import AsyncSessionLocal
-from app.models.document import Document, Chunk
+from app.core.database import AsyncSessionLocal, engine
+from app.models import Document, Chunk
 from app.services.storage import download_document, store_extracted_text
 from app.services.ocr_pipeline import extract_text_with_ocr
 from app.services.chunking import chunk_document
@@ -15,12 +15,17 @@ from app.services.embeddings import generate_embeddings
 
 
 def run_async(coro):
-    """Helper to run async code in sync Celery tasks."""
+    """Helper to run async code in sync Celery tasks.
+
+    Disposes the shared engine pool before closing the loop to prevent
+    'Future attached to a different loop' errors on subsequent tasks.
+    """
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
         return loop.run_until_complete(coro)
     finally:
+        loop.run_until_complete(engine.dispose())
         loop.close()
 
 
