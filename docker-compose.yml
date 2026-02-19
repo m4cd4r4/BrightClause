@@ -126,7 +126,7 @@ services:
         condition: service_started
       ollama:
         condition: service_started
-    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=2
+    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=2 -Q celery,documents,embeddings
 
   # Celery Beat for scheduled tasks (optional)
   # beat:
