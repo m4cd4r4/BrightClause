@@ -1,1 +1,1 @@
-# ClauseLens Backend
+# BrightClause Backend

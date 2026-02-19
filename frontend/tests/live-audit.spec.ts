@@ -5,12 +5,12 @@ const LIVE_URL = 'https://frontend-jade-seven-48.vercel.app'
 // Bypass access code gate + onboarding tour before each test
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    sessionStorage.setItem('clauselens_admin_access', 'true')
-    localStorage.setItem('cc_walkthrough_seen', 'true')
+    sessionStorage.setItem('brightclause_admin_access', 'true')
+    localStorage.setItem('bc_walkthrough_seen', 'true')
   })
 })
 
-test.describe('ClauseLens Live Site Audit', () => {
+test.describe('BrightClause Live Site Audit', () => {
   test.setTimeout(60_000)
 
   // ── Landing Page ──────────────────────────────────────────────
@@ -59,7 +59,7 @@ test.describe('ClauseLens Live Site Audit', () => {
     const footer = page.locator('footer')
     await footer.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
-    await expect(footer.getByText('ClauseLens')).toBeVisible()
+    await expect(footer.getByText('BrightClause')).toBeVisible()
     await page.screenshot({ path: 'test-results/audit-05-landing-footer.png', fullPage: false })
   })
 

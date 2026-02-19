@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 const FRONTEND_URL = 'http://localhost:3000'
 
-test.describe('ClauseLens Obligations Page', () => {
+test.describe('BrightClause Obligations Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${FRONTEND_URL}/obligations`)
     await page.waitForLoadState('networkidle')
@@ -156,8 +156,8 @@ test.describe('ClauseLens Obligations Page', () => {
     expect(hasObligations || hasGenericEmpty).toBeTruthy()
   })
 
-  test('should have navigation bar with ClauseLens branding', async ({ page }) => {
-    await expect(page.getByText('ClauseLens').first()).toBeVisible()
+  test('should have navigation bar with BrightClause branding', async ({ page }) => {
+    await expect(page.getByText('BrightClause').first()).toBeVisible()
   })
 
   test('should show Obligations link as active in navigation', async ({ page }) => {

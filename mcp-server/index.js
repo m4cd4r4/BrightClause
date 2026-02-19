@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * ClauseLens MCP Server
+ * BrightClause MCP Server
  *
- * Exposes ClauseLens API endpoints as MCP tools for Claude interaction.
+ * Exposes BrightClause API endpoints as MCP tools for Claude interaction.
  * Enables AI-powered contract analysis queries during conversations.
  */
 
@@ -14,7 +14,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 // Configuration
-const API_URL = process.env.CLAUSELENS_API_URL || 'http://45.77.233.102:8003';
+const API_URL = process.env.BRIGHTCLAUSE_API_URL || 'http://45.77.233.102:8003';
 
 // Helper for API calls
 async function apiCall(endpoint, options = {}) {
@@ -42,7 +42,7 @@ async function apiCall(endpoint, options = {}) {
 // Create MCP server
 const server = new Server(
   {
-    name: 'clauselens',
+    name: 'brightclause',
     version: '1.0.0',
   },
   {
@@ -181,7 +181,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'get_clause_types',
-        description: 'List all 26 supported clause types that ClauseLens can extract and analyze.',
+        description: 'List all 26 supported clause types that BrightClause can extract and analyze.',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -380,7 +380,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('ClauseLens MCP server running');
+  console.error('BrightClause MCP server running');
 }
 
 main().catch(console.error);

@@ -1,4 +1,4 @@
-# ClauseLens - Project Plan
+# BrightClause - Project Plan
 
 **Version:** 3.1
 **Created:** 2026-01-29
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-ClauseLens is a **production-quality** AI-powered contract analysis platform for M&A due diligence. It demonstrates enterprise-grade RAG systems, knowledge graphs, and LLM-powered document analysis - built to production standards even though regulatory barriers (SOC 2, compliance) prevent immediate enterprise sales.
+BrightClause is a **production-quality** AI-powered contract analysis platform for M&A due diligence. It demonstrates enterprise-grade RAG systems, knowledge graphs, and LLM-powered document analysis - built to production standards even though regulatory barriers (SOC 2, compliance) prevent immediate enterprise sales.
 
 **This is a full product, not a demo.**
 
@@ -152,13 +152,13 @@ This demonstrates real skills without requiring user trust or security complianc
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FRONTEND (React)                         │
-│                     clauselens.com                         │
+│                     brightclause.com                         │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    API GATEWAY (FastAPI)                        │
-│                   api.clauselens.com                       │
+│                   api.brightclause.com                       │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
 │  │   Auth      │  │   Upload    │  │   Analysis Pipeline     │ │
 │  │   (JWT)     │  │   Handler   │  │   (Async Workers)       │ │
@@ -245,10 +245,10 @@ This demonstrates real skills without requiring user trust or security complianc
 - ollama (11434)      - LLM inference (shared)
 ```
 
-**ClauseLens Services (New):**
+**BrightClause Services (New):**
 ```
-- clauselens-backend (8002)   - FastAPI application
-- clauselens-worker           - Celery worker (async jobs)
+- brightclause-backend (8002)   - FastAPI application
+- brightclause-worker           - Celery worker (async jobs)
 - minio (9000/9001)                - S3-compatible document storage
 - tesseract                        - OCR (installed on host)
 - paddleocr                        - Complex OCR (Python package)
@@ -288,14 +288,14 @@ This demonstrates real skills without requiring user trust or security complianc
 ```nginx
 # nginx configuration
 server {
-    server_name clauselens.com;
+    server_name brightclause.com;
 
     location / {
         # Option A: Proxy to Vercel
-        proxy_pass https://clauselens.vercel.app;
+        proxy_pass https://brightclause.vercel.app;
 
         # Option B: Self-hosted frontend
-        # root /var/www/clauselens;
+        # root /var/www/brightclause;
     }
 
     location /api {
@@ -309,12 +309,12 @@ server {
 ```yaml
 # Added to existing docker-compose.yml
 services:
-  clauselens-backend:
-    build: ./clauselens/backend
+  brightclause-backend:
+    build: ./brightclause/backend
     ports:
       - "8002:8000"
     environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/clauselens
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/brightclause
       - REDIS_URL=redis://redis:6379/1
       - OLLAMA_URL=http://ollama:11434
       - MINIO_ENDPOINT=minio:9000
@@ -323,11 +323,11 @@ services:
       - redis
       - ollama
 
-  clauselens-worker:
-    build: ./clauselens/backend
+  brightclause-worker:
+    build: ./brightclause/backend
     command: celery -A app.worker worker -l info
     environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/clauselens
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/brightclause
       - REDIS_URL=redis://redis:6379/1
       - OLLAMA_URL=http://ollama:11434
     depends_on:
@@ -354,7 +354,7 @@ services:
 
 ### Already Paid
 - VPS: ~AU$60/mo (shared with Donnacha, Chlann, etc.)
-- Domain: ~$12/year (clauselens.com - need to register)
+- Domain: ~$12/year (brightclause.com - need to register)
 
 ### External Costs (Optional)
 | Service | When Needed | Cost |
@@ -948,7 +948,7 @@ Build it properly. Quality over speed. Each milestone produces something usable.
 | Demo crashes during interview | Medium | High | Test thoroughly, have backup demo video |
 | LLM gives bad output | High | Medium | Cherry-pick demo documents, have fallback examples |
 | Run out of time before interview | Medium | Medium | Prioritize core pipeline over polish |
-| NOHUP doesn't respond | Medium | Low | ClauseLens is valuable regardless, apply to other jobs |
+| NOHUP doesn't respond | Medium | Low | BrightClause is valuable regardless, apply to other jobs |
 
 ### Scope Creep Risks
 
@@ -983,7 +983,7 @@ Build it properly. Quality over speed. Each milestone produces something usable.
 
 | Product | Domain | Focus | Shared |
 |---------|--------|-------|--------|
-| ClauseLens | clauselens.com | Contracts | Legal focus, M&A |
+| BrightClause | brightclause.com | Contracts | Legal focus, M&A |
 | TaxLens | taxlens.com | Tax documents | Tax analysis |
 | PetLens | petlens.com | Veterinary records | Pet health |
 
@@ -1003,7 +1003,7 @@ Build it properly. Quality over speed. Each milestone produces something usable.
 
 ## NOHUP Application Synergy
 
-### Why ClauseLens Helps NOHUP Application
+### Why BrightClause Helps NOHUP Application
 
 1. **Directly relevant to their clients**
    - M&A teams at investment banks (their target)
@@ -1022,7 +1022,7 @@ Build it properly. Quality over speed. Each milestone produces something usable.
    - Practical application of AI to business problems
 
 4. **Talking points for interview**
-   - "I'm building ClauseLens specifically because..."
+   - "I'm building BrightClause specifically because..."
    - "I learned about M&A due diligence workflows while..."
    - "This is the kind of work I want to do with NOHUP..."
 
@@ -1032,7 +1032,7 @@ Add to NOHUP proposal:
 ```
 CURRENT PROJECT:
 
-I'm building ClauseLens - an AI-powered contract analysis tool for
+I'm building BrightClause - an AI-powered contract analysis tool for
 M&A due diligence. It uses RAG for semantic search, extracts key clauses,
 and translates legal language to plain English.
 
@@ -1040,7 +1040,7 @@ This directly aligns with your work for investment banks and PE firms -
 I'm building it because I'm genuinely fascinated by how AI can streamline
 deal workflows.
 
-GitHub: https://github.com/m4cd4r4/ClauseLens (in development)
+GitHub: https://github.com/m4cd4r4/BrightClause (in development)
 ```
 
 ---
@@ -1049,14 +1049,14 @@ GitHub: https://github.com/m4cd4r4/ClauseLens (in development)
 
 ### Priority #1: Apply to NOHUP (TODAY)
 
-**ClauseLens is Plan B. NOHUP application is Plan A.**
+**BrightClause is Plan B. NOHUP application is Plan A.**
 
 1. [ ] Apply to NOHUP job on Upwork (proposal is ready in daily log)
 2. [ ] Update Upwork profile (if not done)
 
 ### If NOHUP Responds with Interview
 
-**Fast-track ClauseLens to have something to show:**
+**Fast-track BrightClause to have something to show:**
 
 Week 1 (before interview if possible):
 - [ ] Git repo with basic structure
@@ -1069,7 +1069,7 @@ Week 1 (before interview if possible):
 **Build full 4-week demo:**
 
 Week 1:
-- [ ] Initialize Git repo at I:\Scratch\ClauseLens
+- [ ] Initialize Git repo at I:\Scratch\BrightClause
 - [ ] Docker compose (postgres + pgvector + ollama)
 - [ ] FastAPI skeleton
 - [ ] PDF upload + PyMuPDF extraction
@@ -1096,7 +1096,7 @@ Week 4:
 
 ### What NOT to Do
 
-- ❌ Register clauselens.com domain yet (wait until demo works)
+- ❌ Register brightclause.com domain yet (wait until demo works)
 - ❌ Set up production infrastructure
 - ❌ Build authentication
 - ❌ Build OCR pipeline (native PDFs only)
@@ -1164,7 +1164,7 @@ Respond in JSON format:
 | ContractPodAi | $$$ | CLM focus, integrations | Broad, not M&A focused |
 | DocuSign CLM | $$ | Brand recognition | Weak AI, basic extraction |
 
-### ClauseLens Differentiation
+### BrightClause Differentiation
 
 1. **Self-hosted option** - Own your data, no vendor lock-in
 2. **Open-source (potentially)** - Transparency, customization
@@ -1202,7 +1202,7 @@ If fine-tuning needed:
 | 1.0 | 2026-01-29 | Initial plan |
 | 2.0 | 2026-01-29 | Major revision: Reframed as portfolio demo, not commercial product. Reduced scope from 8 weeks to 4 weeks. Removed enterprise market focus. Added honest assessment of market reality. |
 | 3.0 | 2026-01-31 | Full implementation complete. Restored 8-week scope. Added production deployment details. |
-| 3.1 | 2026-02-01 | MVP complete. E2E test suite passing. Fixed Knowledge Graph (zoom, filters, node size). Deployed to Vercel (clauselens-app.vercel.app). |
+| 3.1 | 2026-02-01 | MVP complete. E2E test suite passing. Fixed Knowledge Graph (zoom, filters, node size). Deployed to Vercel (brightclause-app.vercel.app). |
 
 ---
 

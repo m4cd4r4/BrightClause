@@ -1,6 +1,6 @@
-# ClauseLens Demo Walkthrough
+# BrightClause Demo Walkthrough
 
-A guided demonstration of ClauseLens's AI-powered contract analysis capabilities. Use this guide for live demos, recorded walkthroughs, or portfolio presentations.
+A guided demonstration of BrightClause's AI-powered contract analysis capabilities. Use this guide for live demos, recorded walkthroughs, or portfolio presentations.
 
 ---
 
@@ -19,11 +19,11 @@ A guided demonstration of ClauseLens's AI-powered contract analysis capabilities
 
 ## Step 1: Dashboard Overview
 
-**Open**: https://clauselens-app.vercel.app (or http://localhost:3000 for local dev)
+**Open**: https://brightclause-app.vercel.app (or http://localhost:3000 for local dev)
 
 ### Talking Points
 
-> "This is ClauseLens - an AI-powered contract analysis platform for M&A due diligence. In a typical M&A deal, legal teams spend weeks reviewing hundreds of contracts manually. ClauseLens reduces that to minutes."
+> "This is BrightClause - an AI-powered contract analysis platform for M&A due diligence. In a typical M&A deal, legal teams spend weeks reviewing hundreds of contracts manually. BrightClause reduces that to minutes."
 
 **Point out:**
 - **Stats cards** - Documents indexed, text chunks, clauses extracted, ready for review
@@ -213,7 +213,7 @@ Queue:    Redis
 
 Before starting:
 
-- [ ] Frontend accessible at https://clauselens-app.vercel.app (or http://localhost:3000 locally)
+- [ ] Frontend accessible at https://brightclause-app.vercel.app (or http://localhost:3000 locally)
 - [ ] Backend accessible at http://45.77.233.102:8002 (or http://localhost:8002 locally)
 - [ ] At least one contract uploaded and processed
 - [ ] Clause extraction completed on demo document
@@ -227,7 +227,7 @@ Before starting:
 docker ps
 
 # Check Ollama models
-docker exec clauselens-ollama ollama list
+docker exec brightclause-ollama ollama list
 
 # Run E2E tests (to verify everything works)
 cd frontend && npm test

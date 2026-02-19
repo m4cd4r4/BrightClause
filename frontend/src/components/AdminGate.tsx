@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Shield, Lock, ArrowRight } from 'lucide-react'
 
-const STORAGE_KEY = 'clauselens_admin_access'
-const PASSWORD = 'clauselens2026'
+const STORAGE_KEY = 'brightclause_admin_access'
+const PASSWORD = 'brightclause2026'
 
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const [authorized, setAuthorized] = useState(false)
@@ -42,7 +42,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
             <Shield className="w-8 h-8 text-ink-950" />
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-ink-100 mb-2">
-            ClauseLens
+            BrightClause
           </h1>
           <p className="text-ink-500 text-sm">Enter access code to continue</p>
         </div>

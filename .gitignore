@@ -75,3 +75,5 @@ token.json
 
 # Sample contracts
 sample-contracts/
+.vercel
+.env*.local

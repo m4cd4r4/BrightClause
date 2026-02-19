@@ -44,7 +44,7 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
   },
 ]
 
-const STORAGE_KEY = 'cc_walkthrough_seen'
+const STORAGE_KEY = 'bc_walkthrough_seen'
 
 export function useWalkthrough() {
   const [active, setActive] = useState(false)

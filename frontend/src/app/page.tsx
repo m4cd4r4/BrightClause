@@ -123,12 +123,12 @@ export default function LandingPage() {
               <Shield className="w-5 h-5 text-ink-950" />
             </div>
             <div>
-              <span className="font-display text-xl font-bold tracking-tight">ClauseLens</span>
+              <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/m4cd4r4/ClauseLens"
+              href="https://github.com/m4cd4r4/BrightClause"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-ink-400 hover:text-ink-200 transition-colors"
@@ -489,7 +489,7 @@ export default function LandingPage() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <a
-                href="https://github.com/m4cd4r4/ClauseLens"
+                href="https://github.com/m4cd4r4/BrightClause"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-ink-400 hover:text-ink-200 transition-colors"
@@ -508,12 +508,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
             <Shield className="w-4 h-4 text-accent/50" />
-            <span>ClauseLens</span>
+            <span>BrightClause</span>
             <span className="text-ink-700">·</span>
             <span>Built by Macdara</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-ink-500">
-            <a href="https://github.com/m4cd4r4/ClauseLens" target="_blank" rel="noopener noreferrer" className="hover:text-ink-300 transition-colors">
+            <a href="https://github.com/m4cd4r4/BrightClause" target="_blank" rel="noopener noreferrer" className="hover:text-ink-300 transition-colors">
               GitHub
             </a>
             <Link href="/dashboard" className="hover:text-ink-300 transition-colors">

@@ -1,4 +1,4 @@
-"""ClauseLens FastAPI application."""
+"""BrightClause FastAPI application."""
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="ClauseLens API",
+    title="BrightClause API",
     description="AI-powered contract analysis for M&A due diligence",
     version="0.1.0",
     lifespan=lifespan,
@@ -78,7 +78,7 @@ app.include_router(deals_router, dependencies=[Depends(verify_api_key)])
 async def root():
     """Root endpoint."""
     return {
-        "name": "ClauseLens API",
+        "name": "BrightClause API",
         "version": "0.1.0",
         "status": "running",
         "docs": "/docs",

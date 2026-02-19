@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark')
 
   useEffect(() => {
-    const stored = localStorage.getItem('clauselens_theme') as Theme | null
+    const stored = localStorage.getItem('brightclause_theme') as Theme | null
     if (stored === 'light' || stored === 'dark') {
       setTheme(stored)
       document.documentElement.classList.toggle('light', stored === 'light')
@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
       const next = prev === 'dark' ? 'light' : 'dark'
-      localStorage.setItem('clauselens_theme', next)
+      localStorage.setItem('brightclause_theme', next)
       document.documentElement.classList.toggle('light', next === 'light')
       return next
     })

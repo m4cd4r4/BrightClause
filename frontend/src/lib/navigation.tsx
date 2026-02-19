@@ -30,7 +30,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
               <Shield className="w-5 h-5 text-ink-950" />
             </div>
             <div className="hidden sm:block">
-              <span className="font-display text-xl font-bold tracking-tight text-ink-50">ClauseLens</span>
+              <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
               <p className="text-[10px] text-ink-500 tracking-wide uppercase font-mono">M&A Due Diligence</p>
             </div>
           </Link>

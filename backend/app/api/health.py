@@ -14,7 +14,7 @@ settings = get_settings()
 @router.get("")
 async def health_check():
     """Basic health check."""
-    return {"status": "healthy", "service": "clauselens"}
+    return {"status": "healthy", "service": "brightclause"}
 
 
 @router.get("/ready")

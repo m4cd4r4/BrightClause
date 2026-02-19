@@ -7,7 +7,7 @@ settings = get_settings()
 
 # Initialize Celery
 celery_app = Celery(
-    "clauselens",
+    "brightclause",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
     include=["app.tasks.document_tasks"],

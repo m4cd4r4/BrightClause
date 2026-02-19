@@ -77,7 +77,7 @@ export const OutroScene: React.FC = () => {
         margin: 0, opacity: titleProgress, transform: `translateY(${titleY}px)`,
         letterSpacing: "-0.01em", lineHeight: 1,
       }}>
-        Clause<span style={{ color: colors.accent }}>Lens</span>
+        Bright<span style={{ color: colors.accent }}>Clause</span>
       </h1>
 
       {/* Subtitle */}
@@ -119,7 +119,7 @@ export const OutroScene: React.FC = () => {
       <div style={{ position: "absolute", bottom: 40,
         fontFamily: fonts.mono, fontSize: 13, color: colors.textDim, opacity: footerOpacity,
       }}>
-        AI-Powered Contract Intelligence — clauselens.com
+        AI-Powered Contract Intelligence — brightclause.com
       </div>
     </AbsoluteFill>
   );

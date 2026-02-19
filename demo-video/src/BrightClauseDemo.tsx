@@ -24,7 +24,7 @@ const OUTRO = 120;       // 4s
 const FADE_T = 15;
 const SLIDE_T = 20;
 
-export const ClauseLensDemo: React.FC = () => {
+export const BrightClauseDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#06060a" }}>
       <TransitionSeries>

@@ -1,6 +1,6 @@
-# ClauseLens MCP Server
+# BrightClause MCP Server
 
-MCP (Model Context Protocol) server that exposes ClauseLens's contract analysis API to Claude.
+MCP (Model Context Protocol) server that exposes BrightClause's contract analysis API to Claude.
 
 ## Features
 
@@ -40,11 +40,11 @@ Add to `~/.claude/mcp_settings.json`:
 ```json
 {
   "mcpServers": {
-    "clauselens": {
+    "brightclause": {
       "command": "node",
-      "args": ["I:\\Scratch\\ClauseLens\\mcp-server\\index.js"],
+      "args": ["I:\\Scratch\\BrightClause\\mcp-server\\index.js"],
       "env": {
-        "CLAUSELENS_API_URL": "http://45.77.233.102:8003"
+        "BRIGHTCLAUSE_API_URL": "http://45.77.233.102:8003"
       }
     }
   }
@@ -65,7 +65,7 @@ Once configured, Claude can:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CLAUSELENS_API_URL` | `http://45.77.233.102:8003` | Backend API URL |
+| `BRIGHTCLAUSE_API_URL` | `http://45.77.233.102:8003` | Backend API URL |
 
 ## Development
 

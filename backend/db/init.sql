@@ -1,4 +1,4 @@
--- Initialize ClauseLens database
+-- Initialize BrightClause database
 
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;

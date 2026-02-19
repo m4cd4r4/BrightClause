@@ -1,4 +1,4 @@
-# ClauseLens — Remotion Marketing Video
+# BrightClause — Remotion Marketing Video
 
 ## Overview
 
@@ -24,7 +24,7 @@ cd demo-video && npx tsc --noEmit
 demo-video/                          # Standalone Remotion project
 ├── src/
 │   ├── index.tsx                    # Remotion root — registers composition
-│   ├── ClauseLensDemo.tsx       # Scene sequencer (TransitionSeries)
+│   ├── BrightClauseDemo.tsx       # Scene sequencer (TransitionSeries)
 │   ├── styles.ts                    # Design tokens (colors, fonts, CSS helpers)
 │   └── scenes/
 │       ├── IntroScene.tsx           # 4s   Shield logo, glow, pills
@@ -41,7 +41,7 @@ demo-video/                          # Standalone Remotion project
 frontend/src/components/
 ├── DemoVideoModal.tsx               # Landing page modal (lazy-loaded)
 └── demo-video/                      # COPY of scenes for @remotion/player
-    ├── ClauseLensDemo.tsx
+    ├── BrightClauseDemo.tsx
     ├── styles.ts
     └── scenes/*.tsx
 ```
@@ -50,7 +50,7 @@ frontend/src/components/
 
 ```bash
 cp demo-video/src/styles.ts frontend/src/components/demo-video/styles.ts
-cp demo-video/src/ClauseLensDemo.tsx frontend/src/components/demo-video/ClauseLensDemo.tsx
+cp demo-video/src/BrightClauseDemo.tsx frontend/src/components/demo-video/BrightClauseDemo.tsx
 cp demo-video/src/scenes/*.tsx frontend/src/components/demo-video/scenes/
 ```
 
@@ -169,7 +169,7 @@ To replace with a custom logo:
    };
    ```
 
-2. Add to `ClauseLensDemo.tsx`:
+2. Add to `BrightClauseDemo.tsx`:
    ```tsx
    import { NewScene } from "./scenes/NewScene";
    // ...
@@ -184,7 +184,7 @@ To replace with a custom logo:
 
 ### Changing Scene Duration
 
-Edit `ClauseLensDemo.tsx` — adjust the `from` and `durationInFrames` on each `<Sequence>`. Then update `durationInFrames` in `index.tsx` to match the new total.
+Edit `BrightClauseDemo.tsx` — adjust the `from` and `durationInFrames` on each `<Sequence>`. Then update `durationInFrames` in `index.tsx` to match the new total.
 
 Current timing (with TransitionSeries, 10-frame fade overlaps):
 ```

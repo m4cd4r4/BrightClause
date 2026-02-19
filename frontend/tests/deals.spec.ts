@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 const FRONTEND_URL = 'http://localhost:3000'
 
-test.describe('ClauseLens Deals Page', () => {
+test.describe('BrightClause Deals Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${FRONTEND_URL}/deals`)
     await page.waitForLoadState('networkidle')
@@ -107,8 +107,8 @@ test.describe('ClauseLens Deals Page', () => {
     ).not.toBeVisible()
   })
 
-  test('should have navigation bar with ClauseLens branding', async ({ page }) => {
-    await expect(page.getByText('ClauseLens').first()).toBeVisible()
+  test('should have navigation bar with BrightClause branding', async ({ page }) => {
+    await expect(page.getByText('BrightClause').first()).toBeVisible()
   })
 
   test('should show Deals link as active in navigation', async ({ page }) => {
@@ -117,7 +117,7 @@ test.describe('ClauseLens Deals Page', () => {
   })
 
   test('should navigate back to landing page via logo', async ({ page }) => {
-    // Click the ClauseLens logo/brand link which goes to "/"
+    // Click the BrightClause logo/brand link which goes to "/"
     const logoLink = page.locator('header a[href="/"]')
     await logoLink.click()
     await page.waitForURL(/\/$/)

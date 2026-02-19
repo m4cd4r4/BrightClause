@@ -1,4 +1,4 @@
-# ClauseLens
+# BrightClause
 
 <div align="center">
 
@@ -10,9 +10,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 
-[Live Demo](https://clauselens-app.vercel.app) | [API Docs](http://45.77.233.102:8002/docs) | [Quick Start](#quick-start)
+[Live Demo](https://brightclause-app.vercel.app) | [API Docs](http://45.77.233.102:8002/docs) | [Quick Start](#quick-start)
 
-<img src="docs/demo-preview.gif" alt="ClauseLens Demo" width="800" />
+<img src="docs/demo-preview.gif" alt="BrightClause Demo" width="800" />
 
 </div>
 
@@ -20,9 +20,9 @@
 
 ## Overview
 
-ClauseLens transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph.
+BrightClause transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph.
 
-**Part of the Lens Suite** &mdash; ClauseLens &middot; TaxLens &middot; PetLens
+**Part of the Lens Suite** &mdash; BrightClause &middot; TaxLens &middot; PetLens
 
 ### Key Capabilities
 
@@ -169,15 +169,15 @@ Upload PDF
 ### 1. Clone & Start Services
 
 ```bash
-git clone https://github.com/m4cd4r4/ClauseLens.git
-cd ClauseLens
+git clone https://github.com/m4cd4r4/BrightClause.git
+cd BrightClause
 
 # Start all backend services
 docker-compose up -d
 
 # Pull required Ollama models
-docker exec clauselens-ollama ollama pull llama3.2
-docker exec clauselens-ollama ollama pull nomic-embed-text
+docker exec brightclause-ollama ollama pull llama3.2
+docker exec brightclause-ollama ollama pull nomic-embed-text
 ```
 
 ### 2. Start Frontend
@@ -193,7 +193,7 @@ npm run dev
 | Service | URL |
 |---------|-----|
 | Frontend (local) | http://localhost:3000 |
-| Frontend (prod) | https://clauselens-app.vercel.app |
+| Frontend (prod) | https://brightclause-app.vercel.app |
 | API Docs (local) | http://localhost:8002/docs |
 | API (prod) | http://45.77.233.102:8002 |
 | MinIO Console | http://localhost:9001 |
@@ -305,7 +305,7 @@ Accepts `question` and `history` array. Returns AI answer with source chunk cita
 ## Project Structure
 
 ```
-ClauseLens/
+BrightClause/
 ├── backend/
 │   ├── app/
 │   │   ├── api/                  # Route handlers
@@ -423,15 +423,15 @@ npx playwright test --headed
 
 ```bash
 # Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/clauselens
+DATABASE_URL=postgresql://user:pass@localhost:5432/brightclause
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
 
 # MinIO
 MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=clauselens
-MINIO_SECRET_KEY=clauselens_dev
+MINIO_ACCESS_KEY=brightclause
+MINIO_SECRET_KEY=brightclause_dev
 
 # Ollama
 OLLAMA_URL=http://localhost:11434

@@ -17,7 +17,7 @@ import { OutroScene } from "./scenes/OutroScene";
 //   Deals:      990–1200  (7s)   — Deal cards with progress + stats
 //   Outro:     1200–1350  (5s)   — CTA, logo, feature pills
 
-export const ClauseLensDemo: React.FC = () => {
+export const BrightClauseDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#06060a" }}>
       <Sequence from={0} durationInFrames={150}>

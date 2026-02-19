@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 const API_URL = 'http://45.77.233.102:8003'
 const FRONTEND_URL = 'http://localhost:3000'
 
-test.describe('ClauseLens Dashboard', () => {
+test.describe('BrightClause Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FRONTEND_URL)
     // Wait for the page to be fully loaded
@@ -12,7 +12,7 @@ test.describe('ClauseLens Dashboard', () => {
 
   test('should load dashboard and display header correctly', async ({ page }) => {
     // Check header elements
-    await expect(page.locator('h1')).toHaveText('ClauseLens')
+    await expect(page.locator('h1')).toHaveText('BrightClause')
     await expect(page.getByText('M&A Due Diligence Platform')).toBeVisible()
 
     // Check header buttons

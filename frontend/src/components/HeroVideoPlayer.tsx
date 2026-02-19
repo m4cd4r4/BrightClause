@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState, useRef, useEffect } from 'react'
 import { Player, type PlayerRef } from '@remotion/player'
-import { ClauseLensDemo } from './demo-video/ClauseLensDemo'
+import { BrightClauseDemo } from './demo-video/BrightClauseDemo'
 import { Play, Pause, SkipBack, Maximize2, Minimize2, X } from 'lucide-react'
 
 const SCENES = [
@@ -131,7 +131,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             </div>
             <div className="flex-1 flex justify-center">
               <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[10px] text-ink-500 font-mono">
-                clauselens.com — Demo
+                brightclause.com — Demo
               </div>
             </div>
             <button
@@ -148,7 +148,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
         <div className={isFullscreen ? 'flex-1 min-h-0' : ''}>
           <Player
             ref={playerRef}
-            component={ClauseLensDemo}
+            component={BrightClauseDemo}
             compositionWidth={1920}
             compositionHeight={1080}
             durationInFrames={1000}

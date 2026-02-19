@@ -5,14 +5,10 @@ const API_URL = 'http://45.77.233.102:8003';
 const CONTRACTS_DIR = 'I:/Scratch/ContractClarity/sample-contracts/scribd-downloads';
 
 const contracts = [
-  '143282563-Agreement-and-Plan-of-Merger.pdf',
-  '246188537-NDA-pdf.pdf',
-  '385368649-Lufa-Farms-Inc-s-Employment-Contract-Agreement-Letter-pdf.pdf',
-  '426351269-Contract-of-Lease-Rental-Agreement-for-Commercial-Use-Space-With-Rental-Escalation-Clause.pdf',
-  '487956066-LABOUR-CONTRACT-AGREEMENT-doc.pdf',
-  '384847678-Software-License-Purchase-Agreement.pdf',
-  '427647345-Merger-Format.pdf',
-  '490673342-Business-Agreement-Template-docx.pdf'
+  // New PDFs to upload
+  '116987661-Sample-Saas-Agreement.pdf',
+  '364828294-Sample-Agreement.pdf',
+  '440361177-CONTRACT-OF-LEASE-OF-COMMERCIAL-SPACE-docx.pdf',
 ];
 
 async function uploadContract(filename) {

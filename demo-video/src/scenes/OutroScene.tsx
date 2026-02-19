@@ -60,7 +60,7 @@ export const OutroScene: React.FC = () => {
             lineHeight: 1,
           }}
         >
-          Clause<span style={{ color: colors.accent }}>Lens</span>
+          Bright<span style={{ color: colors.accent }}>Clause</span>
         </h1>
 
         {/* Subtitle */}
@@ -96,7 +96,7 @@ export const OutroScene: React.FC = () => {
               textShadow: `0 0 ${ctaGlow}px ${colors.accent}80`,
             }}
           >
-            clauselens.com
+            brightclause.com
           </span>
         </div>
 
@@ -146,7 +146,7 @@ export const OutroScene: React.FC = () => {
           opacity: footerOpacity,
         }}
       >
-        AI-Powered Contract Intelligence — clauselens.com
+        AI-Powered Contract Intelligence — brightclause.com
       </div>
     </AbsoluteFill>
   );

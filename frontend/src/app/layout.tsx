@@ -27,18 +27,18 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://clauselens-app.vercel.app'),
-  title: 'ClauseLens | AI-Powered Contract Analysis for M&A Due Diligence',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://brightclause-app.vercel.app'),
+  title: 'BrightClause | AI-Powered Contract Analysis for M&A Due Diligence',
   description: 'Upload contracts, extract clauses, assess risk levels, and visualize entity relationships with AI-powered analysis. Supporting 16 clause types, 4-tier OCR, and knowledge graph visualization.',
   openGraph: {
-    title: 'ClauseLens | AI Contract Analysis',
+    title: 'BrightClause | AI Contract Analysis',
     description: 'AI-powered contract analysis for M&A due diligence. Extract clauses, assess risk, visualize entity relationships.',
     type: 'website',
-    siteName: 'ClauseLens',
+    siteName: 'BrightClause',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ClauseLens | AI Contract Analysis',
+    title: 'BrightClause | AI Contract Analysis',
     description: 'AI-powered contract analysis for M&A due diligence.',
   },
   robots: { index: true, follow: true },

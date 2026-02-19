@@ -2,15 +2,15 @@ import { test, expect } from '@playwright/test'
 
 const FRONTEND_URL = 'http://localhost:3000'
 
-test.describe('ClauseLens Landing Page', () => {
+test.describe('BrightClause Landing Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FRONTEND_URL)
     await page.waitForLoadState('networkidle')
   })
 
-  test('should load with correct title containing ClauseLens', async ({ page }) => {
+  test('should load with correct title containing BrightClause', async ({ page }) => {
     const title = await page.title()
-    expect(title.toLowerCase()).toContain('clauselens')
+    expect(title.toLowerCase()).toContain('brightclause')
   })
 
   test('should display hero section with correct heading text', async ({ page }) => {
@@ -36,7 +36,7 @@ test.describe('ClauseLens Landing Page', () => {
   test('should have Source Code navigation link pointing to GitHub', async ({ page }) => {
     const sourceLink = page.getByRole('link', { name: /Source Code/i })
     await expect(sourceLink).toBeVisible()
-    await expect(sourceLink).toHaveAttribute('href', 'https://github.com/m4cd4r4/ClauseLens')
+    await expect(sourceLink).toHaveAttribute('href', 'https://github.com/m4cd4r4/BrightClause')
     await expect(sourceLink).toHaveAttribute('target', '_blank')
   })
 
@@ -149,12 +149,12 @@ test.describe('ClauseLens Landing Page', () => {
     await expect(page.getByText('FastAPI Backend')).toBeVisible()
   })
 
-  test('should render footer with ClauseLens branding and GitHub link', async ({ page }) => {
+  test('should render footer with BrightClause branding and GitHub link', async ({ page }) => {
     const footer = page.locator('footer')
     await expect(footer).toBeVisible()
 
     // Check branding text
-    await expect(footer.getByText('ClauseLens')).toBeVisible()
+    await expect(footer.getByText('BrightClause')).toBeVisible()
     await expect(footer.getByText('Built by Macdara')).toBeVisible()
 
     // Check GitHub link in footer
@@ -162,7 +162,7 @@ test.describe('ClauseLens Landing Page', () => {
     await expect(footerGithubLink).toBeVisible()
     await expect(footerGithubLink).toHaveAttribute(
       'href',
-      'https://github.com/m4cd4r4/ClauseLens'
+      'https://github.com/m4cd4r4/BrightClause'
     )
 
     // Check Dashboard link in footer
@@ -195,7 +195,7 @@ test.describe('ClauseLens Landing Page', () => {
     const nav = page.locator('nav').first()
     await expect(nav).toBeVisible()
 
-    // Nav should contain ClauseLens text
-    await expect(nav.getByText('ClauseLens')).toBeVisible()
+    // Nav should contain BrightClause text
+    await expect(nav.getByText('BrightClause')).toBeVisible()
   })
 })

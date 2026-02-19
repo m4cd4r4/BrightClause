@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Player, type PlayerRef } from '@remotion/player'
-import { ClauseLensDemo } from './demo-video/ClauseLensDemo'
+import { BrightClauseDemo } from './demo-video/BrightClauseDemo'
 import { X, RotateCcw, Play, Pause, SkipBack } from 'lucide-react'
 import React from 'react'
 
@@ -147,7 +147,7 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ open, onClose })
         <div className="rounded-2xl overflow-hidden border border-ink-800/50 shadow-2xl shadow-black/50 bg-[#06060a]">
           <Player
             ref={playerRef}
-            component={ClauseLensDemo}
+            component={BrightClauseDemo}
             compositionWidth={1920}
             compositionHeight={1080}
             durationInFrames={1350}

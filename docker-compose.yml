@@ -4,18 +4,18 @@ services:
   # PostgreSQL with pgvector extension
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: clauselens-postgres
+    container_name: brightclause-postgres
     environment:
-      POSTGRES_USER: clauselens
-      POSTGRES_PASSWORD: clauselens_dev
-      POSTGRES_DB: clauselens
+      POSTGRES_USER: brightclause
+      POSTGRES_PASSWORD: brightclause_dev
+      POSTGRES_DB: brightclause
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U clauselens"]
+      test: ["CMD-SHELL", "pg_isready -U brightclause"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,7 +23,7 @@ services:
   # Redis for Celery queue and caching
   redis:
     image: redis:7-alpine
-    container_name: clauselens-redis
+    container_name: brightclause-redis
     ports:
       - "6380:6379"
     volumes:
@@ -37,11 +37,11 @@ services:
   # MinIO for S3-compatible document storage
   minio:
     image: minio/minio:latest
-    container_name: clauselens-minio
+    container_name: brightclause-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: clauselens
-      MINIO_ROOT_PASSWORD: clauselens_dev
+      MINIO_ROOT_USER: brightclause
+      MINIO_ROOT_PASSWORD: brightclause_dev
     ports:
       - "9000:9000"   # API
       - "9001:9001"   # Console
@@ -56,7 +56,7 @@ services:
   # Ollama for LLM inference
   ollama:
     image: ollama/ollama:latest
-    container_name: clauselens-ollama
+    container_name: brightclause-ollama
     ports:
       - "11435:11434"
     volumes:
@@ -75,16 +75,16 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: clauselens-backend
+    container_name: brightclause-backend
     ports:
       - "8002:8000"
     environment:
-      - DATABASE_URL=postgresql://clauselens:clauselens_dev@postgres:5432/clauselens
+      - DATABASE_URL=postgresql://brightclause:brightclause_dev@postgres:5432/brightclause
       - REDIS_URL=redis://redis:6379/0
       - OLLAMA_URL=http://ollama:11434
       - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=clauselens
-      - MINIO_SECRET_KEY=clauselens_dev
+      - MINIO_ACCESS_KEY=brightclause
+      - MINIO_SECRET_KEY=brightclause_dev
       - MINIO_BUCKET=contracts
       - ENVIRONMENT=development
     volumes:
@@ -105,14 +105,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: clauselens-worker
+    container_name: brightclause-worker
     environment:
-      - DATABASE_URL=postgresql://clauselens:clauselens_dev@postgres:5432/clauselens
+      - DATABASE_URL=postgresql://brightclause:brightclause_dev@postgres:5432/brightclause
       - REDIS_URL=redis://redis:6379/0
       - OLLAMA_URL=http://ollama:11434
       - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=clauselens
-      - MINIO_SECRET_KEY=clauselens_dev
+      - MINIO_ACCESS_KEY=brightclause
+      - MINIO_SECRET_KEY=brightclause_dev
       - MINIO_BUCKET=contracts
       - ENVIRONMENT=development
     volumes:
@@ -133,9 +133,9 @@ services:
   #   build:
   #     context: ./backend
   #     dockerfile: Dockerfile
-  #   container_name: clauselens-beat
+  #   container_name: brightclause-beat
   #   environment:
-  #     - DATABASE_URL=postgresql://clauselens:clauselens_dev@postgres:5432/clauselens
+  #     - DATABASE_URL=postgresql://brightclause:brightclause_dev@postgres:5432/brightclause
   #     - REDIS_URL=redis://redis:6379/0
   #   depends_on:
   #     - redis

@@ -1,10 +1,10 @@
 {
-  "name": "clauselens-demo-video",
+  "name": "brightclause-demo-video",
   "version": "1.0.0",
-  "description": "Animated demo video for ClauseLens using Remotion",
+  "description": "Animated demo video for BrightClause using Remotion",
   "scripts": {
     "start": "remotion studio",
-    "build": "remotion render src/index.tsx ClauseLensDemo out/demo.mp4",
+    "build": "remotion render src/index.tsx BrightClauseDemo out/demo.mp4",
     "preview": "remotion preview"
   },
   "dependencies": {
