@@ -68,9 +68,9 @@ export const ChatScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Real document analysis page in the background */}
+      {/* Dashboard in the background */}
       <ScreenshotReveal
-        src="assets/journey/200-document-full-page.png"
+        src="assets/screenshot-dashboard.png"
         delay={5}
         startScale={1.45}
         endScale={1.52}
