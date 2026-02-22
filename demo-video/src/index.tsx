@@ -8,7 +8,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="BrightClauseDemo"
         component={BrightClauseDemo}
-        durationInFrames={1000}
+        durationInFrames={1120}
         fps={30}
         width={1920}
         height={1080}
@@ -16,7 +16,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="BrightClauseDemoMobile"
         component={BrightClauseDemoMobile}
-        durationInFrames={1050}
+        durationInFrames={1200}
         fps={30}
         width={1080}
         height={1920}

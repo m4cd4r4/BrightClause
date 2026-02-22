@@ -79,7 +79,7 @@ export const ObligationsScene: React.FC<ObligationsSceneProps> = ({ mobile }) =>
     return (
       <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
         <ScreenshotReveal
-          src="assets/screenshot-obligations.png"
+          src="assets/journey/140-obligations-full.png"
           delay={0}
           startScale={0.6}
           endScale={0.63}
@@ -217,7 +217,7 @@ export const ObligationsScene: React.FC<ObligationsSceneProps> = ({ mobile }) =>
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
       <ScreenshotReveal
-        src="assets/screenshot-obligations.png"
+        src="assets/journey/140-obligations-full.png"
         delay={0}
         startScale={0.6}
         endScale={0.63}

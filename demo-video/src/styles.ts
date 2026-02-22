@@ -60,3 +60,16 @@ export const card: CSSProperties = {
   border: `1px solid ${colors.border}`,
   overflow: "hidden",
 };
+
+// Scene durations at 30fps
+// Total scene frames: 1235 - transitions (~110) ≈ 1125 net frames = ~37.5s
+export const SCENE_DURATIONS = {
+  intro: 130,       // 4.3s
+  problem: 160,     // 5.3s
+  chat: 190,        // 6.3s
+  riskDashboard: 160, // 5.3s
+  obligations: 150, // 5.0s
+  search: 155,      // 5.2s  ← NEW: search + analytics
+  deals: 160,       // 5.3s
+  outro: 130,       // 4.3s
+};

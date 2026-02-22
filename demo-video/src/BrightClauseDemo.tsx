@@ -8,11 +8,12 @@ import { ProblemScene } from "./scenes/ProblemScene";
 import { ChatScene } from "./scenes/ChatScene";
 import { RiskDashboardScene } from "./scenes/RiskDashboardScene";
 import { ObligationsScene } from "./scenes/ObligationsScene";
+import { SearchScene } from "./scenes/SearchScene";
 import { DealsScene } from "./scenes/DealsScene";
 import { OutroScene } from "./scenes/OutroScene";
 import { SCENE_DURATIONS } from "./styles";
 
-const { intro: INTRO, problem: PROBLEM, chat: CHAT, riskDashboard: RISK, obligations: OBLIGATIONS, deals: DEALS, outro: OUTRO } = SCENE_DURATIONS;
+const { intro: INTRO, problem: PROBLEM, chat: CHAT, riskDashboard: RISK, obligations: OBLIGATIONS, search: SEARCH, deals: DEALS, outro: OUTRO } = SCENE_DURATIONS;
 
 // Transition durations
 const FADE_T = 15;
@@ -70,10 +71,21 @@ export const BrightClauseDemo: React.FC = () => {
           <ObligationsScene />
         </TransitionSeries.Sequence>
 
-        {/* Obligations → Deals: slide from right */}
+        {/* Obligations → Search: slide from right */}
         <TransitionSeries.Transition
           presentation={slide({ direction: "from-right" })}
           timing={springTiming({ config: { damping: 14, stiffness: 100 } })}
+        />
+
+        {/* Search & Analytics */}
+        <TransitionSeries.Sequence durationInFrames={SEARCH} premountFor={30}>
+          <SearchScene />
+        </TransitionSeries.Sequence>
+
+        {/* Search → Deals: fade */}
+        <TransitionSeries.Transition
+          presentation={fade()}
+          timing={linearTiming({ durationInFrames: FADE_T })}
         />
 
         {/* Deals */}

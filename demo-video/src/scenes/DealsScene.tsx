@@ -67,7 +67,7 @@ export const DealsScene: React.FC<DealsSceneProps> = ({ mobile }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
       <ScreenshotReveal
-        src="assets/screenshot-deals.png"
+        src="assets/journey/160-deals-list.png"
         delay={0}
         startScale={0.6}
         endScale={0.63}

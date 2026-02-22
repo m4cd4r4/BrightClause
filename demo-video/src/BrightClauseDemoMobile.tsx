@@ -8,6 +8,7 @@ import { ProblemScene } from "./scenes/ProblemScene";
 import { ChatScene } from "./scenes/ChatScene";
 import { RiskDashboardScene } from "./scenes/RiskDashboardScene";
 import { ObligationsScene } from "./scenes/ObligationsScene";
+import { SearchScene } from "./scenes/SearchScene";
 import { DealsScene } from "./scenes/DealsScene";
 import { colors, fonts, springs } from "./styles";
 import { AnimatedBackground } from "./components/AnimatedBackground";
@@ -21,6 +22,7 @@ const PROBLEM = 170;     // 5.7s
 const CHAT = 200;        // 6.7s
 const RISK = 170;        // 5.7s
 const OBLIGATIONS = 155; // 5.2s
+const SEARCH = 160;      // 5.3s
 const DEALS = 170;       // 5.7s
 const OUTRO = 130;       // 4.3s
 
@@ -300,6 +302,18 @@ export const BrightClauseDemoMobile: React.FC = () => {
         <TransitionSeries.Sequence durationInFrames={OBLIGATIONS} premountFor={30}>
           <MobileFrame label="Obligations" sublabel="Deadline Tracking" showBranding={false}>
             <ObligationsScene mobile />
+          </MobileFrame>
+        </TransitionSeries.Sequence>
+
+        <TransitionSeries.Transition
+          presentation={fade()}
+          timing={linearTiming({ durationInFrames: FADE_T })}
+        />
+
+        {/* Search & Analytics */}
+        <TransitionSeries.Sequence durationInFrames={SEARCH} premountFor={30}>
+          <MobileFrame label="Semantic Search" sublabel="Find Any Clause" showBranding={false}>
+            <SearchScene mobile />
           </MobileFrame>
         </TransitionSeries.Sequence>
 

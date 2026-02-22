@@ -87,7 +87,7 @@ export const ChatScene: React.FC<ChatSceneProps> = ({ mobile }) => {
       />
       {!mobile && (
         <ScreenshotReveal
-          src="assets/screenshot-risk.png"
+          src="assets/journey/080-clause-critical-expanded.png"
           delay={0}
           startScale={0.7}
           endScale={0.72}
