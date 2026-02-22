@@ -546,42 +546,46 @@ async def explain_clause(
     )
 
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                f"{settings.ollama_url}/api/generate",
-                json={
-                    "model": settings.llm_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.3,
-                        "num_predict": 512,
+        if settings.anthropic_api_key:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": settings.anthropic_api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
                     },
-                },
-            )
-
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=502,
-                    detail="AI service temporarily unavailable",
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "max_tokens": 1024,
+                        "messages": [{"role": "user", "content": prompt}],
+                    },
                 )
+                if response.status_code != 200:
+                    raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+                explanation = response.json()["content"][0]["text"].strip()
+        else:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    f"{settings.ollama_url}/api/generate",
+                    json={
+                        "model": settings.llm_model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {"temperature": 0.3, "num_predict": 512},
+                    },
+                )
+                if response.status_code != 200:
+                    raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+                explanation = response.json().get("response", "").strip()
 
-            data = response.json()
-            explanation = data.get("response", "").strip()
-
-            if not explanation:
-                explanation = "Unable to generate an explanation. Please try again."
+        if not explanation:
+            explanation = "Unable to generate an explanation. Please try again."
 
     except httpx.TimeoutException:
-        raise HTTPException(
-            status_code=504,
-            detail="AI service timed out. Please try again.",
-        )
+        raise HTTPException(status_code=504, detail="AI service timed out. Please try again.")
     except httpx.ConnectError:
-        raise HTTPException(
-            status_code=502,
-            detail="AI service is not available. Please try again later.",
-        )
+        raise HTTPException(status_code=502, detail="AI service is not available. Please try again later.")
 
     return ExplainResponse(
         explanation=explanation,
@@ -678,24 +682,44 @@ async def extract_obligations(
 
     extracted = []
     try:
-        async with httpx.AsyncClient(timeout=90.0) as client:
-            response = await client.post(
-                f"{settings.ollama_url}/api/generate",
-                json={
-                    "model": settings.llm_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0.2, "num_predict": 2048},
-                },
-            )
-
-            if response.status_code == 200:
-                text = response.json().get("response", "").strip()
-                # Find JSON array in response
-                start = text.find("[")
-                end = text.rfind("]") + 1
-                if start >= 0 and end > start:
-                    extracted = json.loads(text[start:end])
+        if settings.anthropic_api_key:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": settings.anthropic_api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "max_tokens": 2048,
+                        "messages": [{"role": "user", "content": prompt}],
+                    },
+                )
+                if response.status_code == 200:
+                    text = response.json()["content"][0]["text"].strip()
+                    start = text.find("[")
+                    end = text.rfind("]") + 1
+                    if start >= 0 and end > start:
+                        extracted = json.loads(text[start:end])
+        else:
+            async with httpx.AsyncClient(timeout=90.0) as client:
+                response = await client.post(
+                    f"{settings.ollama_url}/api/generate",
+                    json={
+                        "model": settings.llm_model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {"temperature": 0.2, "num_predict": 2048},
+                    },
+                )
+                if response.status_code == 200:
+                    text = response.json().get("response", "").strip()
+                    start = text.find("[")
+                    end = text.rfind("]") + 1
+                    if start >= 0 and end > start:
+                        extracted = json.loads(text[start:end])
     except (httpx.TimeoutException, httpx.ConnectError, json.JSONDecodeError):
         pass
 

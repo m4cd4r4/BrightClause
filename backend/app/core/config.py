@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     embedding_model: str = "nomic-embed-text"
     vision_model: str = "llava"  # For OCR Tier 4 (Pixtral alternative)
 
+    # Anthropic Claude API (optional — used for explain/obligations when set)
+    anthropic_api_key: str = ""
+
     # File upload
     max_file_size: int = 50 * 1024 * 1024  # 50MB
 
