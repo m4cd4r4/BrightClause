@@ -17,64 +17,64 @@ const HeroVideoPlayer = lazy(() =>
   import('@/components/HeroVideoPlayer').then(m => ({ default: m.HeroVideoPlayer }))
 )
 
-const features = [
+const features: { Icon: React.ElementType; title: string; description: string }[] = [
   {
-    icon: <MessageCircle className="w-6 h-6" />,
+    Icon: MessageCircle,
     title: 'Chat with Your Contract',
     description: 'Ask questions in plain English. RAG-powered Q&A retrieves relevant clauses and generates contextual answers with source citations.',
   },
   {
-    icon: <Zap className="w-6 h-6" />,
+    Icon: Zap,
     title: 'AI Clause Extraction',
     description: '16+ clause types automatically identified and classified: termination, indemnification, IP, non-compete, and more.',
   },
   {
-    icon: <Lightbulb className="w-6 h-6" />,
-    title: 'Plain-English Translator',
-    description: 'One click to translate any legal clause into simple language anyone can understand. No law degree required.',
-  },
-  {
-    icon: <Shield className="w-6 h-6" />,
+    Icon: Shield,
     title: 'Risk Assessment',
     description: 'Each clause scored Critical / High / Medium / Low with specific risk factors and AI-generated summaries.',
   },
   {
-    icon: <ClipboardCheck className="w-6 h-6" />,
+    Icon: Lightbulb,
+    title: 'Plain-English Translator',
+    description: 'One click to translate any legal clause into simple language anyone can understand. No law degree required.',
+  },
+  {
+    Icon: ClipboardCheck,
     title: 'Obligation Tracker',
     description: 'AI extracts obligations, responsible parties, and deadlines from clauses. Track status as pending, completed, or overdue.',
   },
   {
-    icon: <BarChart3 className="w-6 h-6" />,
+    Icon: BarChart3,
     title: 'Executive Reports',
     description: 'AI-generated executive summaries with risk overview, key clauses, and actionable recommendations. Export as PDF.',
   },
   {
-    icon: <Calendar className="w-6 h-6" />,
+    Icon: Calendar,
     title: 'Timeline Extraction',
     description: 'Automatically extracts key dates — effective, expiration, renewal, payment — and displays them on an interactive timeline.',
   },
   {
-    icon: <Briefcase className="w-6 h-6" />,
+    Icon: Briefcase,
     title: 'Deal Grouping',
     description: 'Group related contracts into deals for aggregate risk analysis, batch uploads, and portfolio-level insights.',
   },
   {
-    icon: <Network className="w-6 h-6" />,
+    Icon: Network,
     title: 'Knowledge Graph',
     description: 'Entity extraction and relationship mapping. Visualize parties, dates, amounts, and obligations as an interactive graph.',
   },
   {
-    icon: <Search className="w-6 h-6" />,
+    Icon: Search,
     title: 'Hybrid Vector Search',
     description: 'Semantic + keyword search powered by pgvector embeddings. Find relevant clauses using natural language.',
   },
   {
-    icon: <FileText className="w-6 h-6" />,
+    Icon: FileText,
     title: 'PDF Viewer & Export',
     description: 'In-app PDF viewing with clause navigation. Export analysis as PDF, Excel, Word, CSV, or JSON.',
   },
   {
-    icon: <Sun className="w-6 h-6" />,
+    Icon: Sun,
     title: 'Dark & Light Mode',
     description: 'Full theme toggle with persistent preferences. Professional interface that adapts to your working environment.',
   },
@@ -248,34 +248,50 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[
-              { step: '01', title: 'Upload', desc: 'PDF stored in MinIO (S3)', icon: <FileText className="w-5 h-5" /> },
-              { step: '02', title: 'Extract', desc: '4-tier OCR pipeline', icon: <Layers className="w-5 h-5" /> },
-              { step: '03', title: 'Embed', desc: 'pgvector embeddings', icon: <Database className="w-5 h-5" /> },
-              { step: '04', title: 'Analyze', desc: 'Clauses, risk, entities', icon: <Brain className="w-5 h-5" /> },
-              { step: '05', title: 'Chat', desc: 'RAG-powered Q&A', icon: <MessageCircle className="w-5 h-5" /> },
-              { step: '06', title: 'Act', desc: 'Reports, obligations, deals', icon: <Eye className="w-5 h-5" /> },
-            ].map((item, i) => (
+          <div className="relative">
+            {/* Connecting line — desktop only */}
+            <div className="hidden lg:block absolute top-[2.25rem] left-[calc(8.333%+2rem)] right-[calc(8.333%+2rem)] h-px">
               <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative p-6 bg-ink-900/40 border border-ink-800/50 rounded-xl text-center group hover:border-accent/30 transition-all"
-              >
-                <div className="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/20 transition-colors">
-                  {item.icon}
-                </div>
-                <div className="text-[10px] font-mono text-accent uppercase tracking-widest mb-2">{item.step}</div>
-                <h3 className="font-display text-lg font-semibold mb-1">{item.title}</h3>
-                <p className="text-sm text-ink-500">{item.desc}</p>
-                {i < 5 && (
-                  <ChevronRight className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-700" />
-                )}
-              </motion.div>
-            ))}
+                transition={{ duration: 0.8, delay: 0.2, ease: 'easeInOut' }}
+                className="h-full origin-left bg-gradient-to-r from-accent/40 via-accent/20 to-accent/40"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-10">
+              {[
+                { title: 'Upload', desc: 'PDF stored in MinIO (S3)', Icon: FileText },
+                { title: 'Extract', desc: '4-tier OCR pipeline', Icon: Layers },
+                { title: 'Embed', desc: 'pgvector embeddings', Icon: Database },
+                { title: 'Analyze', desc: 'Clauses, risk, entities', Icon: Brain },
+                { title: 'Chat', desc: 'RAG-powered Q&A', Icon: MessageCircle },
+                { title: 'Act', desc: 'Reports, obligations, deals', Icon: Eye },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  className="flex flex-col items-center text-center group"
+                >
+                  {/* Icon bubble with step badge */}
+                  <div className="relative mb-5">
+                    <div className="w-[4.5rem] h-[4.5rem] rounded-2xl bg-ink-900 border border-ink-700/80 flex items-center justify-center text-accent
+                                    group-hover:border-accent/50 group-hover:bg-accent/10 group-hover:shadow-lg group-hover:shadow-accent/10 transition-all duration-300">
+                      <item.Icon className="w-6 h-6" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-ink-950 border border-accent/40 flex items-center justify-center">
+                      <span className="text-[9px] font-mono text-accent font-bold leading-none">{String(i + 1).padStart(2, '0')}</span>
+                    </div>
+                  </div>
+                  <h3 className="font-display text-sm font-semibold text-ink-100 mb-1">{item.title}</h3>
+                  <p className="text-xs text-ink-500 leading-relaxed">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -295,21 +311,47 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {features.map((feature, i) => (
+          {/* Top 3 spotlight features */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+            {features.slice(0, 3).map((feature, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="p-6 bg-ink-900/30 border border-ink-800/50 rounded-xl hover:border-accent/20 transition-all group"
+                transition={{ delay: i * 0.1 }}
+                className="relative p-8 bg-ink-900/50 border border-ink-700/60 rounded-2xl group overflow-hidden hover:border-accent/40 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
-                  {feature.icon}
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
+                    <feature.Icon className="w-7 h-7" />
+                  </div>
+                  <h3 className="font-display text-xl font-semibold mb-3 text-ink-50">{feature.title}</h3>
+                  <p className="text-ink-400 leading-relaxed text-sm">{feature.description}</p>
                 </div>
-                <h3 className="font-display text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-ink-400 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Remaining 9 features — compact horizontal-list grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {features.slice(3).map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                className="flex items-start gap-4 p-5 bg-ink-900/20 border border-ink-800/40 rounded-xl hover:border-accent/20 hover:bg-ink-900/40 transition-all group"
+              >
+                <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                  <feature.Icon className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-display text-sm font-semibold text-ink-100 mb-1">{feature.title}</h3>
+                  <p className="text-xs text-ink-500 leading-relaxed">{feature.description}</p>
+                </div>
               </motion.div>
             ))}
           </div>
