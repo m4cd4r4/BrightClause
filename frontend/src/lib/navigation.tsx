@@ -2,7 +2,8 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Shield, LayoutDashboard, BarChart3, GitCompareArrows, Search, Menu, X, Sun, Moon, ClipboardCheck, Briefcase } from 'lucide-react'
+import Image from 'next/image'
+import { LayoutDashboard, BarChart3, GitCompareArrows, Search, Menu, X, Sun, Moon, ClipboardCheck, Briefcase } from 'lucide-react'
 import { useState } from 'react'
 import { useTheme } from '@/lib/theme'
 
@@ -26,8 +27,8 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-accent via-accent to-accent-dark flex items-center justify-center shadow-lg shadow-accent/20">
-              <Shield className="w-5 h-5 text-ink-950" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg shadow-accent/20">
+              <Image src="/logo.png" alt="BrightClause" width={40} height={40} className="w-full h-full object-contain" />
             </div>
             <div className="hidden sm:block">
               <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
