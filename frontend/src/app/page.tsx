@@ -3,7 +3,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
@@ -12,6 +11,7 @@ import {
   Briefcase, Sun, Activity, Play
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
+import { BrightClauseMark } from '@/components/BrightClauseLogo'
 
 const HeroVideoPlayer = lazy(() =>
   import('@/components/HeroVideoPlayer').then(m => ({ default: m.HeroVideoPlayer }))
@@ -118,12 +118,8 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/50 bg-ink-950/90 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-accent/20">
-              <Image src="/logo.png" alt="BrightClause" width={40} height={40} className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
-            </div>
+            <BrightClauseMark size={40} />
+            <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
           </div>
           <div className="flex items-center gap-4">
             <a
@@ -510,8 +506,8 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-16 h-16 mx-auto mb-8">
-              <Image src="/logo-large.png" alt="BrightClause" width={64} height={64} className="w-full h-full object-contain" />
+            <div className="mx-auto mb-8 w-fit">
+              <BrightClauseMark size={64} />
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
               See It in Action
@@ -547,7 +543,7 @@ export default function LandingPage() {
       <footer className="border-t border-ink-800/50 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
-            <Image src="/logo-large.png" alt="BrightClause" width={20} height={20} className="w-5 h-5 object-contain" />
+            <BrightClauseMark size={20} />
             <span>BrightClause</span>
             <span className="text-ink-700">·</span>
             <span>Built by Macdara</span>
