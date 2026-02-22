@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
 import { BrightClauseMark } from '@/components/BrightClauseLogo'
+import { ScreenshotShowcase } from '@/components/ScreenshotShowcase'
 
 const HeroVideoPlayer = lazy(() =>
   import('@/components/HeroVideoPlayer').then(m => ({ default: m.HeroVideoPlayer }))
@@ -229,6 +230,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Screenshot Showcase */}
+      <ScreenshotShowcase />
 
       {/* Architecture Overview */}
       <section className="py-24 border-t border-ink-800/50">
