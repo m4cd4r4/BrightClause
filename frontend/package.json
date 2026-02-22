@@ -12,7 +12,11 @@
     "test:headed": "playwright test --headed"
   },
   "dependencies": {
+    "@remotion/light-leaks": "^4.0.420",
+    "@remotion/paths": "^4.0.420",
     "@remotion/player": "^4.0.420",
+    "@remotion/shapes": "^4.0.420",
+    "@remotion/transitions": "^4.0.420",
     "docx": "^8.5.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^10.18.0",
