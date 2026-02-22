@@ -74,9 +74,9 @@ export const ObligationsScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Real obligations page — grounds the animated table in the actual product */}
+      {/* Real obligations screenshot — grounds the animated table in the actual product */}
       <ScreenshotReveal
-        src="assets/journey/150-obligations-full-page.png"
+        src="assets/screenshot-obligations.png"
         delay={5}
         startScale={1.45}
         endScale={1.52}

@@ -38,10 +38,10 @@ export const OutroScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
-      <AnimatedBackground backgroundImage="assets/outro-bg.png" accentColor={colors.accent} bgImageOpacity={0.15} showParticles showGrid showScanLine />
+      <AnimatedBackground backgroundImage="assets/outro-bg.png" accentColor={colors.accent} bgImageOpacity={0.15} showGrid />
       {/* Full dashboard screenshot — final impression of the real product */}
       <ScreenshotReveal
-        src="assets/journey/010-dashboard-full.png"
+        src="assets/screenshot-dashboard.png"
         delay={10}
         startScale={1.35}
         endScale={1.45}

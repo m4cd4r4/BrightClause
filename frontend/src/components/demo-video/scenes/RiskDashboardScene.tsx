@@ -84,9 +84,9 @@ export const RiskDashboardScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Real risk dashboard screenshot as atmosphere background */}
+      {/* Real analytics screenshot as atmosphere background */}
       <ScreenshotReveal
-        src="assets/journey/030-dashboard-risk-panel.png"
+        src="assets/screenshot-analytics.png"
         delay={5}
         startScale={1.45}
         endScale={1.52}

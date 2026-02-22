@@ -60,9 +60,9 @@ export const DealsScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Real deals list — shows the actual batch analysis UI */}
+      {/* Compare view — shows multi-document analysis */}
       <ScreenshotReveal
-        src="assets/journey/160-deals-list.png"
+        src="assets/screenshot-compare.png"
         delay={5}
         startScale={1.45}
         endScale={1.52}
