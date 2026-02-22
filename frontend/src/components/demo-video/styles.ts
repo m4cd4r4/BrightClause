@@ -28,6 +28,34 @@ export const fonts = {
   mono: "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace",
 };
 
+export const springs = {
+  smooth: { damping: 200 },
+  snappy: { damping: 20, stiffness: 200 },
+  bouncy: { damping: 8 },
+  heavy: { damping: 15, stiffness: 80, mass: 2 },
+  logo: { damping: 12, stiffness: 80 },
+  panel: { damping: 15, stiffness: 100 },
+};
+
+export const STAGGER = {
+  fast: 5,
+  normal: 8,
+  slow: 12,
+};
+
+export const TRANSITION_FRAMES = 15;
+
+// Scene durations (frames at 30fps)
+export const SCENE_DURATIONS = {
+  intro: 150,         // 5s
+  problem: 150,       // 5s
+  chat: 180,          // 6s
+  riskDashboard: 165, // 5.5s
+  obligations: 150,   // 5s
+  deals: 165,         // 5.5s
+  outro: 120,         // 4s
+} as const;
+
 export const centered: CSSProperties = {
   display: "flex",
   flexDirection: "column",

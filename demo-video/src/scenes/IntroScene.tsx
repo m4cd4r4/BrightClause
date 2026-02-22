@@ -7,9 +7,10 @@ import {
 } from "remotion";
 import { colors, fonts, centered, springs, STAGGER } from "../styles";
 import { AnimatedBackground } from "../components/AnimatedBackground";
-import { ShieldLogo } from "../components/ShieldLogo";
+import { LogoImage } from "../components/LogoImage";
 import { GlowOrb } from "../components/GlowOrb";
 import { FadeInSlide } from "../components/FadeInSlide";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const PILLS = [
   "Chat with Contracts",
@@ -18,18 +19,34 @@ const PILLS = [
   "Deal Grouping",
 ];
 
-export const IntroScene: React.FC = () => {
+export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
   const titleProgress = spring({
-    frame: frame - 15,
+    frame: frame - 20,
     fps,
     config: springs.smooth,
   });
   const titleY = interpolate(titleProgress, [0, 1], [40, 0]);
 
-  // Exit animation in final 25 frames
+  // Gold accent line expanding from center
+  const lineWidth = interpolate(frame, [25, 60], [0, mobile ? 200 : 400], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const lineOpacity = interpolate(frame, [25, 40], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Background fade — circuits visible at start, then fade to black
+  const bgFade = interpolate(frame, [50, 90], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Exit animation
   const exitProgress = interpolate(
     frame,
     [durationInFrames - 25, durationInFrames],
@@ -41,8 +58,34 @@ export const IntroScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
-      <AnimatedBackground showParticles showGrid showScanLine />
-      <GlowOrb pulse y="42%" maxOpacity={0.45} />
+      {/* Background layers — fade to black mid-scene */}
+      <div style={{ position: "absolute", inset: 0, opacity: bgFade, pointerEvents: "none" }}>
+        <AnimatedBackground
+          backgroundImage="assets/intro-bg.png"
+          bgImageOpacity={0.18}
+          accentColor={colors.accent}
+          showGrid
+          showScanLine
+          showParticles
+        />
+
+        {/* Product screenshot floating behind */}
+        <ScreenshotReveal
+          src="assets/screenshot-dashboard.png"
+          delay={8}
+          startScale={0.55}
+          endScale={0.6}
+          opacity={0.15}
+          blur={4}
+          borderRadius={20}
+          perspective
+          rotateX={8}
+          y={mobile ? 300 : 180}
+          shadow={false}
+        />
+      </div>
+
+      <GlowOrb pulse y="42%" maxOpacity={0.4} />
 
       <div
         style={{
@@ -51,16 +94,28 @@ export const IntroScene: React.FC = () => {
           opacity: exitOpacity,
         }}
       >
-        {/* Shield */}
-        <div style={{ marginBottom: 40 }}>
-          <ShieldLogo size={110} />
+        {/* Logo */}
+        <div style={{ marginBottom: 32 }}>
+          <LogoImage size={mobile ? 140 : 180} delay={0} />
         </div>
+
+        {/* Gold accent line */}
+        <div
+          style={{
+            width: lineWidth,
+            height: 2,
+            background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
+            opacity: lineOpacity,
+            marginBottom: 24,
+            boxShadow: `0 0 12px ${colors.accent}40`,
+          }}
+        />
 
         {/* Title */}
         <h1
           style={{
             fontFamily: fonts.display,
-            fontSize: 82,
+            fontSize: mobile ? 64 : 96,
             fontWeight: 600,
             color: colors.text,
             margin: 0,
@@ -68,31 +123,41 @@ export const IntroScene: React.FC = () => {
             transform: `translateY(${titleY}px)`,
             letterSpacing: "-0.01em",
             lineHeight: 1,
+            textShadow: "0 4px 30px rgba(0,0,0,0.8)",
           }}
         >
           Bright<span style={{ color: colors.accent }}>Clause</span>
         </h1>
 
         {/* Subtitle */}
-        <FadeInSlide delay={30} slideDistance={20}>
+        <FadeInSlide delay={35} slideDistance={20}>
           <p
             style={{
               fontFamily: fonts.body,
-              fontSize: 26,
+              fontSize: mobile ? 22 : 32,
               color: colors.textSoft,
               margin: "20px 0 0 0",
               fontWeight: 400,
+              textShadow: "0 2px 20px rgba(0,0,0,0.9)",
             }}
           >
-            AI-Powered Contract Analysis for M&A Due Diligence
+            AI-Powered Contract Intelligence
           </p>
         </FadeInSlide>
 
-        {/* Pills — staggered entrance */}
-        <div style={{ display: "flex", gap: 16, marginTop: 56 }}>
+        {/* Pills */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: mobile ? 10 : 16,
+            marginTop: mobile ? 36 : 56,
+            justifyContent: "center",
+          }}
+        >
           {PILLS.map((item, i) => {
             const pillProgress = spring({
-              frame: frame - 45 - i * STAGGER.fast,
+              frame: frame - 50 - i * STAGGER.fast,
               fps,
               config: springs.snappy,
             });
@@ -101,12 +166,13 @@ export const IntroScene: React.FC = () => {
               <div
                 key={item}
                 style={{
-                  padding: "10px 20px",
-                  backgroundColor: colors.bgCard,
+                  padding: mobile ? "8px 14px" : "10px 20px",
+                  backgroundColor: `${colors.bgCard}cc`,
+                  backdropFilter: "blur(10px)",
                   borderRadius: 8,
                   border: `1px solid ${colors.border}`,
                   fontFamily: fonts.mono,
-                  fontSize: 14,
+                  fontSize: mobile ? 14 : 18,
                   color: colors.textSoft,
                   opacity: pillProgress,
                   transform: `translateY(${pillY}px)`,

@@ -1,5 +1,5 @@
 import { AbsoluteFill } from "remotion";
-import { TransitionSeries, linearTiming } from "@remotion/transitions";
+import { TransitionSeries, linearTiming, springTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { slide } from "@remotion/transitions/slide";
 import { LightLeak } from "@remotion/light-leaks";
@@ -10,15 +10,9 @@ import { RiskDashboardScene } from "./scenes/RiskDashboardScene";
 import { ObligationsScene } from "./scenes/ObligationsScene";
 import { DealsScene } from "./scenes/DealsScene";
 import { OutroScene } from "./scenes/OutroScene";
+import { SCENE_DURATIONS } from "./styles";
 
-// Scene durations (frames at 30fps)
-const INTRO = 120;       // 4s
-const PROBLEM = 165;     // 5.5s
-const CHAT = 195;        // 6.5s
-const RISK = 165;        // 5.5s
-const OBLIGATIONS = 150; // 5s
-const DEALS = 165;       // 5.5s
-const OUTRO = 120;       // 4s
+const { intro: INTRO, problem: PROBLEM, chat: CHAT, riskDashboard: RISK, obligations: OBLIGATIONS, deals: DEALS, outro: OUTRO } = SCENE_DURATIONS;
 
 // Transition durations
 const FADE_T = 15;
@@ -33,11 +27,10 @@ export const BrightClauseDemo: React.FC = () => {
           <IntroScene />
         </TransitionSeries.Sequence>
 
-        {/* Intro → Problem: fade */}
-        <TransitionSeries.Transition
-          presentation={fade()}
-          timing={linearTiming({ durationInFrames: FADE_T })}
-        />
+        {/* Intro → Problem: light leak (dramatic tone shift) */}
+        <TransitionSeries.Overlay durationInFrames={25}>
+          <LightLeak seed={7} hueShift={45} />
+        </TransitionSeries.Overlay>
 
         {/* Problem */}
         <TransitionSeries.Sequence durationInFrames={PROBLEM} premountFor={30}>
@@ -55,10 +48,10 @@ export const BrightClauseDemo: React.FC = () => {
           <ChatScene />
         </TransitionSeries.Sequence>
 
-        {/* Chat → Risk: fade */}
+        {/* Chat → Risk: spring slide from bottom (data reveal) */}
         <TransitionSeries.Transition
-          presentation={fade()}
-          timing={linearTiming({ durationInFrames: FADE_T })}
+          presentation={slide({ direction: "from-bottom" })}
+          timing={springTiming({ config: { damping: 14, stiffness: 100 } })}
         />
 
         {/* Risk Dashboard */}
@@ -77,10 +70,10 @@ export const BrightClauseDemo: React.FC = () => {
           <ObligationsScene />
         </TransitionSeries.Sequence>
 
-        {/* Obligations → Deals: fade */}
+        {/* Obligations → Deals: slide from right */}
         <TransitionSeries.Transition
-          presentation={fade()}
-          timing={linearTiming({ durationInFrames: FADE_T })}
+          presentation={slide({ direction: "from-right" })}
+          timing={springTiming({ config: { damping: 14, stiffness: 100 } })}
         />
 
         {/* Deals */}
@@ -88,9 +81,9 @@ export const BrightClauseDemo: React.FC = () => {
           <DealsScene />
         </TransitionSeries.Sequence>
 
-        {/* Deals → Outro: light leak overlay */}
+        {/* Deals → Outro: light leak overlay (gold) */}
         <TransitionSeries.Overlay durationInFrames={30}>
-          <LightLeak seed={3} hueShift={45} />
+          <LightLeak seed={3} hueShift={48} />
         </TransitionSeries.Overlay>
 
         {/* Outro */}

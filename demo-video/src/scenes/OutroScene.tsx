@@ -7,7 +7,7 @@ import {
 } from "remotion";
 import { colors, fonts, centered, springs } from "../styles";
 import { AnimatedBackground } from "../components/AnimatedBackground";
-import { ShieldLogo } from "../components/ShieldLogo";
+import { LogoImage } from "../components/LogoImage";
 import { GlowOrb } from "../components/GlowOrb";
 import { FadeInSlide } from "../components/FadeInSlide";
 
@@ -37,13 +37,13 @@ export const OutroScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
-      <AnimatedBackground showParticles showGrid showScanLine />
+      <AnimatedBackground backgroundImage="assets/outro-bg.png" accentColor={colors.accent} bgImageOpacity={0.15} showParticles showGrid showScanLine />
       <GlowOrb pulse y="40%" maxOpacity={0.5} maxScale={1.5} />
 
       <div style={{ ...centered }}>
-        {/* Shield */}
+        {/* Logo */}
         <div style={{ marginBottom: 28 }}>
-          <ShieldLogo size={90} />
+          <LogoImage size={120} delay={5} />
         </div>
 
         {/* Title */}
