@@ -65,13 +65,11 @@ export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
           bgImageOpacity={0.18}
           accentColor={colors.accent}
           showGrid
-          showScanLine
-          showParticles
         />
 
-        {/* Product screenshot floating behind — real dashboard with analysis data */}
+        {/* Product screenshot floating behind — real dashboard */}
         <ScreenshotReveal
-          src="assets/journey/040-dashboard-with-analysis.png"
+          src="assets/screenshot-dashboard.png"
           delay={8}
           startScale={0.58}
           endScale={0.65}
