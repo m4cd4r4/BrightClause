@@ -293,10 +293,13 @@ export const api = {
     clauseTypes: () => fetchAPI<{ clause_types: string[]; descriptions: Record<string, string> }>(
       '/analysis/clause-types'
     ),
-    explainClause: (documentId: string, clauseId: string) =>
+    explainClause: (documentId: string, clauseId: string, claudeApiKey?: string) =>
       fetchAPI<{ explanation: string; clause_type: string }>(
         `/analysis/${documentId}/clauses/${clauseId}/explain`,
-        { method: 'POST' }
+        {
+          method: 'POST',
+          body: claudeApiKey ? JSON.stringify({ claude_api_key: claudeApiKey }) : undefined,
+        }
       ),
     report: (documentId: string) =>
       fetchAPI<ReportData>(`/analysis/${documentId}/report`, { method: 'POST' }),
@@ -354,10 +357,13 @@ export const api = {
 
   // Obligations
   obligations: {
-    extractForDocument: (documentId: string) =>
+    extractForDocument: (documentId: string, claudeApiKey?: string) =>
       fetchAPI<{ document_id: string; obligations_found: number; message: string }>(
         `/analysis/${documentId}/obligations/extract`,
-        { method: 'POST' },
+        {
+          method: 'POST',
+          body: claudeApiKey ? JSON.stringify({ claude_api_key: claudeApiKey }) : undefined,
+        },
       ),
     forDocument: (documentId: string) =>
       fetchAPI<{

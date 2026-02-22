@@ -230,7 +230,7 @@ export default function DocumentDetailPage() {
     if (explaining || explanations[clauseId]) return
     setExplaining(clauseId)
     try {
-      const result = await api.analysis.explainClause(documentId, clauseId)
+      const result = await api.analysis.explainClause(documentId, clauseId, byokApiKey || undefined)
       setExplanations(prev => ({ ...prev, [clauseId]: result.explanation }))
     } catch {
       showError('Failed to generate explanation. Please try again.')
@@ -268,7 +268,7 @@ export default function DocumentDetailPage() {
     if (extractingObligations) return
     setExtractingObligations(true)
     try {
-      const result = await api.obligations.extractForDocument(documentId)
+      const result = await api.obligations.extractForDocument(documentId, byokApiKey || undefined)
       showSuccess(result.message)
     } catch {
       showError('Failed to extract obligations.')

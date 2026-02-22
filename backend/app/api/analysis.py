@@ -527,6 +527,7 @@ class ExplainResponse(BaseModel):
 async def explain_clause(
     document_id: UUID,
     clause_id: UUID,
+    request: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Explain a clause in plain English using AI."""
@@ -545,13 +546,16 @@ async def explain_clause(
         content=clause.content[:3000],
     )
 
+    # Per-request key takes priority over env var
+    effective_api_key = (request.claude_api_key if request else None) or settings.anthropic_api_key
+
     try:
-        if settings.anthropic_api_key:
+        if effective_api_key:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     "https://api.anthropic.com/v1/messages",
                     headers={
-                        "x-api-key": settings.anthropic_api_key,
+                        "x-api-key": effective_api_key,
                         "anthropic-version": "2023-06-01",
                         "content-type": "application/json",
                     },
@@ -643,6 +647,7 @@ class ObligationResponse(BaseModel):
 @router.post("/{document_id}/obligations/extract")
 async def extract_obligations(
     document_id: UUID,
+    request: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Extract obligations and deadlines from document clauses using AI."""
@@ -680,14 +685,17 @@ async def extract_obligations(
 
     prompt = OBLIGATION_PROMPT.format(clauses=clause_text)
 
+    # Per-request key takes priority over env var
+    effective_api_key = (request.claude_api_key if request else None) or settings.anthropic_api_key
+
     extracted = []
     try:
-        if settings.anthropic_api_key:
+        if effective_api_key:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     "https://api.anthropic.com/v1/messages",
                     headers={
-                        "x-api-key": settings.anthropic_api_key,
+                        "x-api-key": effective_api_key,
                         "anthropic-version": "2023-06-01",
                         "content-type": "application/json",
                     },
