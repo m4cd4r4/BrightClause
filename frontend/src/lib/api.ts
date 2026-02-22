@@ -273,9 +273,15 @@ export const api = {
 
   // Analysis
   analysis: {
-    extract: (documentId: string) => fetchAPI<{ status: string; message: string }>(
+    extract: (documentId: string, claudeApiKey?: string) => fetchAPI<{ status: string; message: string }>(
       `/analysis/${documentId}/extract`,
-      { method: 'POST' }
+      {
+        method: 'POST',
+        ...(claudeApiKey ? {
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ claude_api_key: claudeApiKey }),
+        } : {}),
+      }
     ),
     summary: (documentId: string) => fetchAPI<AnalysisSummary>(`/analysis/${documentId}/summary`),
     clauses: (documentId: string, options?: { clause_type?: string; risk_level?: string }) => {

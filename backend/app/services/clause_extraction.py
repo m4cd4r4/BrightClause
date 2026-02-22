@@ -81,9 +81,32 @@ Format:
 Only extract clauses that are clearly present. Do not hallucinate or infer clauses that aren't explicitly stated."""
 
 
+async def _extract_with_claude_api(prompt: str, api_key: str) -> str:
+    """Call Anthropic Claude API directly and return response text."""
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 2048,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+        )
+        if response.status_code != 200:
+            raise ValueError(f"Claude API error: {response.status_code} {response.text[:200]}")
+        data = response.json()
+        return data["content"][0]["text"]
+
+
 async def extract_clauses_from_chunk(
     chunk: Chunk,
     db: AsyncSession,
+    claude_api_key: str | None = None,
 ) -> list[Clause]:
     """
     Extract legal clauses from a single chunk using LLM.
@@ -91,6 +114,7 @@ async def extract_clauses_from_chunk(
     Args:
         chunk: Document chunk to analyze
         db: Database session
+        claude_api_key: Optional Anthropic API key; if provided, uses Claude instead of Ollama
 
     Returns:
         List of extracted Clause objects
@@ -101,74 +125,76 @@ async def extract_clauses_from_chunk(
     )
 
     try:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                f"{settings.ollama_url}/api/generate",
-                json={
-                    "model": settings.llm_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "format": "json",
-                    "options": {
-                        "temperature": 0.1,  # Low temp for consistent extraction
-                        "num_predict": 2048,
-                    },
-                },
-            )
-
-            if response.status_code != 200:
-                return []
-
-            data = response.json()
-            response_text = data.get("response", "")
-
-            # Parse JSON response
-            try:
-                clauses_data = json.loads(response_text)
-                if not isinstance(clauses_data, list):
-                    clauses_data = [clauses_data] if clauses_data else []
-            except json.JSONDecodeError:
-                # Try to extract JSON from response
-                import re
-                json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
-                if json_match:
-                    clauses_data = json.loads(json_match.group())
-                else:
-                    return []
-
-            # Create Clause objects
-            clauses = []
-            for clause_data in clauses_data:
-                if not clause_data.get("clause_type") or not clause_data.get("content"):
-                    continue
-
-                # Validate clause type
-                clause_type = clause_data["clause_type"].lower().replace(" ", "_")
-                if clause_type not in CLAUSE_TYPES:
-                    continue
-
-                # Assess risk
-                risk_level = assess_risk(clause_type, clause_data.get("content", ""))
-                if clause_data.get("risk_level") in ["critical", "high"]:
-                    risk_level = clause_data["risk_level"]
-
-                clause = Clause(
-                    document_id=chunk.document_id,
-                    chunk_id=chunk.id,
-                    clause_type=clause_type,
-                    content=clause_data["content"][:5000],  # Limit content length
-                    summary=clause_data.get("summary"),
-                    risk_level=risk_level,
-                    confidence=0.8,  # Default confidence for LLM extraction
-                    clause_metadata={
-                        "risk_factors": clause_data.get("risk_factors", []),
-                        "extraction_model": settings.llm_model,
-                        "chunk_index": chunk.chunk_index,
+        if claude_api_key:
+            response_text = await _extract_with_claude_api(prompt, claude_api_key)
+            extraction_model = "claude-haiku-4-5-20251001"
+        else:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                response = await client.post(
+                    f"{settings.ollama_url}/api/generate",
+                    json={
+                        "model": settings.llm_model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "format": "json",
+                        "options": {
+                            "temperature": 0.1,
+                            "num_predict": 2048,
+                        },
                     },
                 )
-                clauses.append(clause)
 
-            return clauses
+                if response.status_code != 200:
+                    return []
+
+                data = response.json()
+                response_text = data.get("response", "")
+            extraction_model = settings.llm_model
+
+        # Parse JSON response
+        try:
+            clauses_data = json.loads(response_text)
+            if not isinstance(clauses_data, list):
+                clauses_data = [clauses_data] if clauses_data else []
+        except json.JSONDecodeError:
+            import re
+            json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+            if json_match:
+                clauses_data = json.loads(json_match.group())
+            else:
+                return []
+
+        # Create Clause objects
+        clauses = []
+        for clause_data in clauses_data:
+            if not clause_data.get("clause_type") or not clause_data.get("content"):
+                continue
+
+            clause_type = clause_data["clause_type"].lower().replace(" ", "_")
+            if clause_type not in CLAUSE_TYPES:
+                continue
+
+            risk_level = assess_risk(clause_type, clause_data.get("content", ""))
+            if clause_data.get("risk_level") in ["critical", "high"]:
+                risk_level = clause_data["risk_level"]
+
+            clause = Clause(
+                document_id=chunk.document_id,
+                chunk_id=chunk.id,
+                clause_type=clause_type,
+                content=clause_data["content"][:5000],
+                summary=clause_data.get("summary"),
+                risk_level=risk_level,
+                confidence=0.8,
+                clause_metadata={
+                    "risk_factors": clause_data.get("risk_factors", []),
+                    "extraction_model": extraction_model,
+                    "chunk_index": chunk.chunk_index,
+                },
+            )
+            clauses.append(clause)
+
+        return clauses
 
     except Exception as e:
         print(f"Clause extraction error: {e}")
@@ -207,6 +233,7 @@ def assess_risk(clause_type: str, content: str) -> str:
 async def extract_clauses_from_document(
     document_id: UUID,
     db: AsyncSession,
+    claude_api_key: str | None = None,
 ) -> list[Clause]:
     """
     Extract all clauses from a document's chunks.
@@ -214,6 +241,7 @@ async def extract_clauses_from_document(
     Args:
         document_id: Document UUID
         db: Database session
+        claude_api_key: Optional Anthropic API key for Claude-based extraction
 
     Returns:
         List of all extracted clauses
@@ -236,7 +264,6 @@ async def extract_clauses_from_document(
 
     all_clauses = []
     for i, chunk_text in enumerate(text_chunks):
-        # Create a temporary chunk for extraction
         temp_chunk = Chunk(
             id=None,
             document_id=document_id,
@@ -244,7 +271,7 @@ async def extract_clauses_from_document(
             chunk_index=i,
         )
 
-        clauses = await extract_clauses_from_chunk(temp_chunk, db)
+        clauses = await extract_clauses_from_chunk(temp_chunk, db, claude_api_key=claude_api_key)
         all_clauses.extend(clauses)
 
     # Deduplicate similar clauses
