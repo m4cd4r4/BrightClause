@@ -1,4 +1,8 @@
-import { AbsoluteFill, Sequence } from "remotion";
+import { AbsoluteFill } from "remotion";
+import { TransitionSeries, linearTiming, springTiming } from "@remotion/transitions";
+import { fade } from "@remotion/transitions/fade";
+import { slide } from "@remotion/transitions/slide";
+import { LightLeak } from "@remotion/light-leaks";
 import { IntroScene } from "./scenes/IntroScene";
 import { ProblemScene } from "./scenes/ProblemScene";
 import { ChatScene } from "./scenes/ChatScene";
@@ -6,47 +10,87 @@ import { RiskDashboardScene } from "./scenes/RiskDashboardScene";
 import { ObligationsScene } from "./scenes/ObligationsScene";
 import { DealsScene } from "./scenes/DealsScene";
 import { OutroScene } from "./scenes/OutroScene";
+import { SCENE_DURATIONS } from "./styles";
 
-// 45 seconds at 30fps = 1350 frames
-// Scene breakdown:
-//   Intro:        0–150   (5s)   — Logo, tagline, feature pills
-//   Problem:    150–360   (7s)   — Legal jargon → plain English
-//   Chat:       360–570   (7s)   — RAG Q&A with typing + sources
-//   Risk:       570–780   (7s)   — Donut chart, risk bars, clause types
-//   Obligations:780–990   (7s)   — Deadline table + timeline strip
-//   Deals:      990–1200  (7s)   — Deal cards with progress + stats
-//   Outro:     1200–1350  (5s)   — CTA, logo, feature pills
+const { intro: INTRO, problem: PROBLEM, chat: CHAT, riskDashboard: RISK, obligations: OBLIGATIONS, deals: DEALS, outro: OUTRO } = SCENE_DURATIONS;
+
+// Transition durations
+const FADE_T = 15;
+const SLIDE_T = 20;
 
 export const BrightClauseDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#06060a" }}>
-      <Sequence from={0} durationInFrames={150}>
-        <IntroScene />
-      </Sequence>
+      <TransitionSeries>
+        {/* Intro */}
+        <TransitionSeries.Sequence durationInFrames={INTRO} premountFor={30}>
+          <IntroScene />
+        </TransitionSeries.Sequence>
 
-      <Sequence from={150} durationInFrames={210}>
-        <ProblemScene />
-      </Sequence>
+        {/* Intro → Problem: light leak (dramatic tone shift) */}
+        <TransitionSeries.Overlay durationInFrames={25}>
+          <LightLeak seed={7} hueShift={45} />
+        </TransitionSeries.Overlay>
 
-      <Sequence from={360} durationInFrames={210}>
-        <ChatScene />
-      </Sequence>
+        {/* Problem */}
+        <TransitionSeries.Sequence durationInFrames={PROBLEM} premountFor={30}>
+          <ProblemScene />
+        </TransitionSeries.Sequence>
 
-      <Sequence from={570} durationInFrames={210}>
-        <RiskDashboardScene />
-      </Sequence>
+        {/* Problem → Chat: slide from left */}
+        <TransitionSeries.Transition
+          presentation={slide({ direction: "from-left" })}
+          timing={linearTiming({ durationInFrames: SLIDE_T })}
+        />
 
-      <Sequence from={780} durationInFrames={210}>
-        <ObligationsScene />
-      </Sequence>
+        {/* Chat */}
+        <TransitionSeries.Sequence durationInFrames={CHAT} premountFor={30}>
+          <ChatScene />
+        </TransitionSeries.Sequence>
 
-      <Sequence from={990} durationInFrames={210}>
-        <DealsScene />
-      </Sequence>
+        {/* Chat → Risk: spring slide from bottom (data reveal) */}
+        <TransitionSeries.Transition
+          presentation={slide({ direction: "from-bottom" })}
+          timing={springTiming({ config: { damping: 14, stiffness: 100 } })}
+        />
 
-      <Sequence from={1200} durationInFrames={150}>
-        <OutroScene />
-      </Sequence>
+        {/* Risk Dashboard */}
+        <TransitionSeries.Sequence durationInFrames={RISK} premountFor={30}>
+          <RiskDashboardScene />
+        </TransitionSeries.Sequence>
+
+        {/* Risk → Obligations: fade */}
+        <TransitionSeries.Transition
+          presentation={fade()}
+          timing={linearTiming({ durationInFrames: FADE_T })}
+        />
+
+        {/* Obligations */}
+        <TransitionSeries.Sequence durationInFrames={OBLIGATIONS} premountFor={30}>
+          <ObligationsScene />
+        </TransitionSeries.Sequence>
+
+        {/* Obligations → Deals: slide from right */}
+        <TransitionSeries.Transition
+          presentation={slide({ direction: "from-right" })}
+          timing={springTiming({ config: { damping: 14, stiffness: 100 } })}
+        />
+
+        {/* Deals */}
+        <TransitionSeries.Sequence durationInFrames={DEALS} premountFor={30}>
+          <DealsScene />
+        </TransitionSeries.Sequence>
+
+        {/* Deals → Outro: light leak overlay (gold) */}
+        <TransitionSeries.Overlay durationInFrames={30}>
+          <LightLeak seed={3} hueShift={48} />
+        </TransitionSeries.Overlay>
+
+        {/* Outro */}
+        <TransitionSeries.Sequence durationInFrames={OUTRO} premountFor={30}>
+          <OutroScene />
+        </TransitionSeries.Sequence>
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

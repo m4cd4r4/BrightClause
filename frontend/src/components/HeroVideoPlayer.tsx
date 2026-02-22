@@ -6,15 +6,15 @@ import { BrightClauseDemo } from './demo-video/BrightClauseDemo'
 import { Play, Pause, SkipBack, Maximize2, Minimize2, X } from 'lucide-react'
 
 const SCENES = [
-  { name: 'Intro', from: 0, duration: 110 },
-  { name: 'Problem', from: 110, duration: 155 },
-  { name: 'Chat', from: 265, duration: 185 },
-  { name: 'Risk', from: 450, duration: 155 },
-  { name: 'Obligations', from: 605, duration: 140 },
-  { name: 'Deals', from: 745, duration: 145 },
-  { name: 'Outro', from: 890, duration: 110 },
+  { name: 'Intro', from: 0, duration: 150 },
+  { name: 'Problem', from: 150, duration: 150 },
+  { name: 'Chat', from: 300, duration: 180 },
+  { name: 'Risk', from: 480, duration: 165 },
+  { name: 'Obligations', from: 645, duration: 150 },
+  { name: 'Deals', from: 795, duration: 165 },
+  { name: 'Outro', from: 960, duration: 120 },
 ] as const
-const TOTAL_FRAMES = 1000
+const TOTAL_FRAMES = 1080
 
 interface HeroVideoPlayerProps {
   onDismiss: () => void
@@ -151,7 +151,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             component={BrightClauseDemo}
             compositionWidth={1920}
             compositionHeight={1080}
-            durationInFrames={1000}
+            durationInFrames={TOTAL_FRAMES}
             fps={30}
             autoPlay
             style={{

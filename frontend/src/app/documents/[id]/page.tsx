@@ -575,7 +575,7 @@ export default function DocumentDetailPage() {
                 : 'Extract clauses and assess risk levels for this document.'}
             </p>
             <button
-              onClick={triggerExtraction}
+              onClick={() => triggerExtraction()}
               disabled={extracting}
               className="mt-6 btn-primary"
             >

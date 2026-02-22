@@ -1,8 +1,8 @@
 # BrightClause - Project Plan
 
-**Version:** 3.1
+**Version:** 3.2
 **Created:** 2026-01-29
-**Updated:** 2026-02-01
+**Updated:** 2026-02-22
 **Author:** Macdara
 **Status:** Production (MVP Complete)
 
@@ -360,7 +360,7 @@ services:
 | Service | When Needed | Cost |
 |---------|-------------|------|
 | Vercel (frontend) | MVP | Free tier |
-| OpenAI API | Complex analysis fallback | Pay-per-use (~$0.01-0.10/doc) |
+| Anthropic Claude API (BYOK) | Visitor-supplied per-request | $0 to us — visitors pay their own API cost |
 | Domain registration | Now | ~$12/year |
 | SSL Certificate | Now | Free (Let's Encrypt) |
 
@@ -1203,6 +1203,7 @@ If fine-tuning needed:
 | 2.0 | 2026-01-29 | Major revision: Reframed as portfolio demo, not commercial product. Reduced scope from 8 weeks to 4 weeks. Removed enterprise market focus. Added honest assessment of market reality. |
 | 3.0 | 2026-01-31 | Full implementation complete. Restored 8-week scope. Added production deployment details. |
 | 3.1 | 2026-02-01 | MVP complete. E2E test suite passing. Fixed Knowledge Graph (zoom, filters, node size). Deployed to Vercel (brightclause.com). |
+| 3.2 | 2026-02-22 | Added BYOK (Bring Your Own Key): visitors can supply an Anthropic API key for per-request Claude Haiku clause extraction. Key is session-only, never persisted server-side. Pre-loaded 22 high-quality clauses across 3 demo documents. |
 
 ---
 
