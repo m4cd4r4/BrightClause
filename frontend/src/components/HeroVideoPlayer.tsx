@@ -5,6 +5,8 @@ import { Player, type PlayerRef } from '@remotion/player'
 import { BrightClauseDemo } from './demo-video/BrightClauseDemo'
 import { Play, Pause, SkipBack, Maximize2, Minimize2, X } from 'lucide-react'
 
+// CSS-based "expanded" mode: covers the viewport with a backdrop, no native browser fullscreen
+
 const SCENES = [
   { name: 'Intro', from: 0, duration: 150 },
   { name: 'Problem', from: 150, duration: 150 },
@@ -25,28 +27,22 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
   const containerRef = useRef<HTMLDivElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
   const [currentFrame, setCurrentFrame] = useState(0)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
-  // Dismiss on click outside the video card (skip when fullscreen)
+  // Dismiss/collapse on click outside the video card
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (document.fullscreenElement) return
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        onDismiss()
+        if (isExpanded) {
+          setIsExpanded(false)
+        } else {
+          onDismiss()
+        }
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [onDismiss])
-
-  // Track fullscreen state
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
+  }, [onDismiss, isExpanded])
 
   // Sync play state and frame position with player events
   useEffect(() => {
@@ -95,34 +91,34 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
     player.play()
   }, [])
 
-  const handleToggleFullscreen = useCallback(() => {
-    if (!containerRef.current) return
-    if (document.fullscreenElement) {
-      document.exitFullscreen()
-    } else {
-      containerRef.current.requestFullscreen()
-    }
+  const handleToggleExpanded = useCallback(() => {
+    setIsExpanded(prev => !prev)
   }, [])
 
   const activeSceneIndex = SCENES.findLastIndex(s => currentFrame >= s.from)
 
   return (
-    <div className="relative">
-      {/* Glow behind video (hidden in fullscreen) */}
-      {!isFullscreen && (
-        <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
+    <>
+      {/* Backdrop overlay when expanded */}
+      {isExpanded && (
+        <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm pointer-events-none" />
       )}
 
-      <div
-        ref={containerRef}
-        className={`relative bg-ink-950 overflow-hidden flex flex-col
-          ${isFullscreen
-            ? 'w-screen h-screen'
-            : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.05)]'
-          }`}
-      >
-        {/* Browser chrome header (hidden in fullscreen) */}
-        {!isFullscreen && (
+      <div className={isExpanded ? 'fixed inset-0 z-50 flex items-center justify-center p-4' : 'relative'}>
+        {/* Glow behind video (hidden when expanded) */}
+        {!isExpanded && (
+          <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
+        )}
+
+        <div
+          ref={containerRef}
+          className={`relative bg-ink-950 overflow-hidden flex flex-col
+            ${isExpanded
+              ? 'w-full max-w-6xl bg-ink-950 border border-ink-700/40 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)]'
+              : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.05)]'
+            }`}
+        >
+          {/* Browser chrome header */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-ink-800/40 bg-ink-900/60">
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
@@ -142,29 +138,32 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-        )}
 
-        {/* Remotion Player — fills remaining space in fullscreen */}
-        <div className={isFullscreen ? 'flex-1 min-h-0' : ''}>
-          <Player
-            ref={playerRef}
-            component={BrightClauseDemo}
-            compositionWidth={1920}
-            compositionHeight={1080}
-            durationInFrames={TOTAL_FRAMES}
-            fps={30}
-            autoPlay
-            style={{
-              width: '100%',
-              height: isFullscreen ? '100%' : undefined,
-              aspectRatio: isFullscreen ? undefined : '16 / 9',
-            }}
-            controls={false}
-          />
-        </div>
+          {/* Remotion Player — click to expand/collapse */}
+          <div
+            className="cursor-pointer"
+            onClick={handleToggleExpanded}
+            title={isExpanded ? 'Click to collapse' : 'Click to expand'}
+          >
+            <Player
+              ref={playerRef}
+              component={BrightClauseDemo}
+              compositionWidth={1920}
+              compositionHeight={1080}
+              durationInFrames={TOTAL_FRAMES}
+              fps={30}
+              autoPlay
+              style={{
+                width: '100%',
+                aspectRatio: '16 / 9',
+                pointerEvents: 'none',
+              }}
+              controls={false}
+            />
+          </div>
 
-        {/* Segmented scene progress bar */}
-        <div className={`flex bg-ink-900/80 ${isFullscreen ? 'h-2' : 'h-1'}`}>
+          {/* Segmented scene progress bar */}
+          <div className="flex bg-ink-900/80 h-1">
           {SCENES.map((scene, i) => {
             const widthPct = (scene.duration / TOTAL_FRAMES) * 100
             const isActive = i === activeSceneIndex
@@ -202,8 +201,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <button
                 key={scene.name}
                 onClick={() => handleSeekToScene(scene.from)}
-                className={`font-mono transition-colors truncate
-                  ${isFullscreen ? 'text-xs py-2' : 'text-[9px] py-1.5'}
+                className={`font-mono transition-colors truncate text-[9px] py-1.5
                   ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}
                 style={{ width: `${widthPct}%` }}
               >
@@ -214,40 +212,37 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
         </div>
 
         {/* Controls bar */}
-        <div className={`flex items-center gap-2 bg-ink-950/80 border-t border-ink-800/40
-          ${isFullscreen ? 'px-6 py-3' : 'px-4 py-2'}`}>
+        <div className="flex items-center gap-2 bg-ink-950/80 border-t border-ink-800/40 px-4 py-2">
           <button
             onClick={handleTogglePlay}
             className="p-1.5 text-ink-500 hover:text-white transition-colors"
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying
-              ? <Pause className={isFullscreen ? 'w-5 h-5' : 'w-3.5 h-3.5'} />
-              : <Play className={isFullscreen ? 'w-5 h-5' : 'w-3.5 h-3.5'} />}
+              ? <Pause className="w-3.5 h-3.5" />
+              : <Play className="w-3.5 h-3.5" />}
           </button>
           <button
             onClick={handleRestart}
             className="p-1.5 text-ink-500 hover:text-white transition-colors"
             aria-label="Restart"
           >
-            <SkipBack className={isFullscreen ? 'w-5 h-5' : 'w-3.5 h-3.5'} />
+            <SkipBack className="w-3.5 h-3.5" />
           </button>
 
-          <span className={`ml-auto font-mono text-ink-600 ${isFullscreen ? 'text-xs' : 'text-[10px]'}`}>
-            Live React Animation
-          </span>
-
           <button
-            onClick={handleToggleFullscreen}
-            className="p-1.5 text-ink-500 hover:text-accent transition-colors"
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            onClick={handleToggleExpanded}
+            className="ml-auto p-1.5 text-ink-500 hover:text-accent transition-colors"
+            aria-label={isExpanded ? 'Collapse' : 'Expand'}
           >
-            {isFullscreen
-              ? <Minimize2 className="w-5 h-5" />
+            {isExpanded
+              ? <Minimize2 className="w-3.5 h-3.5" />
               : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
     </div>
+    </>
   )
 }
+

@@ -226,9 +226,6 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ open, onClose })
             >
               <SkipBack className="w-4 h-4" />
             </button>
-            <span className="ml-auto text-xs text-ink-600 font-mono">
-              45s — Live React Animation
-            </span>
           </div>
         </div>
       </div>
