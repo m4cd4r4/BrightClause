@@ -27,9 +27,14 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg shadow-accent/20">
-              <Image src="/logo.png" alt="BrightClause" width={40} height={40} className="w-full h-full object-contain" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="BrightClause"
+              width={40}
+              height={40}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+              style={{ mixBlendMode: 'screen' }}
+            />
             <div className="hidden sm:block">
               <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
               <p className="text-[10px] text-ink-500 tracking-wide uppercase font-mono">Contract Intelligence</p>

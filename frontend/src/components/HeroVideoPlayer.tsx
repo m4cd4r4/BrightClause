@@ -104,7 +104,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
         <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm pointer-events-none" />
       )}
 
-      <div className={isExpanded ? 'fixed inset-0 z-50 flex items-center justify-center p-4' : 'relative'}>
+      <div className={isExpanded ? 'fixed inset-0 z-50 flex items-center justify-center p-2' : 'relative'}>
         {/* Glow behind video (hidden when expanded) */}
         {!isExpanded && (
           <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
@@ -114,7 +114,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
           ref={containerRef}
           className={`relative bg-ink-950 overflow-hidden flex flex-col
             ${isExpanded
-              ? 'w-full max-w-6xl bg-ink-950 border border-ink-700/40 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)]'
+              ? 'w-[98vw] max-h-[98vh] border border-ink-700/40 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)]'
               : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.05)]'
             }`}
         >
