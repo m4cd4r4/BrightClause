@@ -41,6 +41,12 @@ class ClauseResponse(BaseModel):
         from_attributes = True
 
 
+class ExtractionRequest(BaseModel):
+    """Optional request body for extraction endpoints."""
+
+    claude_api_key: str | None = None
+
+
 class AnalysisResponse(BaseModel):
     """Response model for document analysis."""
 
@@ -253,14 +259,17 @@ async def generate_report(
 async def trigger_extraction(
     document_id: UUID,
     background_tasks: BackgroundTasks,
+    request: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
     Trigger clause extraction for a document.
 
-    This starts an asynchronous extraction process using LLM.
-    The document must be in 'completed' status.
+    Optionally accepts a `claude_api_key` in the request body to use
+    Anthropic Claude for extraction instead of the default local Ollama model.
     """
+    claude_api_key = request.claude_api_key if request else None
+
     # Verify document exists and is processed
     query = select(Document).where(Document.id == document_id)
     result = await db.execute(query)
@@ -281,7 +290,6 @@ async def trigger_extraction(
     existing_clause = clause_result.scalar_one_or_none()
 
     if existing_clause:
-        # Count existing clauses
         from sqlalchemy import func
         count_query = select(func.count(Clause.id)).where(Clause.document_id == document_id)
         count_result = await db.execute(count_query)
@@ -295,7 +303,7 @@ async def trigger_extraction(
         )
 
     # Queue background extraction
-    background_tasks.add_task(run_extraction, document_id)
+    background_tasks.add_task(run_extraction, document_id, claude_api_key)
 
     await log_activity(db, "extraction_started", document_id, {"filename": doc.filename})
 
@@ -311,14 +319,17 @@ async def trigger_extraction(
 async def reanalyze_document(
     document_id: UUID,
     background_tasks: BackgroundTasks,
+    request: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
     Re-extract clauses from a document.
 
     This deletes existing clauses and runs extraction again.
+    Optionally accepts a `claude_api_key` to use Claude instead of Ollama.
     """
-    # Verify document exists
+    claude_api_key = request.claude_api_key if request else None
+
     query = select(Document).where(Document.id == document_id)
     result = await db.execute(query)
     doc = result.scalar_one_or_none()
@@ -326,14 +337,12 @@ async def reanalyze_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    # Delete existing clauses
     from sqlalchemy import delete
     delete_query = delete(Clause).where(Clause.document_id == document_id)
     await db.execute(delete_query)
     await db.commit()
 
-    # Queue background extraction
-    background_tasks.add_task(run_extraction, document_id)
+    background_tasks.add_task(run_extraction, document_id, claude_api_key)
 
     return AnalysisStatusResponse(
         document_id=document_id,
@@ -580,13 +589,13 @@ async def explain_clause(
     )
 
 
-async def run_extraction(document_id: UUID):
+async def run_extraction(document_id: UUID, claude_api_key: str | None = None):
     """Background task to run clause extraction."""
     from app.core.database import AsyncSessionLocal
 
     async with AsyncSessionLocal() as db:
         try:
-            await extract_clauses_from_document(document_id, db)
+            await extract_clauses_from_document(document_id, db, claude_api_key=claude_api_key)
         except Exception as e:
             print(f"Extraction error for {document_id}: {e}")
 

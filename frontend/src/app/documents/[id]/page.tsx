@@ -8,7 +8,7 @@ import {
   FileText, AlertTriangle, Shield,
   Loader2, ChevronDown, ChevronRight, Network,
   Download, Zap, FileSpreadsheet, FileType, FileJson, Lightbulb,
-  FileBarChart, X, CheckCircle, ClipboardCheck, BookOpen
+  FileBarChart, X, CheckCircle, ClipboardCheck, BookOpen, Key
 } from 'lucide-react'
 import { api, Document, Clause, AnalysisSummary, Entity, ReportData } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -37,6 +37,37 @@ const clauseTypeLabels: Record<string, string> = {
   audit_rights: 'Audit Rights',
 }
 
+function ByokForm({ onSubmit, initialKey, onCancel }: {
+  onSubmit: (key: string) => void
+  initialKey: string
+  onCancel: () => void
+}) {
+  const [key, setKey] = useState(initialKey)
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(key) }}>
+      <input
+        type="password"
+        autoFocus
+        placeholder="sk-ant-api03-..."
+        value={key}
+        onChange={(e) => setKey(e.target.value)}
+        className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-sm font-mono text-ink-200 placeholder-ink-600 focus:outline-none focus:border-accent mb-4"
+      />
+      <div className="flex gap-2">
+        <button type="submit" disabled={!key.trim()} className="flex-1 btn-primary text-sm py-2">
+          <Zap className="w-4 h-4 mr-2" /> Extract Clauses
+        </button>
+        <button type="button" onClick={onCancel} className="px-4 py-2 text-sm text-ink-400 hover:text-ink-200 border border-ink-700 rounded-lg">
+          Cancel
+        </button>
+      </div>
+      <p className="text-[10px] text-ink-600 mt-3 text-center">
+        Get your key at <span className="text-ink-400">console.anthropic.com</span>
+      </p>
+    </form>
+  )
+}
+
 export default function DocumentDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -61,6 +92,10 @@ export default function DocumentDetailPage() {
   const [showReport, setShowReport] = useState(false)
   const [extractingObligations, setExtractingObligations] = useState(false)
   const [viewMode, setViewMode] = useState<'analysis' | 'pdf'>('analysis')
+  const [showByokModal, setShowByokModal] = useState(false)
+  const [byokApiKey, setByokApiKey] = useState(() =>
+    typeof window !== 'undefined' ? sessionStorage.getItem('cc_claude_api_key') || '' : ''
+  )
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { error: showError, success: showSuccess } = useToast()
@@ -100,10 +135,15 @@ export default function DocumentDetailPage() {
     }
   }
 
-  const triggerExtraction = async () => {
+  const triggerExtraction = async (apiKey?: string) => {
+    const keyToUse = apiKey ?? byokApiKey
+    if (!keyToUse) {
+      setShowByokModal(true)
+      return
+    }
     setExtracting(true)
     try {
-      await api.analysis.extract(documentId)
+      await api.analysis.extract(documentId, keyToUse)
       // Poll for completion with proper cleanup
       pollIntervalRef.current = setInterval(async () => {
         const analysisRes = await api.analysis.summary(documentId).catch(() => null)
@@ -124,6 +164,15 @@ export default function DocumentDetailPage() {
       console.error('Extraction failed:', error)
       setExtracting(false)
     }
+  }
+
+  const handleByokSubmit = (key: string) => {
+    if (key.trim()) {
+      sessionStorage.setItem('cc_claude_api_key', key.trim())
+      setByokApiKey(key.trim())
+    }
+    setShowByokModal(false)
+    if (key.trim()) triggerExtraction(key.trim())
   }
 
   const filteredClauses = clauses.filter((clause) => {
@@ -275,6 +324,45 @@ export default function DocumentDetailPage() {
 
   return (
     <div className="min-h-screen">
+      {/* BYOK Modal */}
+      <AnimatePresence>
+        {showByokModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={(e) => e.target === e.currentTarget && setShowByokModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="card max-w-md w-full p-6"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                    <Key className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-semibold">AI Extraction Key</h3>
+                    <p className="text-xs text-ink-500">Powered by Anthropic Claude</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowByokModal(false)} className="text-ink-500 hover:text-ink-200">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-sm text-ink-400 mb-4">
+                Enter your <span className="text-accent font-medium">Anthropic API key</span> to run AI clause extraction on this document. Your key is stored in session only and never saved to our servers.
+              </p>
+              <ByokForm onSubmit={handleByokSubmit} initialKey={byokApiKey} onCancel={() => setShowByokModal(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Navigation>
         {/* Document Info */}
         <div className="hidden sm:flex items-center gap-3 text-sm text-ink-400">
