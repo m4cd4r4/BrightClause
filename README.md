@@ -30,6 +30,7 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
 |---------|-------------|
 | **4-Tier OCR** | PyMuPDF, Tesseract, PaddleOCR, Vision LLM fallback |
 | **Clause Extraction** | 16+ clause types with AI-powered risk scoring |
+| **BYOK Extraction** | Bring Your Own Anthropic API key — upload any document and extract clauses on demand |
 | **Contract Q&A Chat** | RAG-powered chat — ask questions about any document in natural language |
 | **Plain-English Translator** | One-click clause explanation in simple, non-legal language |
 | **Executive Reports** | AI-generated executive summaries with risk overview and recommendations |
@@ -79,9 +80,9 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
          ┌───────────────────────┼───────────────────────┐
          ▼                       ▼                       ▼
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-│   PostgreSQL     │   │      MinIO       │   │     Ollama       │
-│   + pgvector     │   │    (Storage)     │   │     (LLM)        │
-│   768-dim vectors│   │   S3-compatible  │   │   llama3.2       │
+│   PostgreSQL     │   │      MinIO       │   │  Ollama / Claude │
+│   + pgvector     │   │    (Storage)     │   │  (LLM Inference) │
+│   768-dim vectors│   │   S3-compatible  │   │  llama3.2 / BYOK │
 └──────────────────┘   └──────────────────┘   └──────────────────┘
          │
          ▼
@@ -147,6 +148,7 @@ Upload PDF
 | **Celery + Redis** | Background task processing |
 | **MinIO** | S3-compatible object storage |
 | **Ollama** | Local LLM inference (llama3.2, nomic-embed-text) |
+| **Claude API (BYOK)** | Per-request Anthropic API key for cloud-quality extraction without server-side cost |
 
 ### Frontend
 | Technology | Purpose |
@@ -176,8 +178,8 @@ cd BrightClause
 docker-compose up -d
 
 # Pull required Ollama models
-docker exec brightclause-ollama ollama pull llama3.2
-docker exec brightclause-ollama ollama pull nomic-embed-text
+docker exec clauselens-ollama ollama pull llama3.2
+docker exec clauselens-ollama ollama pull nomic-embed-text
 ```
 
 ### 2. Start Frontend
@@ -235,7 +237,7 @@ Accepts `question` and `history` array. Returns AI answer with source chunk cita
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/analysis/{id}/extract` | Trigger clause extraction |
+| `POST` | `/analysis/{id}/extract` | Trigger clause extraction (optional body: `{"claude_api_key": "sk-ant-..."}`) |
 | `POST` | `/analysis/{id}/report` | Generate AI executive summary |
 | `POST` | `/analysis/{id}/clauses/{clause_id}/explain` | Plain-English clause explanation |
 | `POST` | `/analysis/{id}/obligations/extract` | AI obligation extraction |
@@ -244,6 +246,14 @@ Accepts `question` and `history` array. Returns AI answer with source chunk cita
 | `GET` | `/analysis/{id}/summary` | Get risk summary |
 | `GET` | `/analysis/{id}/clauses` | Get extracted clauses (with page numbers) |
 | `GET` | `/analysis/clause-types` | List clause types |
+
+**BYOK Extraction:** Pass `claude_api_key` in the request body to use Claude (Haiku) instead of the local Ollama model. The key is never stored server-side — it is used only for the duration of the request.
+
+```bash
+curl -X POST http://localhost:8002/analysis/{id}/extract \
+  -H "Content-Type: application/json" \
+  -d '{"claude_api_key": "sk-ant-api03-..."}'
+```
 
 ### Knowledge Graph API
 
@@ -442,6 +452,10 @@ EMBEDDING_MODEL=nomic-embed-text
 CHUNK_SIZE=6000
 CHUNK_OVERLAP=600
 MAX_FILE_SIZE=52428800
+
+# Optional: Anthropic Claude API (for server-side extraction without BYOK)
+# Leave blank to use Ollama for all LLM inference (free, self-hosted)
+ANTHROPIC_API_KEY=
 ```
 
 ---
@@ -484,6 +498,7 @@ Public contract datasets for testing:
 - [x] Obligation & deadline tracker
 - [x] Deal grouping with aggregate risk analysis
 - [x] In-app PDF viewer with clause navigation
+- [x] BYOK (Bring Your Own Key) — Claude API extraction per-request, key stored in sessionStorage only
 
 ### Planned
 - [ ] Browser-only privacy mode (pdf.js + WebLLM, no server required)

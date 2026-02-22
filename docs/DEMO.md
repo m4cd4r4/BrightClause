@@ -91,6 +91,18 @@ A guided demonstration of BrightClause's AI-powered contract analysis capabiliti
 
 > "What used to take a junior associate hours to extract and categorize, the AI does in seconds. And it never misses a clause due to fatigue."
 
+### Demo Note: Pre-Loaded Clauses
+
+The three demo documents have pre-loaded high-quality clauses extracted by Claude:
+
+| Document | Clauses | Overall Risk |
+|----------|---------|--------------|
+| SaaS License Agreement | 10 | Critical (IP assignment) |
+| NDA | 9 | Critical (confidentiality + change of control) |
+| Business Acquisition Agreement | 3 | High (non-compete) |
+
+This ensures a consistent, polished demo experience regardless of backend LLM availability.
+
 ---
 
 ## Step 4: Knowledge Graph
@@ -189,7 +201,7 @@ Queue:    Redis
 
 ### "How accurate is the clause extraction?"
 
-> "The accuracy depends on the LLM model and the quality of the input document. With llama3.2 and clean PDFs, we see high accuracy on standard commercial contracts. The system is designed to be conservative - it's better to flag something for human review than to miss it."
+> "The demo documents use Claude-extracted clauses, which are high quality. For new documents, visitors can bring their own Anthropic API key for cloud-quality extraction, or use the self-hosted Ollama backend. The system is designed to be conservative - it's better to flag something for human review than to miss it."
 
 ### "Can it handle scanned documents?"
 
@@ -227,7 +239,7 @@ Before starting:
 docker ps
 
 # Check Ollama models
-docker exec brightclause-ollama ollama list
+docker exec clauselens-ollama ollama list
 
 # Run E2E tests (to verify everything works)
 cd frontend && npm test
@@ -278,6 +290,24 @@ If short on time:
 3. **Risk panel** (30s) - "Critical clauses highlighted"
 4. **Knowledge Graph** (30s) - "Entity relationships visualized"
 5. **Search** (30s) - "Semantic search across all contracts"
+
+---
+
+---
+
+## BYOK: Extracting Clauses from New Documents
+
+Visitors can trigger extraction on any uploaded document using their own Anthropic API key:
+
+1. Upload a PDF via the dashboard
+2. Navigate to the document detail page
+3. Click **"Extract Clauses"** — a modal prompts for an API key
+4. Enter `sk-ant-api03-...` key (stored in sessionStorage only, never sent to the server for persistence)
+5. Click **"Extract Clauses"** — Claude Haiku runs extraction on the backend
+
+> "The key is session-only. It's never logged, cached, or stored server-side. Once you close the tab, it's gone."
+
+Get a key at [console.anthropic.com](https://console.anthropic.com).
 
 ---
 
