@@ -29,7 +29,7 @@ CLAUSE_TYPES = [
     "data_protection",
 ]
 
-# Risk factors for M&A due diligence
+# Risk factors for contract due diligence
 RISK_FACTORS = {
     "change_of_control": {
         "high": ["consent required", "may terminate", "acceleration", "buyout"],
@@ -53,14 +53,14 @@ RISK_FACTORS = {
     },
 }
 
-EXTRACTION_PROMPT = """You are a legal contract analyst specializing in M&A due diligence.
+EXTRACTION_PROMPT = """You are a legal contract analyst specializing in due diligence.
 Analyze the following contract excerpt and extract any legal clauses present.
 
 For each clause found, provide:
 1. clause_type: One of: {clause_types}
 2. content: The exact text of the clause
 3. summary: A 1-2 sentence plain English summary
-4. risk_level: low/medium/high/critical based on M&A implications
+4. risk_level: low/medium/high/critical based on contractual implications
 5. risk_factors: List of specific concerns for buyers
 
 Contract excerpt:
@@ -347,7 +347,7 @@ async def generate_document_summary(
     """
     Generate a summary of all clauses in a document.
 
-    Returns a risk assessment summary for M&A due diligence.
+    Returns a risk assessment summary for contract due diligence.
     """
     from sqlalchemy import select, func
 

@@ -9,9 +9,8 @@ Our demo contracts are **generic templates** sourced from Scribd, with all real 
 - SaaS License Agreements
 - Software License Agreements
 - Commercial Lease Contracts
-- Business Acquisition Agreements
+- Business Agreements
 - NDA Templates
-- Merger Agreement Templates
 - Employment Contract Templates
 - Construction Contracts
 
@@ -31,19 +30,19 @@ Contains 13,000+ labeled contract clauses (JSON annotations, not PDFs) from:
 **Note:** CUAD provides text and clause annotations, not original PDF files.
 
 ### SEC EDGAR
-Download M&A filings from: https://www.sec.gov/cgi-bin/browse-edgar
+Download commercial filings from: https://www.sec.gov/cgi-bin/browse-edgar
 
 Search for:
 - Form 8-K (Current Reports)
 - Form 10-K (Annual Reports)
-- Merger Agreements
+- Commercial Agreements
 
 **Note:** SEC filings are HTML format, not PDF.
 
 ### MAUD Dataset
 Download from: https://www.mauldataset.org/
 
-Contains 152 labeled merger agreements with:
+Contains 152 labeled agreements with:
 - Deal terms
 - Representations & warranties
 - Covenants

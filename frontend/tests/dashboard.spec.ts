@@ -13,7 +13,7 @@ test.describe('BrightClause Dashboard', () => {
   test('should load dashboard and display header correctly', async ({ page }) => {
     // Check header elements
     await expect(page.locator('h1')).toHaveText('BrightClause')
-    await expect(page.getByText('M&A Due Diligence Platform')).toBeVisible()
+    await expect(page.getByText('Contract Intelligence')).toBeVisible()
 
     // Check header buttons
     await expect(page.getByPlaceholder('Search contracts...')).toBeVisible()

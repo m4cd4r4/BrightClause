@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="BrightClause API",
-    description="AI-powered contract analysis for M&A due diligence",
+    description="AI-powered contract intelligence and enhanced analysis",
     version="0.1.0",
     lifespan=lifespan,
 )

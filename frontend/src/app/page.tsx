@@ -3,6 +3,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
@@ -117,8 +118,8 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/50 bg-ink-950/90 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center shadow-lg shadow-accent/20">
-              <Shield className="w-5 h-5 text-ink-950" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-accent/20">
+              <Image src="/logo.png" alt="BrightClause" width={40} height={40} className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
@@ -169,8 +170,7 @@ export default function LandingPage() {
           >
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
               AI-Powered{' '}
-              <span className="text-accent">Contract Analysis</span>{' '}
-              for M&A Due Diligence
+              <span className="text-accent">Contract Intelligence</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-ink-400 leading-relaxed mb-10 max-w-2xl mx-auto">
@@ -327,7 +327,7 @@ export default function LandingPage() {
           >
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">16+ Clause Types</h2>
             <p className="text-ink-400 max-w-xl mx-auto">
-              AI identifies and classifies clause types common in M&A contracts
+              AI identifies and classifies clause types across commercial contracts
             </p>
           </motion.div>
 
@@ -468,8 +468,8 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center mx-auto mb-8 shadow-lg shadow-accent/20">
-              <Shield className="w-8 h-8 text-ink-950" />
+            <div className="w-16 h-16 mx-auto mb-8">
+              <Image src="/logo-large.png" alt="BrightClause" width={64} height={64} className="w-full h-full object-contain" />
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
               See It in Action
@@ -505,7 +505,7 @@ export default function LandingPage() {
       <footer className="border-t border-ink-800/50 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
-            <Shield className="w-4 h-4 text-accent/50" />
+            <Image src="/logo-large.png" alt="BrightClause" width={20} height={20} className="w-5 h-5 object-contain" />
             <span>BrightClause</span>
             <span className="text-ink-700">·</span>
             <span>Built by Macdara</span>

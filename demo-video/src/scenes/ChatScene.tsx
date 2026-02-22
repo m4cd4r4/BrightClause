@@ -8,6 +8,7 @@ import {
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const userQuestion = "What are the termination rights in this contract?";
 
@@ -24,17 +25,19 @@ const sources = [
   { page: 12, section: "§9.3", label: "Change of Control" },
 ];
 
-export const ChatScene: React.FC = () => {
+interface ChatSceneProps {
+  mobile?: boolean;
+}
+
+export const ChatScene: React.FC<ChatSceneProps> = ({ mobile }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Chat window with growing shadow
   const windowScale = spring({ frame: frame - 5, fps, config: springs.panel });
   const shadowSpread = interpolate(Math.max(0, windowScale), [0, 1], [0, 40], {
     extrapolateRight: "clamp",
   });
 
-  // Typing with blinking cursor
   const typedLen = Math.min(
     Math.floor(interpolate(frame, [20, 60], [0, userQuestion.length], { extrapolateRight: "clamp" })),
     userQuestion.length
@@ -42,22 +45,18 @@ export const ChatScene: React.FC = () => {
   const cursorBlink = Math.floor(frame / 15) % 2 === 0;
   const showCursor = typedLen < userQuestion.length;
 
-  // Thinking dots
   const dotsOpacity = interpolate(frame, [65, 75, 85, 90], [0, 1, 1, 0], {
     extrapolateRight: "clamp",
   });
 
-  // AI response
   const aiOpacity = interpolate(frame, [90, 105], [0, 1], { extrapolateRight: "clamp" });
   const aiY = interpolate(frame, [90, 105], [15, 0], { extrapolateRight: "clamp" });
 
   const answerLines = aiAnswer.split("\n").filter(Boolean);
 
-  // Sources staggered
   const getSourceProgress = (i: number) =>
     spring({ frame: frame - 135 - i * STAGGER.normal, fps, config: springs.snappy });
 
-  // Exit
   const exitOpacity = interpolate(
     frame,
     [durationInFrames - 25, durationInFrames],
@@ -65,19 +64,53 @@ export const ChatScene: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
+  // Font sizes
+  const sz = mobile
+    ? { header: 24, user: 32, ai: 30, sourcesLabel: 22, srcPage: 22, srcSection: 20, dots: 12 }
+    : { header: 16, user: 22, ai: 21, sourcesLabel: 14, srcPage: 15, srcSection: 14, dots: 8 };
+
+  const sidePad = mobile ? 32 : 120;
+  const topPad = mobile ? 0 : 130;
+  const bottomPad = mobile ? 0 : 60;
+
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      <GlowOrb color={colors.blue} size={350} x="50%" y="50%" maxOpacity={0.12} delay={5} />
+      <ScreenshotReveal
+        src="assets/chat-bg.png"
+        delay={0}
+        startScale={1.05}
+        endScale={1.1}
+        opacity={0.1}
+        blur={14}
+        borderRadius={0}
+        shadow={false}
+      />
+      {!mobile && (
+        <ScreenshotReveal
+          src="assets/screenshot-risk.png"
+          delay={0}
+          startScale={0.7}
+          endScale={0.72}
+          opacity={0.08}
+          blur={6}
+          borderRadius={12}
+          y={40}
+        />
+      )}
+      <GlowOrb color={colors.blue} size={mobile ? 300 : 350} x="50%" y="50%" maxOpacity={0.12} delay={5} />
 
-      <SceneBadge title="Contract Q&A" subtitle="RAG-Powered Chat — Ask Anything" />
+      <SceneBadge title="Contract Q&A" subtitle="RAG-Powered Chat — Ask Anything" mobile={mobile} />
 
       <div
         style={{
           position: "absolute",
-          left: 120,
-          right: 120,
-          top: 130,
-          bottom: 60,
+          left: sidePad,
+          right: sidePad,
+          top: topPad,
+          bottom: bottomPad,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
           transform: `scale(${Math.max(0, windowScale)})`,
           transformOrigin: "center center",
         }}
@@ -87,7 +120,6 @@ export const ChatScene: React.FC = () => {
             backgroundColor: colors.bgCard,
             borderRadius: 16,
             border: `1px solid ${colors.border}`,
-            height: "100%",
             display: "flex",
             flexDirection: "column",
             boxShadow: `0 ${shadowSpread}px ${shadowSpread * 2}px rgba(0,0,0,0.4)`,
@@ -96,7 +128,7 @@ export const ChatScene: React.FC = () => {
           {/* Header */}
           <div
             style={{
-              padding: "16px 28px",
+              padding: mobile ? "18px 28px" : "16px 28px",
               borderBottom: `1px solid ${colors.border}`,
               display: "flex",
               alignItems: "center",
@@ -108,31 +140,31 @@ export const ChatScene: React.FC = () => {
               <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#febc2e" }} />
               <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#28c840" }} />
             </div>
-            <span style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.textDim, marginLeft: 8 }}>
+            <span style={{ fontFamily: fonts.mono, fontSize: sz.header, color: colors.textDim, marginLeft: 8 }}>
               Acme-TechStart-Acquisition.pdf — Chat
             </span>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, padding: 32, display: "flex", flexDirection: "column", gap: 24, overflow: "hidden" }}>
+          <div style={{ flex: 1, padding: mobile ? 36 : 32, display: "flex", flexDirection: "column", gap: mobile ? 28 : 24, overflow: "hidden" }}>
             {/* User message */}
-            <div style={{ alignSelf: "flex-end", maxWidth: "65%" }}>
+            <div style={{ alignSelf: "flex-end", maxWidth: mobile ? "90%" : "65%" }}>
               <div
                 style={{
                   backgroundColor: `${colors.accent}20`,
                   borderRadius: "16px 16px 4px 16px",
-                  padding: "16px 22px",
+                  padding: mobile ? "20px 26px" : "16px 22px",
                   border: `1px solid ${colors.accent}30`,
                 }}
               >
-                <p style={{ fontFamily: fonts.body, fontSize: 18, color: colors.text, margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontFamily: fonts.body, fontSize: sz.user, color: colors.text, margin: 0, lineHeight: 1.5 }}>
                   {userQuestion.slice(0, typedLen)}
                   {showCursor && (
                     <span
                       style={{
                         display: "inline-block",
                         width: 2,
-                        height: 20,
+                        height: sz.user + 2,
                         backgroundColor: colors.accent,
                         marginLeft: 2,
                         verticalAlign: "text-bottom",
@@ -144,14 +176,14 @@ export const ChatScene: React.FC = () => {
               </div>
             </div>
 
-            {/* Thinking dots with sine bob */}
+            {/* Thinking dots */}
             {dotsOpacity > 0 && (
               <div style={{ alignSelf: "flex-start", opacity: dotsOpacity }}>
                 <div
                   style={{
                     display: "flex",
                     gap: 6,
-                    padding: "12px 20px",
+                    padding: mobile ? "16px 24px" : "12px 20px",
                     backgroundColor: colors.bgCardHover,
                     borderRadius: "16px 16px 16px 4px",
                   }}
@@ -162,8 +194,8 @@ export const ChatScene: React.FC = () => {
                       <div
                         key={i}
                         style={{
-                          width: 8,
-                          height: 8,
+                          width: sz.dots,
+                          height: sz.dots,
                           borderRadius: "50%",
                           backgroundColor: colors.textDim,
                           transform: `translateY(${bobY}px)`,
@@ -180,7 +212,7 @@ export const ChatScene: React.FC = () => {
             <div
               style={{
                 alignSelf: "flex-start",
-                maxWidth: "75%",
+                maxWidth: mobile ? "95%" : "75%",
                 opacity: aiOpacity,
                 transform: `translateY(${aiY}px)`,
               }}
@@ -189,7 +221,7 @@ export const ChatScene: React.FC = () => {
                 style={{
                   backgroundColor: colors.bgCardHover,
                   borderRadius: "16px 16px 16px 4px",
-                  padding: "20px 26px",
+                  padding: mobile ? "24px 30px" : "20px 26px",
                   border: `1px solid ${colors.border}`,
                 }}
               >
@@ -198,7 +230,7 @@ export const ChatScene: React.FC = () => {
                     key={i}
                     style={{
                       fontFamily: fonts.body,
-                      fontSize: 17,
+                      fontSize: sz.ai,
                       color: colors.textSoft,
                       margin: i > 0 ? "8px 0 0 0" : 0,
                       lineHeight: 1.6,
@@ -214,14 +246,14 @@ export const ChatScene: React.FC = () => {
                   </p>
                 ))}
 
-                {/* Sources — staggered from right */}
+                {/* Sources */}
                 <div
                   style={{
                     marginTop: 20,
                     paddingTop: 16,
                     borderTop: `1px solid ${colors.border}`,
                     display: "flex",
-                    gap: 10,
+                    gap: mobile ? 12 : 10,
                     flexWrap: "wrap",
                     alignItems: "center",
                   }}
@@ -229,7 +261,7 @@ export const ChatScene: React.FC = () => {
                   <span
                     style={{
                       fontFamily: fonts.mono,
-                      fontSize: 11,
+                      fontSize: sz.sourcesLabel,
                       color: colors.textDim,
                       textTransform: "uppercase",
                       letterSpacing: "0.1em",
@@ -249,7 +281,7 @@ export const ChatScene: React.FC = () => {
                           display: "flex",
                           alignItems: "center",
                           gap: 6,
-                          padding: "4px 10px",
+                          padding: mobile ? "6px 14px" : "4px 10px",
                           backgroundColor: `${colors.blue}15`,
                           borderRadius: 6,
                           border: `1px solid ${colors.blue}25`,
@@ -257,10 +289,10 @@ export const ChatScene: React.FC = () => {
                           transform: `translateX(${slideX}px)`,
                         }}
                       >
-                        <span style={{ fontFamily: fonts.mono, fontSize: 12, color: colors.blue, fontWeight: 600 }}>
+                        <span style={{ fontFamily: fonts.mono, fontSize: sz.srcPage, color: colors.blue, fontWeight: 600 }}>
                           p.{src.page}
                         </span>
-                        <span style={{ fontFamily: fonts.mono, fontSize: 11, color: colors.textDim }}>
+                        <span style={{ fontFamily: fonts.mono, fontSize: sz.srcSection, color: colors.textDim }}>
                           {src.section}
                         </span>
                       </div>
