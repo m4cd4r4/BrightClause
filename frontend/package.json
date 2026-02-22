@@ -12,11 +12,11 @@
     "test:headed": "playwright test --headed"
   },
   "dependencies": {
-    "@remotion/light-leaks": "^4.0.420",
-    "@remotion/paths": "^4.0.420",
-    "@remotion/player": "^4.0.420",
-    "@remotion/shapes": "^4.0.420",
-    "@remotion/transitions": "^4.0.420",
+    "@remotion/light-leaks": "4.0.427",
+    "@remotion/paths": "4.0.427",
+    "@remotion/player": "4.0.427",
+    "@remotion/shapes": "4.0.427",
+    "@remotion/transitions": "4.0.427",
     "docx": "^8.5.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^10.18.0",
@@ -26,7 +26,7 @@
     "next": "14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remotion": "^4.0.420",
+    "remotion": "4.0.427",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
