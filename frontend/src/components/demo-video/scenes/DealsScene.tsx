@@ -10,6 +10,7 @@ import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { AnimatedCounter } from "../components/AnimatedCounter";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const deals = [
   { name: "Acme Corp Acquisition", docs: 12, risk: "High", progress: 78, clauses: 88, obligations: 15 },
@@ -59,6 +60,17 @@ export const DealsScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
+      {/* Real deals list — shows the actual batch analysis UI */}
+      <ScreenshotReveal
+        src="assets/journey/160-deals-list.png"
+        delay={5}
+        startScale={1.45}
+        endScale={1.52}
+        opacity={0.12}
+        blur={14}
+        borderRadius={0}
+        shadow={false}
+      />
       <GlowOrb color={colors.accent} size={400} x="50%" y="50%" maxOpacity={0.08} delay={10} />
 
       <SceneBadge title="Deal Grouping" subtitle="Batch Upload & Aggregate Analysis" />

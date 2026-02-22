@@ -9,6 +9,7 @@ import {
 import { colors, fonts, centered, springs } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const legalJargon = [
   "Notwithstanding the foregoing provisions set forth in Section 4.2(a)(iii), the aggregate",
@@ -88,6 +89,17 @@ export const ProblemScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
+      {/* Real clause expanded view — shows the problem being solved */}
+      <ScreenshotReveal
+        src="assets/journey/080-clause-critical-expanded.png"
+        delay={5}
+        startScale={1.45}
+        endScale={1.52}
+        opacity={0.10}
+        blur={14}
+        borderRadius={0}
+        shadow={false}
+      />
       <GlowOrb color={colors.critical} size={400} x="25%" y="50%" maxOpacity={0.15} delay={10} />
       <GlowOrb color={colors.low} size={400} x="75%" y="50%" maxOpacity={0.15} delay={110} />
 

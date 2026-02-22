@@ -8,6 +8,7 @@ import {
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { GlowOrb } from "../components/GlowOrb";
+import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const obligations = [
   { desc: "Annual audit report submission", party: "Buyer", due: "Mar 15, 2025", status: "overdue" },
@@ -73,6 +74,17 @@ export const ObligationsScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
+      {/* Real obligations page — grounds the animated table in the actual product */}
+      <ScreenshotReveal
+        src="assets/journey/150-obligations-full-page.png"
+        delay={5}
+        startScale={1.45}
+        endScale={1.52}
+        opacity={0.12}
+        blur={14}
+        borderRadius={0}
+        shadow={false}
+      />
       <GlowOrb color={colors.purple} size={300} x="70%" y="75%" maxOpacity={0.1} delay={60} />
 
       <SceneBadge title="Obligations & Timeline" subtitle="Deadline Tracking — Never Miss a Date" />

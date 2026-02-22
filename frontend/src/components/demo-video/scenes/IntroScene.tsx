@@ -69,18 +69,18 @@ export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
           showParticles
         />
 
-        {/* Product screenshot floating behind */}
+        {/* Product screenshot floating behind — real dashboard with analysis data */}
         <ScreenshotReveal
-          src="assets/screenshot-dashboard.png"
+          src="assets/journey/040-dashboard-with-analysis.png"
           delay={8}
-          startScale={0.55}
-          endScale={0.6}
-          opacity={0.15}
-          blur={4}
+          startScale={0.58}
+          endScale={0.65}
+          opacity={0.25}
+          blur={2}
           borderRadius={20}
           perspective
-          rotateX={8}
-          y={mobile ? 300 : 180}
+          rotateX={6}
+          y={mobile ? 300 : 170}
           shadow={false}
         />
       </div>
