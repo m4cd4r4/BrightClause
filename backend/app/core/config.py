@@ -28,6 +28,7 @@ class Settings(BaseSettings):
 
     # MinIO (S3-compatible storage)
     minio_endpoint: str = "localhost:9000"
+    minio_public_url: str = ""  # Public base URL for presigned URLs, e.g. http://45.77.233.102:9002
     minio_access_key: str = "brightclause"
     minio_secret_key: str = "brightclause_dev"
     minio_bucket: str = "contracts"

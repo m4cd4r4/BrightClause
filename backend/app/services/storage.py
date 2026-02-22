@@ -159,19 +159,22 @@ def get_document_url(document_id: UUID, expires_hours: int = 1) -> str:
     """
     Get a presigned URL for downloading a document.
 
-    Args:
-        document_id: UUID of the document
-        expires_hours: URL expiration time in hours
-
     Returns:
-        Presigned URL
+        Presigned URL (rewritten to public host if MINIO_PUBLIC_URL is set)
     """
     from datetime import timedelta
 
     object_name = f"documents/{document_id}/original.pdf"
 
-    return minio_client.presigned_get_object(
+    url = minio_client.presigned_get_object(
         bucket_name=settings.minio_bucket,
         object_name=object_name,
         expires=timedelta(hours=expires_hours),
     )
+
+    # Rewrite internal Docker hostname to public URL if configured
+    if settings.minio_public_url:
+        internal = f"http://{settings.minio_endpoint}"
+        url = url.replace(internal, settings.minio_public_url.rstrip("/"))
+
+    return url
