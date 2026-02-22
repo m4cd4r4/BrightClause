@@ -3,7 +3,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
@@ -120,7 +119,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/50 bg-ink-950/90 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/logo-transparent.png" alt="BrightClause" width={36} height={36} className="object-contain" />
+            <BrightClauseMark size={32} />
             <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
           </div>
           <div className="flex items-center gap-4">
@@ -480,24 +479,67 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="p-6 bg-ink-900/40 border border-ink-800/50 rounded-xl font-mono text-sm"
+              className="rounded-xl border border-ink-800/50 overflow-hidden"
             >
-              <div className="text-ink-500 mb-4"># Architecture</div>
-              <pre className="text-ink-300 leading-relaxed overflow-x-auto whitespace-pre">{`┌─────────────────────────────────────┐
-│          Next.js Frontend           │
-│  Dashboard · Chat · Deals · Search  │
-└──────────────┬──────────────────────┘
-               │  API Proxy (server-side)
-┌──────────────▼──────────────────────┐
-│          FastAPI Backend            │
-│  8 API routers · RAG · Extraction   │
-├─────────┬───────────┬───────────────┤
-│ Celery  │ pgvector  │    MinIO      │
-│ Workers │ Embeddings│  (S3 Storage) │
-├─────────┼───────────┼───────────────┤
-│  Redis  │ PostgreSQL│    Ollama     │
-│ (Queue) │   (Data)  │   (LLM AI)   │
-└─────────┴───────────┴───────────────┘`}</pre>
+              {([
+                {
+                  label: 'Presentation',
+                  bar: 'bg-blue-400',
+                  items: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+                },
+                {
+                  label: 'API Gateway',
+                  bar: 'bg-accent',
+                  items: ['FastAPI', '8 Routers', 'Server Proxy', 'Pydantic'],
+                },
+                {
+                  label: 'Processing',
+                  bar: 'bg-purple-400',
+                  items: ['Celery Workers', 'RAG Pipeline', 'Tesseract OCR', 'Clause Extraction'],
+                },
+                {
+                  label: 'Storage',
+                  bar: 'bg-emerald-400',
+                  items: ['PostgreSQL 16', 'pgvector', 'Redis 7', 'MinIO S3'],
+                },
+                {
+                  label: 'AI',
+                  bar: 'bg-orange-400',
+                  items: ['Ollama', 'llama3.2', 'Nomic Embeddings', 'Vector Search'],
+                },
+              ] as const).map((tier, i, arr) => (
+                <div key={tier.label}>
+                  <div className="flex items-center bg-ink-900/50 hover:bg-ink-900/70 transition-colors">
+                    <div className={`w-0.5 self-stretch ${tier.bar} opacity-70`} />
+                    <div className="flex-1 px-5 py-3 flex items-center gap-4">
+                      <span className="text-[10px] font-mono uppercase tracking-[0.12em] w-[5.5rem] shrink-0 text-ink-500">
+                        {tier.label}
+                      </span>
+                      <div className="flex gap-2 flex-wrap">
+                        {tier.items.map((item, j) => (
+                          <span
+                            key={item}
+                            className={`px-2.5 py-0.5 rounded text-xs border ${
+                              j === 0
+                                ? 'bg-ink-800 border-ink-600/60 text-ink-200'
+                                : 'bg-ink-900/60 border-ink-800/60 text-ink-500'
+                            }`}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="flex items-center px-[1.15rem] py-0.5 bg-ink-950/60">
+                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" className="opacity-25 ml-[5.75rem]">
+                        <path d="M5 0v8M1 5l4 5 4-5" stroke="#c9a227" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              ))}
             </motion.div>
           </div>
         </div>
@@ -512,7 +554,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <div className="mx-auto mb-8 w-fit">
-              <Image src="/logo-transparent.png" alt="BrightClause" width={64} height={64} className="object-contain" />
+              <BrightClauseMark size={56} />
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
               See It in Action
@@ -548,7 +590,7 @@ export default function LandingPage() {
       <footer className="border-t border-ink-800/50 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
-            <Image src="/logo-transparent.png" alt="BrightClause" width={20} height={20} className="object-contain" />
+            <BrightClauseMark size={18} />
             <span>BrightClause</span>
             <span className="text-ink-700">·</span>
             <span>Built by Macdara</span>
