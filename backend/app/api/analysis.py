@@ -691,7 +691,7 @@ async def extract_obligations(
     extracted = []
     try:
         if effective_api_key:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
                     "https://api.anthropic.com/v1/messages",
                     headers={
@@ -701,7 +701,7 @@ async def extract_obligations(
                     },
                     json={
                         "model": "claude-haiku-4-5-20251001",
-                        "max_tokens": 2048,
+                        "max_tokens": 4096,
                         "messages": [{"role": "user", "content": prompt}],
                     },
                 )

@@ -42,11 +42,7 @@ export const LogoImage: React.FC<LogoImageProps> = ({
     >
       <Img
         src={staticFile("logo-transparent.png")}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
-        }}
+        style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
     </div>
   );

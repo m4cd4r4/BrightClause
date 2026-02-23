@@ -89,9 +89,9 @@ export const ProblemScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Real clause expanded view — shows the problem being solved */}
+      {/* Search / clause view — shows the problem being solved */}
       <ScreenshotReveal
-        src="assets/journey/080-clause-critical-expanded.png"
+        src="assets/screenshot-search.png"
         delay={5}
         startScale={1.45}
         endScale={1.52}

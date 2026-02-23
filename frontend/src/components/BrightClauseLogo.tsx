@@ -13,46 +13,33 @@ export function BrightClauseMark({ size = 40, className = '' }: BrightClauseLogo
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Background */}
-      <rect width="40" height="40" rx="10" fill="#0F0F0F" />
-      <rect width="40" height="40" rx="10" fill="url(#grad)" opacity="0.6" />
-
       {/* Document body */}
       <path
-        d="M11 8h13l6 6v18a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"
-        fill="#1a1a1a"
-        stroke="#333"
-        strokeWidth="1"
+        d="M10 8h14l7 7v18a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"
+        fill="rgba(201,162,39,0.08)"
+        stroke="rgba(201,162,39,0.35)"
+        strokeWidth="1.2"
       />
       {/* Folded corner */}
-      <path d="M24 8l6 6h-5.5A.5.5 0 0 1 24 13.5V8Z" fill="#222" stroke="#333" strokeWidth="1" />
+      <path d="M24 8l7 7h-6.5A.5.5 0 0 1 24 14.5V8Z"
+        fill="rgba(201,162,39,0.15)"
+        stroke="rgba(201,162,39,0.35)"
+        strokeWidth="1.2"
+      />
 
       {/* Document lines */}
-      <line x1="13" y1="18" x2="22" y2="18" stroke="#555" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="13" y1="21.5" x2="24" y2="21.5" stroke="#555" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="13" y1="25" x2="20" y2="25" stroke="#555" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="13" y1="18" x2="22" y2="18" stroke="rgba(201,162,39,0.5)" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="13" y1="22" x2="25" y2="22" stroke="rgba(201,162,39,0.3)" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="13" y1="26" x2="19" y2="26" stroke="rgba(201,162,39,0.3)" strokeWidth="1.2" strokeLinecap="round" />
 
-      {/* Accent spark — bottom right */}
-      <circle cx="28" cy="28" r="7" fill="#0F0F0F" />
-      <circle cx="28" cy="28" r="7" fill="url(#sparkGrad)" opacity="0.15" />
+      {/* Gold spark — bottom right */}
       <path
-        d="M28 23.5v2.8m0 3.4v2.8M23.5 28h2.8m3.4 0h2.8"
+        d="M29 25v3m0 3v3M26 28h3m3 0h3"
         stroke="#c9a227"
-        strokeWidth="1.4"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
-      <circle cx="28" cy="28" r="1.4" fill="#c9a227" />
-
-      <defs>
-        <linearGradient id="grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#c9a227" stopOpacity="0.3" />
-          <stop offset="1" stopColor="#c9a227" stopOpacity="0" />
-        </linearGradient>
-        <radialGradient id="sparkGrad" cx="28" cy="28" r="7" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#c9a227" />
-          <stop offset="1" stopColor="#c9a227" stopOpacity="0" />
-        </radialGradient>
-      </defs>
+      <circle cx="29" cy="28" r="1.6" fill="#c9a227" />
     </svg>
   )
 }
