@@ -55,15 +55,80 @@ def _build_context(chunks: list) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-def _build_history(history: list[ChatMessage]) -> str:
-    """Build conversation history string."""
+def _build_messages(context: str, history: list[ChatMessage], question: str) -> list[dict]:
+    """Build Claude messages list with context in the first user turn."""
+    messages = []
+
+    # Seed context into the first user message
+    first_user = f"CONTRACT EXCERPTS:\n{context}\n\nQUESTION: "
+
     if not history:
-        return ""
-    lines = []
-    for msg in history[-6:]:  # Last 3 exchanges max
-        role = "User" if msg.role == "user" else "Assistant"
-        lines.append(f"{role}: {msg.content}")
-    return "\n".join(lines)
+        messages.append({"role": "user", "content": first_user + question})
+        return messages
+
+    # Prepend context to the oldest user message in history
+    for i, msg in enumerate(history[-6:]):
+        if i == 0 and msg.role == "user":
+            messages.append({"role": "user", "content": first_user + msg.content})
+        else:
+            messages.append({"role": msg.role, "content": msg.content})
+
+    messages.append({"role": "user", "content": question})
+    return messages
+
+
+async def _call_claude(context: str, history: list[ChatMessage], question: str) -> str:
+    """Call Claude Haiku via Anthropic API."""
+    messages = _build_messages(context, history, question)
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": settings.anthropic_api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 1024,
+                "system": CHAT_SYSTEM_PROMPT,
+                "messages": messages,
+            },
+        )
+        if response.status_code != 200:
+            raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+        return response.json()["content"][0]["text"].strip()
+
+
+async def _call_ollama(context: str, history: list[ChatMessage], question: str) -> str:
+    """Call local Ollama — fallback for development."""
+    history_str = ""
+    if history:
+        lines = [
+            f"{'User' if m.role == 'user' else 'Assistant'}: {m.content}"
+            for m in history[-6:]
+        ]
+        history_str = "\n".join(lines) + "\n\n"
+
+    prompt = (
+        f"{CHAT_SYSTEM_PROMPT}\n\nCONTRACT EXCERPTS:\n{context}\n\n"
+        f"{history_str}USER QUESTION: {question}\n\nAnswer:"
+    )
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            f"{settings.ollama_url}/api/generate",
+            json={
+                "model": settings.llm_model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {"temperature": 0.3, "num_predict": 1024},
+            },
+        )
+        if response.status_code != 200:
+            raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+        answer = response.json().get("response", "").strip()
+        return answer or "I wasn't able to generate a response. Please try rephrasing your question."
 
 
 @router.post("/{document_id}", response_model=ChatResponse)
@@ -95,58 +160,19 @@ async def chat_with_document(
             sources=[],
         )
 
-    # 2. Build prompt with context
+    # 2. Build context from retrieved chunks
     context = _build_context(search_results)
-    history = _build_history(request.history)
 
-    prompt = f"""{CHAT_SYSTEM_PROMPT}
-
-CONTRACT EXCERPTS:
-{context}
-
-{f"CONVERSATION HISTORY:{chr(10)}{history}{chr(10)}" if history else ""}
-USER QUESTION: {request.question}
-
-Answer:"""
-
-    # 3. Call Ollama for generation
+    # 3. Generate answer — Claude Haiku if API key set, else Ollama
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                f"{settings.ollama_url}/api/generate",
-                json={
-                    "model": settings.llm_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.3,
-                        "num_predict": 1024,
-                    },
-                },
-            )
-
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=502,
-                    detail="AI service temporarily unavailable",
-                )
-
-            data = response.json()
-            answer = data.get("response", "").strip()
-
-            if not answer:
-                answer = "I wasn't able to generate a response. Please try rephrasing your question."
-
+        if settings.anthropic_api_key:
+            answer = await _call_claude(context, request.history, request.question)
+        else:
+            answer = await _call_ollama(context, request.history, request.question)
     except httpx.TimeoutException:
-        raise HTTPException(
-            status_code=504,
-            detail="AI service timed out. Please try a simpler question.",
-        )
+        raise HTTPException(status_code=504, detail="AI service timed out. Please try a simpler question.")
     except httpx.ConnectError:
-        raise HTTPException(
-            status_code=502,
-            detail="AI service is not available. Please try again later.",
-        )
+        raise HTTPException(status_code=502, detail="AI service is not available. Please try again later.")
 
     # 4. Return answer with source chunks
     sources = [
@@ -156,7 +182,7 @@ Answer:"""
             page_number=r.page_number,
             score=round(r.combined_score, 4),
         )
-        for r in search_results[:3]  # Top 3 sources
+        for r in search_results[:3]
     ]
 
     await log_activity(db, "chat_question", document_id, {"question": request.question[:200]})
