@@ -11,7 +11,6 @@ import {
   Briefcase, Sun, Activity, Play
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
-import { BrightClauseMark } from '@/components/BrightClauseLogo'
 import { ScreenshotShowcase } from '@/components/ScreenshotShowcase'
 
 const HeroVideoPlayer = lazy(() =>
