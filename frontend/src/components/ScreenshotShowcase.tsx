@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Maximize2, Minimize2 } from 'lucide-react'
@@ -45,7 +45,6 @@ export function ScreenshotShowcase() {
   const [paused, setPaused] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const next = useCallback(() => {
     setActive(i => (i + 1) % SCREENS.length)
@@ -74,27 +73,38 @@ export function ScreenshotShowcase() {
     return () => document.removeEventListener('keydown', onKey)
   }, [isExpanded])
 
-  // Click outside to collapse
-  useEffect(() => {
-    if (!isExpanded) return
-    const onPointer = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsExpanded(false)
-      }
-    }
-    document.addEventListener('mousedown', onPointer)
-    return () => document.removeEventListener('mousedown', onPointer)
-  }, [isExpanded])
-
   // Lock body scroll in cinema mode
   useEffect(() => {
     document.body.style.overflow = isExpanded ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [isExpanded])
 
-  const showcase = (
+  const tabNav = (
+    <div className="flex items-center gap-2 flex-wrap">
+      {SCREENS.map((screen, i) => (
+        <button
+          key={screen.id}
+          onClick={() => { setActive(i); setProgress(0) }}
+          className={`relative px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 overflow-hidden
+            ${active === i
+              ? 'bg-accent/15 text-accent border border-accent/40'
+              : 'text-ink-500 hover:text-ink-300 border border-transparent hover:border-ink-700/50'
+            }`}
+        >
+          {screen.label}
+          {active === i && (
+            <span
+              className="absolute inset-0 bg-accent/10 origin-left rounded-lg pointer-events-none"
+              style={{ transform: `scaleX(${progress / 100})` }}
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  )
+
+  const showcaseCard = (
     <div
-      ref={containerRef}
       className="rounded-2xl overflow-hidden border border-ink-700/40 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.04)]"
       style={{ backgroundColor: '#080d18' }}
       onMouseEnter={() => setPaused(true)}
@@ -188,30 +198,11 @@ export function ScreenshotShowcase() {
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
         >
-          {/* Tab navigation */}
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            {SCREENS.map((screen, i) => (
-              <button
-                key={screen.id}
-                onClick={() => { setActive(i); setProgress(0) }}
-                className={`relative px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 overflow-hidden
-                  ${active === i
-                    ? 'bg-accent/15 text-accent border border-accent/40'
-                    : 'text-ink-500 hover:text-ink-300 border border-transparent hover:border-ink-700/50'
-                  }`}
-              >
-                {screen.label}
-                {active === i && (
-                  <span
-                    className="absolute inset-0 bg-accent/10 origin-left rounded-lg pointer-events-none"
-                    style={{ transform: `scaleX(${progress / 100})` }}
-                  />
-                )}
-              </button>
-            ))}
+          {tabNav}
+          {/* Keep in DOM to preserve layout height; hidden while cinema is open */}
+          <div className="mt-4" style={{ visibility: isExpanded ? 'hidden' : 'visible' }}>
+            {showcaseCard}
           </div>
-
-          {showcase}
         </motion.div>
       </div>
 
@@ -219,38 +210,24 @@ export function ScreenshotShowcase() {
       <AnimatePresence>
         {isExpanded && (
           <>
+            {/* Backdrop — click anywhere on it to close */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm pointer-events-none"
+              className="fixed inset-0 z-40 bg-black/85 backdrop-blur-sm cursor-pointer"
+              onClick={() => setIsExpanded(false)}
             />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-              {/* Tab nav floats above in cinema mode */}
-              <div className="flex flex-col gap-3 w-full" style={{ maxWidth: 'calc((88vh - 80px) * 16 / 9)', maxHeight: '90vh' }}>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {SCREENS.map((screen, i) => (
-                    <button
-                      key={screen.id}
-                      onClick={() => { setActive(i); setProgress(0) }}
-                      className={`relative px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 overflow-hidden
-                        ${active === i
-                          ? 'bg-accent/15 text-accent border border-accent/40'
-                          : 'text-ink-500 hover:text-ink-300 border border-transparent hover:border-ink-700/50'
-                        }`}
-                    >
-                      {screen.label}
-                      {active === i && (
-                        <span
-                          className="absolute inset-0 bg-accent/10 origin-left rounded-lg pointer-events-none"
-                          style={{ transform: `scaleX(${progress / 100})` }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                {showcase}
+            {/* Cinema content — pointer-events-none on wrapper so backdrop click works in padding */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+              <div
+                className="flex flex-col gap-3 w-full pointer-events-auto"
+                style={{ maxWidth: 'calc((88vh - 80px) * 16 / 9)', maxHeight: '90vh' }}
+                onClick={e => e.stopPropagation()}
+              >
+                {tabNav}
+                {showcaseCard}
               </div>
             </div>
           </>
