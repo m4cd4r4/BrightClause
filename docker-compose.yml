@@ -87,6 +87,7 @@ services:
       - MINIO_SECRET_KEY=brightclause_dev
       - MINIO_BUCKET=contracts
       - ENVIRONMENT=development
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     volumes:
       - ./backend/app:/app/app
     depends_on:
@@ -115,6 +116,7 @@ services:
       - MINIO_SECRET_KEY=brightclause_dev
       - MINIO_BUCKET=contracts
       - ENVIRONMENT=development
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     volumes:
       - ./backend/app:/app/app
     depends_on:
