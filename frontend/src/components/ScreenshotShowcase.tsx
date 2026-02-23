@@ -65,10 +65,13 @@ export function ScreenshotShowcase() {
     return () => clearInterval(ticker)
   }, [paused, next])
 
-  // Escape key to exit cinema mode
+  // Keyboard navigation: Escape to close, arrows to navigate
   useEffect(() => {
-    if (!isExpanded) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsExpanded(false) }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isExpanded) setIsExpanded(false)
+      if (e.key === 'ArrowRight') { setActive(i => (i + 1) % SCREENS.length); setProgress(0) }
+      if (e.key === 'ArrowLeft') { setActive(i => (i - 1 + SCREENS.length) % SCREENS.length); setProgress(0) }
+    }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [isExpanded])
