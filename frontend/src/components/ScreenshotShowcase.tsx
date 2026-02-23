@@ -135,8 +135,12 @@ export function ScreenshotShowcase() {
         </button>
       </div>
 
-      {/* Screenshot */}
-      <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+      {/* Screenshot — click to expand */}
+      <div
+        className={`relative w-full ${!isExpanded ? 'cursor-pointer' : ''}`}
+        style={{ aspectRatio: '16/9' }}
+        onClick={() => { if (!isExpanded) setIsExpanded(true) }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={active}
