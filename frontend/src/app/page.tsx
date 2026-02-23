@@ -3,6 +3,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
@@ -11,7 +12,6 @@ import {
   Briefcase, Sun, Activity, Play
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
-import { BrightClauseMark } from '@/components/BrightClauseLogo'
 import { ScreenshotShowcase } from '@/components/ScreenshotShowcase'
 
 const HeroVideoPlayer = lazy(() =>
@@ -119,7 +119,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/50 bg-ink-950/90 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BrightClauseMark size={32} />
+            <Image src="/logo-transparent.png" alt="BrightClause" width={36} height={36} className="object-contain" />
             <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
           </div>
           <div className="flex items-center gap-4">
@@ -554,7 +554,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <div className="mx-auto mb-8 w-fit">
-              <BrightClauseMark size={56} />
+              <Image src="/logo-transparent.png" alt="BrightClause" width={64} height={64} className="object-contain" />
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
               See It in Action
@@ -590,7 +590,7 @@ export default function LandingPage() {
       <footer className="border-t border-ink-800/50 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
-            <BrightClauseMark size={18} />
+            <Image src="/logo-transparent.png" alt="BrightClause" width={20} height={20} className="object-contain" />
             <span>BrightClause</span>
             <span className="text-ink-700">·</span>
             <span>Built by Macdara</span>
