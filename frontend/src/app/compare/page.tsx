@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
   GitCompareArrows, FileText, CheckCircle, Loader2,
-  AlertTriangle, X, Plus, ChevronRight, Eye
+  AlertTriangle, X, Plus, Eye
 } from 'lucide-react'
 import { api, Document, AnalysisSummary, Clause } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -19,36 +20,86 @@ interface CompareDoc {
   loading: boolean
 }
 
-export default function ComparePage() {
+function ComparePageContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [compareDocs, setCompareDocs] = useState<CompareDoc[]>([])
   const [showPicker, setShowPicker] = useState(false)
   const [expandedCell, setExpandedCell] = useState<string | null>(null)
+  const [initialized, setInitialized] = useState(false)
   const { error: showError } = useToast()
 
-  useEffect(() => {
-    loadDocuments()
-  }, [])
+  // Update URL whenever the selected doc IDs change
+  const updateUrl = useCallback((docIds: string[]) => {
+    const params = new URLSearchParams()
+    if (docIds.length > 0) params.set('docs', docIds.join(','))
+    router.replace(`/compare${params.toString() ? '?' + params.toString() : ''}`, { scroll: false })
+  }, [router])
 
-  const loadDocuments = async () => {
-    try {
-      const response = await api.documents.list({ limit: 100 })
-      setDocuments(response.documents.filter(d => d.status === 'completed'))
-    } catch (err) {
-      console.error('Failed to load documents:', err)
-      showError('Failed to load documents. Please try again.')
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await api.documents.list({ limit: 100 })
+        setDocuments(response.documents.filter(d => d.status === 'completed'))
+      } catch (err) {
+        console.error('Failed to load documents:', err)
+        showError('Failed to load documents. Please try again.')
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+    load()
+  }, [showError])
+
+  // Restore selected documents from URL after the document list loads
+  useEffect(() => {
+    if (loading || initialized) return
+    setInitialized(true)
+
+    const docParam = searchParams.get('docs')
+    if (!docParam) return
+
+    const ids = docParam.split(',').filter(Boolean)
+    const toAdd = ids
+      .map(id => documents.find(d => d.id === id))
+      .filter((d): d is Document => d !== undefined)
+      .slice(0, 5)
+
+    if (toAdd.length === 0) return
+
+    // Set all as loading immediately so the UI responds at once
+    setCompareDocs(toAdd.map(doc => ({ doc, summary: null, clauses: [], loading: true })))
+
+    // Fetch analysis for each in parallel
+    toAdd.forEach(async (doc) => {
+      try {
+        const [summary, clauses] = await Promise.all([
+          api.analysis.summary(doc.id).catch(() => null),
+          api.analysis.clauses(doc.id).catch(() => [] as Clause[]),
+        ])
+        setCompareDocs(prev => prev.map(cd =>
+          cd.doc.id === doc.id ? { ...cd, summary, clauses, loading: false } : cd
+        ))
+      } catch {
+        setCompareDocs(prev => prev.map(cd =>
+          cd.doc.id === doc.id ? { ...cd, loading: false } : cd
+        ))
+      }
+    })
+  }, [loading, documents, initialized, searchParams])
 
   const addDocument = async (doc: Document) => {
     if (compareDocs.find(cd => cd.doc.id === doc.id)) return
     if (compareDocs.length >= 5) return
 
     const newEntry: CompareDoc = { doc, summary: null, clauses: [], loading: true }
-    setCompareDocs(prev => [...prev, newEntry])
+    setCompareDocs(prev => {
+      const next = [...prev, newEntry]
+      updateUrl(next.map(cd => cd.doc.id))
+      return next
+    })
     setShowPicker(false)
 
     try {
@@ -67,7 +118,11 @@ export default function ComparePage() {
   }
 
   const removeDocument = (docId: string) => {
-    setCompareDocs(prev => prev.filter(cd => cd.doc.id !== docId))
+    setCompareDocs(prev => {
+      const next = prev.filter(cd => cd.doc.id !== docId)
+      updateUrl(next.map(cd => cd.doc.id))
+      return next
+    })
   }
 
   // Collect all clause types across compared docs
@@ -414,5 +469,13 @@ export default function ComparePage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function ComparePage() {
+  return (
+    <Suspense>
+      <ComparePageContent />
+    </Suspense>
   )
 }
