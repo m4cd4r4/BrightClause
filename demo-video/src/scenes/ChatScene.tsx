@@ -75,16 +75,6 @@ export const ChatScene: React.FC<ChatSceneProps> = ({ mobile }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      <ScreenshotReveal
-        src="assets/chat-bg.png"
-        delay={0}
-        startScale={1.05}
-        endScale={1.1}
-        opacity={0.1}
-        blur={14}
-        borderRadius={0}
-        shadow={false}
-      />
       {!mobile && (
         <ScreenshotReveal
           src="assets/journey/080-clause-critical-expanded.png"

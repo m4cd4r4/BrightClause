@@ -9,7 +9,6 @@ import {
 import { colors, fonts, centered, springs } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { GlowOrb } from "../components/GlowOrb";
-import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const legalJargon = [
   "Notwithstanding the foregoing provisions set forth in Section 4.2(a)(iii), the aggregate",
@@ -97,18 +96,7 @@ export const ProblemScene: React.FC<ProblemSceneProps> = ({ mobile }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      <ScreenshotReveal
-        src="assets/problem-bg.png"
-        delay={0}
-        startScale={1.05}
-        endScale={1.1}
-        opacity={0.1}
-        blur={14}
-        borderRadius={0}
-        shadow={false}
-      />
       <GlowOrb color={colors.critical} size={mobile ? 300 : 400} x="25%" y={mobile ? "25%" : "50%"} maxOpacity={0.15} delay={10} />
-      <GlowOrb color={colors.low} size={mobile ? 300 : 400} x="75%" y={mobile ? "75%" : "50%"} maxOpacity={0.15} delay={110} />
 
       <SceneBadge title="The Problem" subtitle="Legal jargon is impenetrable" mobile={mobile} />
 

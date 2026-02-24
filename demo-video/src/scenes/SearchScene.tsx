@@ -81,17 +81,6 @@ export const SearchScene: React.FC<SearchSceneProps> = ({ mobile }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      {/* Background: real search results screenshot, blurred */}
-      <ScreenshotReveal
-        src="assets/journey/180-search-results.png"
-        delay={0}
-        startScale={1.05}
-        endScale={1.1}
-        opacity={0.12}
-        blur={14}
-        borderRadius={0}
-        shadow={false}
-      />
       {/* Secondary: analytics screenshot in corner */}
       {!mobile && (
         <ScreenshotReveal
@@ -106,7 +95,6 @@ export const SearchScene: React.FC<SearchSceneProps> = ({ mobile }) => {
         />
       )}
       <GlowOrb color={colors.blue} size={mobile ? 300 : 400} x="60%" y="35%" maxOpacity={0.1} delay={10} />
-      <GlowOrb color={colors.purple} size={250} x="20%" y="70%" maxOpacity={0.08} delay={60} />
 
       <SceneBadge title="Semantic Search" subtitle="Find Any Clause Across All Contracts" mobile={mobile} />
 
