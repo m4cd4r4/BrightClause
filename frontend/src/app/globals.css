@@ -55,6 +55,93 @@ html.light {
   --border: #e4e4e7;
 }
 
+/* Light Editorial (Navy Variant) — warm cream palette for landing page */
+.light-editorial {
+  --ink-50: 26 26 46;
+  --ink-100: 36 36 56;
+  --ink-200: 52 52 78;
+  --ink-300: 74 74 106;
+  --ink-400: 100 100 130;
+  --ink-500: 122 122 142;
+  --ink-600: 165 165 180;
+  --ink-700: 200 196 188;
+  --ink-800: 212 207 197;
+  --ink-900: 240 237 230;
+  --ink-925: 245 243 238;
+  --ink-950: 250 249 246;
+
+  --bg-primary: #faf9f6;
+  --bg-secondary: #f0ede6;
+  --bg-tertiary: #e8e4db;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a6a;
+  --text-muted: #7a7a8e;
+  --border: #d4cfc5;
+  --accent: #b8941f;
+
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(184, 148, 31, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(184, 148, 31, 0.02) 0%, transparent 50%);
+}
+
+.light-editorial ::-webkit-scrollbar-track { background: #f0ede6; }
+.light-editorial ::-webkit-scrollbar-thumb { background: #d4cfc5; }
+.light-editorial ::-webkit-scrollbar-thumb:hover { background: #b8b0a3; }
+
+.light-editorial .skeleton {
+  background: linear-gradient(90deg, rgba(212,207,197,0.5) 25%, rgba(200,196,188,0.5) 50%, rgba(212,207,197,0.5) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Dark frame — preserves dark palette for product previews on light pages */
+.theme-dark-frame {
+  --ink-50: 247 247 248;
+  --ink-100: 238 238 240;
+  --ink-200: 217 217 222;
+  --ink-300: 184 184 193;
+  --ink-400: 145 145 159;
+  --ink-500: 115 115 132;
+  --ink-600: 93 93 108;
+  --ink-700: 76 76 88;
+  --ink-800: 65 65 75;
+  --ink-900: 57 57 65;
+  --ink-925: 40 40 48;
+  --ink-950: 24 24 27;
+  --accent: #c9a227;
+}
+
+/* Scroll-driven fade-in for sections */
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: scrollFadeUp 0.6s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+
+  .scroll-reveal-stagger {
+    animation: scrollFadeUp 0.5s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
+}
+
+@keyframes scrollFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-stagger {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
