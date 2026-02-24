@@ -10,7 +10,6 @@ import { AnimatedBackground } from "../components/AnimatedBackground";
 import { LogoImage } from "../components/LogoImage";
 import { GlowOrb } from "../components/GlowOrb";
 import { FadeInSlide } from "../components/FadeInSlide";
-import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const PILLS = ["Chat", "Risk Analysis", "Obligations", "Deals", "Reports"];
 
@@ -38,21 +37,8 @@ export const OutroScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
-      <AnimatedBackground backgroundImage="assets/outro-bg.png" accentColor={colors.accent} bgImageOpacity={0.15} showGrid />
-      {/* Full dashboard screenshot — final impression of the real product */}
-      <ScreenshotReveal
-        src="assets/screenshot-dashboard.png"
-        delay={10}
-        startScale={1.35}
-        endScale={1.45}
-        opacity={0.22}
-        blur={6}
-        borderRadius={0}
-        perspective
-        rotateX={4}
-        shadow={false}
-      />
-      <GlowOrb pulse y="40%" maxOpacity={0.5} maxScale={1.5} />
+      <AnimatedBackground accentColor={colors.accent} showGrid showScanLine={false} showParticles={false} />
+      <GlowOrb pulse y="40%" maxOpacity={0.2} maxScale={1.2} />
 
       <div style={{ ...centered }}>
         {/* Logo */}
@@ -88,7 +74,7 @@ export const OutroScene: React.FC = () => {
               fontWeight: 400,
             }}
           >
-            AI-Powered Contract Analysis for M&A Due Diligence
+            Contract Intelligence for M&A Due Diligence
           </p>
         </FadeInSlide>
 
@@ -160,7 +146,7 @@ export const OutroScene: React.FC = () => {
           opacity: footerOpacity,
         }}
       >
-        AI-Powered Contract Intelligence — brightclause.com
+        Contract Intelligence — brightclause.com
       </div>
     </AbsoluteFill>
   );

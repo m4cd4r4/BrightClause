@@ -61,29 +61,29 @@ export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
       {/* Background layers — fade to black mid-scene */}
       <div style={{ position: "absolute", inset: 0, opacity: bgFade, pointerEvents: "none" }}>
         <AnimatedBackground
-          backgroundImage="assets/intro-bg.png"
-          bgImageOpacity={0.18}
           accentColor={colors.accent}
           showGrid
+          showScanLine={false}
+          showParticles={false}
         />
 
-        {/* Product screenshot floating behind — real dashboard */}
+        {/* Product screenshot floating behind */}
         <ScreenshotReveal
           src="assets/screenshot-dashboard.png"
           delay={8}
-          startScale={0.58}
-          endScale={0.65}
-          opacity={0.25}
-          blur={2}
+          startScale={0.55}
+          endScale={0.6}
+          opacity={0.15}
+          blur={4}
           borderRadius={20}
           perspective
-          rotateX={6}
-          y={mobile ? 300 : 170}
+          rotateX={8}
+          y={mobile ? 300 : 180}
           shadow={false}
         />
       </div>
 
-      <GlowOrb pulse y="42%" maxOpacity={0.4} />
+      <GlowOrb pulse y="42%" maxOpacity={0.2} />
 
       <div
         style={{
@@ -139,7 +139,7 @@ export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
               textShadow: "0 2px 20px rgba(0,0,0,0.9)",
             }}
           >
-            AI-Powered Contract Intelligence
+            Read Every Clause. Miss Nothing.
           </p>
         </FadeInSlide>
 
@@ -165,8 +165,7 @@ export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
                 key={item}
                 style={{
                   padding: mobile ? "8px 14px" : "10px 20px",
-                  backgroundColor: `${colors.bgCard}cc`,
-                  backdropFilter: "blur(10px)",
+                  backgroundColor: colors.bgCard,
                   borderRadius: 8,
                   border: `1px solid ${colors.border}`,
                   fontFamily: fonts.mono,
