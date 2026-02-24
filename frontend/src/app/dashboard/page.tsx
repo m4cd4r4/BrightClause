@@ -535,16 +535,54 @@ function DashboardContent() {
                     ))}
                   </div>
                 ) : documents.length === 0 ? (
-                  <div className="p-16 text-center">
-                    <FileText className="w-14 h-14 text-ink-700 mx-auto" />
-                    <p className="mt-5 text-ink-500 text-sm font-medium">No contracts uploaded yet</p>
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="mt-6 btn-primary"
-                    >
-                      Upload Your First Contract
-                    </button>
+                  <div className="p-10 sm:p-16">
+                    <div className="max-w-sm mx-auto text-center">
+                      {/* Decorative upload zone */}
+                      <div
+                        className="relative mx-auto w-24 h-24 rounded-2xl border-2 border-dashed border-ink-700/60 bg-ink-900/30
+                                   flex items-center justify-center mb-6 group-hover:border-accent/40 transition-colors"
+                      >
+                        <Upload className="w-8 h-8 text-ink-600" />
+                        <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center">
+                          <FileText className="w-3.5 h-3.5 text-accent" />
+                        </div>
+                      </div>
+
+                      <h3 className="text-ink-200 font-semibold text-base">Upload your first contract</h3>
+                      <p className="mt-2 text-ink-500 text-sm leading-relaxed">
+                        Drop a PDF here or click below. BrightClause will extract clauses, score risks, and build a searchable index automatically.
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mt-6 btn-primary inline-flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Choose PDF
+                      </button>
+
+                      {/* What happens next */}
+                      <div className="mt-8 pt-6 border-t border-ink-800/40">
+                        <p className="text-[10px] text-ink-600 font-mono uppercase tracking-wider mb-3">What happens next</p>
+                        <div className="flex items-center justify-center gap-3 text-[11px] text-ink-500">
+                          <span className="flex items-center gap-1.5">
+                            <Zap className="w-3 h-3 text-amber-500/70" />
+                            Extract
+                          </span>
+                          <ChevronRight className="w-3 h-3 text-ink-700" />
+                          <span className="flex items-center gap-1.5">
+                            <Shield className="w-3 h-3 text-orange-500/70" />
+                            Score
+                          </span>
+                          <ChevronRight className="w-3 h-3 text-ink-700" />
+                          <span className="flex items-center gap-1.5">
+                            <Search className="w-3 h-3 text-emerald-500/70" />
+                            Index
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   documents.map((doc, i) => (
@@ -843,13 +881,49 @@ function DashboardContent() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="card p-8"
+                  className="card overflow-hidden"
                 >
-                  <div className="text-center py-12">
-                    <Shield className="w-16 h-16 text-ink-700 mx-auto" />
-                    <p className="mt-6 text-ink-500 text-sm">
-                      Select a document to view risk assessment
+                  <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
+                    <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
+                    <p className="text-[11px] text-ink-500 mt-1 font-mono uppercase tracking-wide">
+                      Select a document
                     </p>
+                  </div>
+                  <div className="p-6">
+                    {/* Preview of what the panel shows */}
+                    <div className="p-5 rounded-xl border border-ink-800/30 bg-ink-900/20 mb-5">
+                      <div className="text-center">
+                        <div className="text-[11px] text-ink-600 font-mono uppercase tracking-wide mb-2">
+                          Overall Risk Level
+                        </div>
+                        <div className="text-2xl font-bold text-ink-700 tracking-tight">
+                          — — —
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-ink-800/30">
+                          <div className="text-[10px] text-ink-600 font-mono uppercase">
+                            No document selected
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ghost risk grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      {['Critical', 'High', 'Medium', 'Low'].map((level) => (
+                        <div key={level} className="p-3 rounded-lg border border-ink-800/20 bg-ink-900/10 text-center">
+                          <div className="text-lg font-bold font-mono text-ink-800">0</div>
+                          <div className="text-[10px] uppercase font-mono tracking-wide text-ink-700 mt-0.5">{level}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Guidance */}
+                    <div className="text-center py-4">
+                      <Shield className="w-10 h-10 text-ink-800 mx-auto mb-3" />
+                      <p className="text-sm text-ink-500">
+                        Click a contract from the portfolio to see its risk breakdown, flagged clauses, and recommended actions.
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               )}

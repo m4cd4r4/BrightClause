@@ -108,7 +108,7 @@ export function ScreenshotShowcase() {
 
   const showcaseCard = (
     <div
-      className="rounded-2xl overflow-hidden border border-ink-700/40 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.04)]"
+      className="rounded-2xl overflow-hidden border border-ink-700/40 shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_40px_rgba(201,162,39,0.04)] theme-dark-frame"
       style={{ backgroundColor: '#080d18' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}

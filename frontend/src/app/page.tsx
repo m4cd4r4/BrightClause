@@ -9,7 +9,7 @@ import {
   Database, Brain, Eye, BarChart3, Lock, Layers,
   CheckCircle, ChevronRight, Github, ExternalLink,
   MessageCircle, Lightbulb, ClipboardCheck, Calendar,
-  Briefcase, Sun, Activity, Play
+  Briefcase, Sun, Activity, Play, Server
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
 import { ScreenshotShowcase } from '@/components/ScreenshotShowcase'
@@ -81,13 +81,6 @@ const features: { Icon: React.ElementType; title: string; description: string }[
   },
 ]
 
-const techStack = [
-  { category: 'Frontend', items: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Dark/Light Theming'] },
-  { category: 'Backend', items: ['FastAPI', 'SQLAlchemy 2.0', 'Celery', 'Pydantic', '8 API Routers'] },
-  { category: 'AI / ML', items: ['Ollama (llama3.2)', 'RAG Pipeline', 'pgvector', 'Nomic Embed', 'Tesseract OCR'] },
-  { category: 'Infrastructure', items: ['PostgreSQL 16', 'Redis 7', 'MinIO (S3)', 'Docker Compose'] },
-]
-
 const clauseTypes = [
   'Termination', 'Indemnification', 'Limitation of Liability', 'Confidentiality',
   'Non-Compete', 'Intellectual Property', 'Change of Control', 'Assignment',
@@ -95,32 +88,47 @@ const clauseTypes = [
   'Payment Terms', 'Insurance', 'Audit Rights', 'Data Privacy',
 ]
 
+const trustSignals = [
+  {
+    Icon: Lock,
+    title: 'Self-Hosted & Private',
+    description: 'Your contracts never leave your infrastructure. Full Docker Compose deployment with 6 containerized services.',
+  },
+  {
+    Icon: Zap,
+    title: 'Analysis in Seconds',
+    description: 'Upload a PDF and get clause extraction, risk scores, and actionable insights immediately via async processing.',
+  },
+  {
+    Icon: Server,
+    title: 'Enterprise Architecture',
+    description: 'PostgreSQL 16, Redis caching, Celery workers, FastAPI with 8 routers. Built for production workloads.',
+  },
+  {
+    Icon: Eye,
+    title: 'Complete Audit Trail',
+    description: 'Every upload, analysis, chat question, and export is logged with timestamps, context, and full traceability.',
+  },
+]
+
 
 export default function LandingPage() {
-  const [scrollY, setScrollY] = useState(0)
   const [showHeroVideo, setShowHeroVideo] = useState(false)
   const [heroVideoDismissed, setHeroVideoDismissed] = useState(false)
 
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Auto-show video over hero after 2 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowHeroVideo(true), 2000)
     return () => clearTimeout(timer)
   }, [])
 
   return (
-    <div className="min-h-screen bg-ink-950 text-ink-100">
+    <div className="min-h-screen light-editorial">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/50 bg-ink-950/90 backdrop-blur-xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/40 bg-ink-950/85 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="BrightClause" width={36} height={36} className="object-contain" style={{ mixBlendMode: 'screen' }} />
-            <span className="font-display text-xl font-bold tracking-tight">BrightClause</span>
+            <Image src="/logo-minimal.png" alt="BrightClause" width={36} height={36} className="object-contain" />
+            <span className="font-display text-xl font-bold tracking-tight text-ink-100">BrightClause</span>
           </div>
           <div className="flex items-center gap-4">
             <a
@@ -134,8 +142,8 @@ export default function LandingPage() {
             </a>
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 px-5 py-2.5 bg-accent text-ink-950 font-semibold rounded-xl
-                       hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20 transition-all text-sm"
+              className="flex items-center gap-2 px-5 py-2.5 bg-accent text-[#1a1a2e] font-semibold rounded-xl
+                       hover:brightness-110 hover:shadow-lg hover:shadow-accent/20 transition-all text-sm"
             >
               Live Demo
               <ArrowRight className="w-4 h-4" />
@@ -145,19 +153,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-24 overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div
-            className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-accent/5 blur-[100px]"
-            style={{ transform: `translateY(${scrollY * 0.1}px)` }}
-          />
-          <div
-            className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-accent/3 blur-[80px]"
-            style={{ transform: `translateY(${-scrollY * 0.05}px)` }}
-          />
-        </div>
-
+      <section className="relative pt-32 pb-16 overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -165,21 +161,21 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-              AI-Powered{' '}
-              <span className="text-accent">Contract Intelligence</span>
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-ink-50">
+              Read Every Clause.{' '}
+              <span className="block mt-1">Miss Nothing.</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-ink-400 leading-relaxed mb-10 max-w-2xl mx-auto">
-              Upload contracts. Chat with them in plain English. Extract clauses, assess risk,
-              track obligations, and generate executive reports — all powered by AI.
+              Upload contracts and chat with them in plain English. AI extracts clauses,
+              scores risk, tracks obligations, and generates executive reports.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/dashboard"
-                className="group flex items-center gap-3 px-8 py-4 bg-accent text-ink-950 rounded-xl font-semibold text-lg
-                         hover:bg-accent-light hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
+                className="group flex items-center gap-3 px-8 py-4 bg-accent text-[#1a1a2e] rounded-xl font-semibold text-lg
+                         hover:brightness-110 hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
               >
                 Explore the Demo
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -199,14 +195,12 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          {/* Hero visual / video dissolve */}
-          <div className="relative mt-16 max-w-5xl mx-auto grid" style={{ gridTemplate: '1fr / 1fr' }}>
-            {/* Static visual — always rendered, establishes container size */}
+          {/* Hero visual / video dissolve — dark frame for product preview */}
+          <div className="relative mt-16 max-w-5xl mx-auto grid theme-dark-frame" style={{ gridTemplate: '1fr / 1fr' }}>
             <div style={{ gridArea: '1 / 1' }}>
               <HeroVisual />
             </div>
 
-            {/* Video overlay — fades in on top, auto-dissolves when finished */}
             <AnimatePresence>
               {showHeroVideo && !heroVideoDismissed && (
                 <motion.div
@@ -233,8 +227,8 @@ export default function LandingPage() {
       {/* Screenshot Showcase */}
       <ScreenshotShowcase />
 
-      {/* Architecture Overview */}
-      <section className="py-24 border-t border-ink-800/50">
+      {/* How It Works */}
+      <section className="py-20 border-t border-ink-800/30">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -249,7 +243,6 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="relative">
-            {/* Connecting line — desktop only */}
             <div className="hidden lg:block absolute top-[2.25rem] left-[calc(8.333%+2rem)] right-[calc(8.333%+2rem)] h-px">
               <motion.div
                 initial={{ scaleX: 0 }}
@@ -262,12 +255,12 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-10">
               {[
-                { title: 'Upload', desc: 'PDF stored in MinIO (S3)', Icon: FileText },
+                { title: 'Upload', desc: 'PDF ingestion & storage', Icon: FileText },
                 { title: 'Extract', desc: '4-tier OCR pipeline', Icon: Layers },
-                { title: 'Embed', desc: 'pgvector embeddings', Icon: Database },
+                { title: 'Embed', desc: 'Vector embeddings', Icon: Database },
                 { title: 'Analyze', desc: 'Clauses, risk, entities', Icon: Brain },
                 { title: 'Chat', desc: 'RAG-powered Q&A', Icon: MessageCircle },
-                { title: 'Act', desc: 'Reports, obligations, deals', Icon: Eye },
+                { title: 'Act', desc: 'Reports & obligations', Icon: Eye },
               ].map((item, i) => (
                 <motion.div
                   key={i}
@@ -277,7 +270,6 @@ export default function LandingPage() {
                   transition={{ delay: i * 0.08 }}
                   className="flex flex-col items-center text-center group"
                 >
-                  {/* Icon bubble with step badge */}
                   <div className="relative mb-5">
                     <div className="w-[4.5rem] h-[4.5rem] rounded-2xl bg-ink-900 border border-ink-700/80 flex items-center justify-center text-accent
                                     group-hover:border-accent/50 group-hover:bg-accent/10 group-hover:shadow-lg group-hover:shadow-accent/10 transition-all duration-300">
@@ -296,8 +288,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-24 border-t border-ink-800/50">
+      {/* Features — Bento Layout */}
+      <section className="py-28 border-t border-ink-800/30">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -311,30 +303,59 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Top 3 spotlight features */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-            {features.slice(0, 3).map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative p-8 bg-ink-900/50 border border-ink-700/60 rounded-2xl group overflow-hidden hover:border-accent/40 transition-all duration-300"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                    <feature.Icon className="w-7 h-7" />
+          {/* Hero feature + 2 supporting features in bento layout */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-5">
+            {/* Primary feature — large card spanning 3 cols */}
+            {(() => {
+              const primary = features[0]
+              const PrimaryIcon = primary.Icon
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="md:col-span-3 relative p-8 lg:p-10 bg-ink-900/50 border border-ink-700/60 rounded-2xl group overflow-hidden hover:border-accent/40 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
+                      <PrimaryIcon className="w-7 h-7" />
+                    </div>
+                    <h3 className="font-display text-2xl font-semibold mb-3 text-ink-50">{primary.title}</h3>
+                    <p className="text-ink-400 leading-relaxed text-base max-w-md">{primary.description}</p>
                   </div>
-                  <h3 className="font-display text-xl font-semibold mb-3 text-ink-50">{feature.title}</h3>
-                  <p className="text-ink-400 leading-relaxed text-sm">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              )
+            })()}
+
+            {/* Two supporting features stacked */}
+            <div className="md:col-span-2 flex flex-col gap-5">
+              {features.slice(1, 3).map((feature, i) => {
+                const FeatureIcon = feature.Icon
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: (i + 1) * 0.1 }}
+                    className="flex-1 relative p-6 bg-ink-900/50 border border-ink-700/60 rounded-2xl group overflow-hidden hover:border-accent/40 transition-all duration-300"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    <div className="relative">
+                      <div className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                        <FeatureIcon className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-display text-lg font-semibold mb-2 text-ink-50">{feature.title}</h3>
+                      <p className="text-ink-400 leading-relaxed text-sm">{feature.description}</p>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
 
-          {/* Remaining 9 features — compact horizontal-list grid */}
+          {/* Remaining 9 features — compact */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {features.slice(3).map((feature, i) => (
               <motion.div
@@ -358,14 +379,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Clause Types */}
-      <section className="py-24 border-t border-ink-800/50">
+      {/* Clause Types — light break section */}
+      <section className="py-16 border-t border-ink-800/30">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-10"
           >
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">16+ Clause Types</h2>
             <p className="text-ink-400 max-w-xl mx-auto">
@@ -396,8 +417,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Tech Stack */}
-      <section className="py-24 border-t border-ink-800/50">
+      {/* Built for Trust — replaces raw Tech Stack */}
+      <section className="py-24 border-t border-ink-800/30">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -405,39 +426,48 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Tech Stack</h2>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Built for Trust</h2>
             <p className="text-ink-400 max-w-xl mx-auto">
-              Modern, production-grade architecture with full Docker deployment
+              Production-grade infrastructure you can deploy on your own terms
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {techStack.map((group, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {trustSignals.map((signal, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="p-6 bg-ink-900/30 border border-ink-800/50 rounded-xl"
+                className="p-6 bg-ink-900/30 border border-ink-800/40 rounded-xl group hover:border-accent/30 transition-all"
               >
-                <h3 className="text-xs font-mono text-accent uppercase tracking-widest mb-4">{group.category}</h3>
-                <ul className="space-y-2">
-                  {group.items.map((item, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-ink-300">
-                      <CheckCircle className="w-3.5 h-3.5 text-accent/60 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <div className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-5 group-hover:bg-accent/20 transition-colors">
+                  <signal.Icon className="w-5 h-5" />
+                </div>
+                <h3 className="font-display text-base font-semibold text-ink-100 mb-2">{signal.title}</h3>
+                <p className="text-sm text-ink-500 leading-relaxed">{signal.description}</p>
               </motion.div>
             ))}
+          </div>
+
+          <div className="text-center">
+            <a
+              href="https://github.com/m4cd4r4/BrightClause"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-ink-400 hover:text-accent transition-colors font-medium"
+            >
+              <Github className="w-4 h-4" />
+              View full technical details on GitHub
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Security & Architecture */}
-      <section className="py-24 border-t border-ink-800/50">
+      {/* Architecture — dramatic section */}
+      <section className="py-28 border-t border-ink-800/30">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -475,11 +505,12 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
+            {/* Architecture diagram — dark frame for contrast */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="rounded-xl border border-ink-800/50 overflow-hidden"
+              className="rounded-xl border border-ink-800/50 overflow-hidden theme-dark-frame"
             >
               {([
                 {
@@ -489,7 +520,7 @@ export default function LandingPage() {
                 },
                 {
                   label: 'API Gateway',
-                  bar: 'bg-accent',
+                  bar: 'bg-amber-500',
                   items: ['FastAPI', '8 Routers', 'Server Proxy', 'Pydantic'],
                 },
                 {
@@ -546,7 +577,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 border-t border-ink-800/50">
+      <section className="py-20 border-t border-ink-800/30">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -554,19 +585,19 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <div className="mx-auto mb-8 w-fit">
-              <Image src="/logo.png" alt="BrightClause" width={64} height={64} className="object-contain" style={{ mixBlendMode: 'screen' }} />
+              <Image src="/logo-minimal.png" alt="BrightClause" width={64} height={64} className="object-contain" />
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
-              See It in Action
+              Upload Your First Contract
             </h2>
             <p className="text-ink-400 text-lg mb-10 max-w-lg mx-auto">
-              Upload a contract and chat with it. Explore clause extraction, risk assessment, obligation tracking, deal grouping, and knowledge graph visualization.
+              See clause extraction, risk scoring, obligation tracking, and knowledge graph visualization in action.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/dashboard"
-                className="group flex items-center gap-3 px-8 py-4 bg-accent text-ink-950 rounded-xl font-semibold text-lg
-                         hover:bg-accent-light hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
+                className="group flex items-center gap-3 px-8 py-4 bg-accent text-[#1a1a2e] rounded-xl font-semibold text-lg
+                         hover:brightness-110 hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
               >
                 Explore the Demo
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -587,12 +618,12 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-ink-800/50 py-8">
+      <footer className="border-t border-ink-800/30 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-ink-500 text-sm">
-            <Image src="/logo.png" alt="BrightClause" width={20} height={20} className="object-contain" style={{ mixBlendMode: 'screen' }} />
+            <Image src="/logo-minimal.png" alt="BrightClause" width={20} height={20} className="object-contain" />
             <span>BrightClause</span>
-            <span className="text-ink-700">·</span>
+            <span className="text-ink-700">&middot;</span>
             <span>Built by Macdara</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-ink-500">
