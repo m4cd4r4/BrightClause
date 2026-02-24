@@ -32,8 +32,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
               alt="BrightClause"
               width={40}
               height={40}
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
-              style={{ mixBlendMode: 'screen' }}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-lg"
             />
             <div className="hidden sm:block">
               <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
