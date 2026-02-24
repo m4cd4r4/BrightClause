@@ -4,6 +4,7 @@ import { colors, fonts, springs } from "../styles";
 interface SceneBadgeProps {
   title: string;
   subtitle: string;
+  mobile?: boolean;
 }
 
 export const SceneBadge: React.FC<SceneBadgeProps> = ({ title, subtitle }) => {
