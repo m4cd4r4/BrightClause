@@ -30,6 +30,8 @@ export default function DealDetailPage() {
   const [showAddDocs, setShowAddDocs] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [adding, setAdding] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deletingDeal, setDeletingDeal] = useState(false)
 
   const loadDeal = useCallback(async () => {
     try {
@@ -69,6 +71,19 @@ export default function DealDetailPage() {
       showError('Failed to add documents.')
     } finally {
       setAdding(false)
+    }
+  }
+
+  const handleDeleteDeal = async () => {
+    setDeletingDeal(true)
+    try {
+      await api.deals.delete(dealId)
+      showSuccess('Deal deleted.')
+      router.push('/deals')
+    } catch {
+      showError('Failed to delete deal.')
+      setDeletingDeal(false)
+      setConfirmDelete(false)
     }
   }
 
@@ -141,15 +156,48 @@ export default function DealDetailPage() {
               <p className="text-sm text-ink-500 mt-1 ml-9">{deal.description}</p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={openAddDocs}
-            className="flex items-center gap-2 px-4 py-2 bg-accent text-ink-950 font-semibold rounded-lg
-                     hover:bg-accent-light transition-colors text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Documents</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {confirmDelete ? (
+              <>
+                <span className="text-xs text-ink-400">Delete this deal?</span>
+                <button
+                  type="button"
+                  onClick={handleDeleteDeal}
+                  disabled={deletingDeal}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white font-semibold rounded-lg
+                           hover:bg-red-400 transition-colors text-sm disabled:opacity-50"
+                >
+                  {deletingDeal ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-3 py-2 text-ink-400 hover:text-ink-200 text-sm transition-colors"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="p-2 text-ink-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                title="Delete deal"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={openAddDocs}
+              className="flex items-center gap-2 px-4 py-2 bg-accent text-ink-950 font-semibold rounded-lg
+                       hover:bg-accent-light transition-colors text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add Documents</span>
+            </button>
+          </div>
         </motion.div>
 
         {/* Aggregate Stats */}
