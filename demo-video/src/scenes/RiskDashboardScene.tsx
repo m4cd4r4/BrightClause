@@ -90,16 +90,6 @@ export const RiskDashboardScene: React.FC<RiskDashboardSceneProps> = ({ mobile }
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg, opacity: exitOpacity }}>
-      <ScreenshotReveal
-        src="assets/journey/050-document-analysis-full.png"
-        delay={0}
-        startScale={1.05}
-        endScale={1.1}
-        opacity={0.12}
-        blur={14}
-        borderRadius={0}
-        shadow={false}
-      />
       {!mobile && (
         <ScreenshotReveal
           src="assets/journey/080-clause-critical-expanded.png"

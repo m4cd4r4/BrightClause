@@ -37,8 +37,8 @@ export const OutroScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
-      <AnimatedBackground backgroundImage="assets/outro-bg.png" accentColor={colors.accent} bgImageOpacity={0.15} showParticles showGrid showScanLine />
-      <GlowOrb pulse y="40%" maxOpacity={0.5} maxScale={1.5} />
+      <AnimatedBackground accentColor={colors.accent} showGrid showScanLine={false} showParticles={false} />
+      <GlowOrb pulse y="40%" maxOpacity={0.2} maxScale={1.2} />
 
       <div style={{ ...centered }}>
         {/* Logo */}
@@ -74,7 +74,7 @@ export const OutroScene: React.FC = () => {
               fontWeight: 400,
             }}
           >
-            AI-Powered Contract Analysis for M&A Due Diligence
+            Contract Intelligence for M&A Due Diligence
           </p>
         </FadeInSlide>
 
@@ -146,7 +146,7 @@ export const OutroScene: React.FC = () => {
           opacity: footerOpacity,
         }}
       >
-        AI-Powered Contract Intelligence — brightclause.com
+        Contract Intelligence — brightclause.com
       </div>
     </AbsoluteFill>
   );
