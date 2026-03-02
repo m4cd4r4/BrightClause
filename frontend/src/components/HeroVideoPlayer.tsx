@@ -91,9 +91,29 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
     player.play()
   }, [])
 
-  const handleToggleExpanded = useCallback(() => {
-    setIsExpanded(prev => !prev)
+  // Sync expanded state with native fullscreen changes (e.g. user presses Escape)
+  useEffect(() => {
+    const onFsChange = () => {
+      if (!document.fullscreenElement) setIsExpanded(false)
+    }
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
   }, [])
+
+  const handleToggleExpanded = useCallback(() => {
+    if (!isExpanded && containerRef.current?.requestFullscreen) {
+      containerRef.current.requestFullscreen().catch(() => {
+        // Fallback: CSS-only expanded mode if API blocked
+        setIsExpanded(true)
+      })
+      setIsExpanded(true)
+    } else {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {})
+      }
+      setIsExpanded(false)
+    }
+  }, [isExpanded])
 
   const activeSceneIndex = SCENES.findLastIndex(s => currentFrame >= s.from)
 
@@ -104,7 +124,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
         <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm pointer-events-none" />
       )}
 
-      <div className={isExpanded ? 'fixed inset-0 z-50 flex items-center justify-center p-4' : 'relative'}>
+      <div className={isExpanded ? 'fixed inset-0 z-[60] flex items-center justify-center' : 'relative'}>
         {/* Glow behind video (hidden when expanded) */}
         {!isExpanded && (
           <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
@@ -114,7 +134,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
           ref={containerRef}
           className={`relative bg-ink-950 overflow-hidden flex flex-col
             ${isExpanded
-              ? 'border border-ink-700/40 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)]'
+              ? 'w-full h-full'
               : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.05)]'
             }`}
         >
@@ -141,9 +161,9 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
 
           {/* Remotion Player — click to expand/collapse */}
           <div
-            className="cursor-pointer"
+            className={`cursor-pointer ${isExpanded ? 'flex-1 min-h-0' : ''}`}
             onClick={handleToggleExpanded}
-            title={isExpanded ? 'Click to collapse' : 'Click to expand'}
+            title={isExpanded ? 'Click to exit fullscreen' : 'Click to fullscreen'}
           >
             <Player
               ref={playerRef}
@@ -154,9 +174,9 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               fps={30}
               autoPlay
               style={{
-                width: isExpanded ? 'calc((88vh - 120px) * 16 / 9)' : '100%',
-                maxWidth: isExpanded ? '95vw' : undefined,
-                aspectRatio: '16 / 9',
+                width: '100%',
+                flex: isExpanded ? '1 1 0%' : undefined,
+                aspectRatio: isExpanded ? undefined : '16 / 9',
                 pointerEvents: 'none',
               }}
               controls={false}
