@@ -94,22 +94,32 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
   // Sync expanded state with native fullscreen changes (e.g. user presses Escape)
   useEffect(() => {
     const onFsChange = () => {
-      if (!document.fullscreenElement) setIsExpanded(false)
+      const fsEl = document.fullscreenElement ?? (document as any).webkitFullscreenElement
+      if (!fsEl) setIsExpanded(false)
     }
     document.addEventListener('fullscreenchange', onFsChange)
-    return () => document.removeEventListener('fullscreenchange', onFsChange)
+    document.addEventListener('webkitfullscreenchange', onFsChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange)
+      document.removeEventListener('webkitfullscreenchange', onFsChange)
+    }
   }, [])
 
   const handleToggleExpanded = useCallback(() => {
-    if (!isExpanded && containerRef.current?.requestFullscreen) {
-      containerRef.current.requestFullscreen().catch(() => {
-        // Fallback: CSS-only expanded mode if API blocked
+    const el = containerRef.current as any
+    if (!isExpanded && el) {
+      const goFullscreen = el.requestFullscreen?.bind(el) ?? el.webkitRequestFullscreen?.bind(el)
+      if (goFullscreen) {
+        goFullscreen().catch(() => setIsExpanded(true))
         setIsExpanded(true)
-      })
-      setIsExpanded(true)
+      } else {
+        // No fullscreen support (e.g. iPhone) — CSS fallback
+        setIsExpanded(true)
+      }
     } else {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {})
+      const exitFs = document.exitFullscreen?.bind(document) ?? (document as any).webkitExitFullscreen?.bind(document)
+      if (exitFs && (document.fullscreenElement ?? (document as any).webkitFullscreenElement)) {
+        exitFs().catch(() => {})
       }
       setIsExpanded(false)
     }
