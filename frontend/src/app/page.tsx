@@ -12,10 +12,13 @@ import {
   Briefcase, Sun, Activity, Play, Server
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
-import { ScreenshotShowcase } from '@/components/ScreenshotShowcase'
 
 const HeroVideoPlayer = lazy(() =>
   import('@/components/HeroVideoPlayer').then(m => ({ default: m.HeroVideoPlayer }))
+)
+
+const ScreenshotShowcase = lazy(() =>
+  import('@/components/ScreenshotShowcase').then(m => ({ default: m.ScreenshotShowcase }))
 )
 
 const features: { Icon: React.ElementType; title: string; description: string }[] = [
@@ -225,8 +228,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Screenshot Showcase */}
-      <ScreenshotShowcase />
+      {/* Screenshot Showcase (lazy — below fold) */}
+      <Suspense fallback={<div className="py-24" />}>
+        <ScreenshotShowcase />
+      </Suspense>
 
       {/* How It Works */}
       <section className="py-20 border-t border-ink-800/30">

@@ -54,7 +54,7 @@ export function ScreenshotShowcase() {
   // Auto-advance with smooth progress bar
   useEffect(() => {
     if (paused) return
-    const interval = 50
+    const interval = 100
     const step = (interval / AUTOPLAY_MS) * 100
     const ticker = setInterval(() => {
       setProgress(p => {
