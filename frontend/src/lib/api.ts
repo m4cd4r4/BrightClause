@@ -239,7 +239,11 @@ export const api = {
         method: 'POST',
         body: formData,
       })
-      if (!response.ok) throw new Error('Upload failed')
+      if (!response.ok) {
+        if (response.status === 429) throw new Error('429: Upload rate limit exceeded')
+        if (response.status === 503) throw new Error('503: Server busy processing documents')
+        throw new Error(`Upload failed (${response.status})`)
+      }
       return response.json() as Promise<Document>
     },
     rename: (id: string, filename: string) =>

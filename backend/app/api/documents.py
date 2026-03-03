@@ -1,13 +1,15 @@
 """Document upload and management endpoints."""
 
 from uuid import UUID
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
+import redis as redis_lib
 from app.core.database import get_db
 from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.models.document import Document
 from app.services.storage import upload_document as minio_upload, delete_document as minio_delete, get_document_url
 from app.api.activity import log_activity
@@ -47,13 +49,28 @@ class DocumentListResponse(BaseModel):
     limit: int
 
 
+def _get_queue_depth() -> int:
+    """Check the current Celery task queue depth in Redis."""
+    try:
+        r = redis_lib.from_url(settings.redis_url, decode_responses=True)
+        return r.llen("celery") or 0
+    except Exception:
+        return 0
+
+
+MAX_QUEUE_DEPTH = 20
+ESTIMATED_SECONDS_PER_DOC = 30
+
+
 @router.post("/upload", response_model=DocumentResponse)
+@limiter.limit("5/minute")
 async def upload_document(
+    request: Request,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Upload a contract document (PDF).
+    Upload a contract document (PDF). Rate limited to 5 uploads/minute per IP.
 
     The document will be stored in MinIO and processed asynchronously by Celery:
     1. Store in MinIO
@@ -74,6 +91,14 @@ async def upload_document(
         raise HTTPException(
             status_code=400,
             detail=f"File too large. Maximum size is {settings.max_file_size // (1024*1024)}MB",
+        )
+
+    # Queue back-pressure: reject uploads when queue is saturated
+    queue_depth = _get_queue_depth()
+    if queue_depth >= MAX_QUEUE_DEPTH:
+        raise HTTPException(
+            status_code=503,
+            detail="Server is busy processing documents. Please try again in a few minutes.",
         )
 
     # Create document record
@@ -102,6 +127,13 @@ async def upload_document(
         # Log activity
         await log_activity(db, "uploaded", doc.id, {"filename": doc.filename, "file_size": doc.file_size})
 
+        # Calculate queue position and estimated wait time
+        queue_position = _get_queue_depth()
+        estimated_wait = queue_position * ESTIMATED_SECONDS_PER_DOC
+        response_metadata = doc.doc_metadata or {}
+        response_metadata["queue_position"] = queue_position
+        response_metadata["estimated_wait_seconds"] = estimated_wait
+
         return DocumentResponse(
             id=doc.id,
             filename=doc.filename,
@@ -109,7 +141,7 @@ async def upload_document(
             file_type=doc.file_type,
             page_count=doc.page_count,
             status=doc.status,
-            metadata=doc.doc_metadata,
+            metadata=response_metadata,
         )
 
     except Exception as e:

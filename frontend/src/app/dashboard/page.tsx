@@ -143,12 +143,25 @@ function DashboardContent() {
 
     setUploading(true)
     try {
-      await api.documents.upload(file)
-      showSuccess(`"${file.name}" uploaded successfully. Processing will begin shortly.`)
+      const doc = await api.documents.upload(file)
+      const queuePos = (doc.metadata as Record<string, unknown>)?.queue_position as number | undefined
+      const waitSecs = (doc.metadata as Record<string, unknown>)?.estimated_wait_seconds as number | undefined
+      const waitStr = waitSecs && waitSecs > 0
+        ? waitSecs < 60 ? `~${waitSecs}s` : `~${Math.ceil(waitSecs / 60)} min`
+        : '~30s'
+      const queueStr = queuePos && queuePos > 1 ? ` · #${queuePos} in queue` : ''
+      showSuccess(`"${file.name}" uploaded${queueStr} — results in ${waitStr}`)
       await loadData()
     } catch (err) {
       console.error('Upload failed:', err)
-      showError(`Upload failed: ${err instanceof Error ? err.message : 'Server error'}`)
+      const msg = err instanceof Error ? err.message : 'Server error'
+      if (msg.includes('429') || msg.includes('rate')) {
+        showError('Upload limit reached. Please wait a minute before uploading again.')
+      } else if (msg.includes('503') || msg.includes('busy')) {
+        showError('Server is busy processing documents. Please try again shortly.')
+      } else {
+        showError(`Upload failed: ${msg}`)
+      }
     } finally {
       setUploading(false)
       if (fileInputRef.current) {
@@ -240,7 +253,8 @@ function DashboardContent() {
       }
     }
     if (uploaded > 0) {
-      showSuccess(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded successfully.`)
+      const waitStr = uploaded <= 2 ? '~30s' : `~${Math.ceil((uploaded * 30) / 60)} min`
+      showSuccess(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded — results in ${waitStr}`)
       await loadData()
     }
     setUploading(false)
@@ -272,7 +286,8 @@ function DashboardContent() {
       }
     }
     if (uploaded > 0) {
-      showSuccess(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded successfully.`)
+      const waitStr = uploaded <= 2 ? '~30s' : `~${Math.ceil((uploaded * 30) / 60)} min`
+      showSuccess(`${uploaded} file${uploaded > 1 ? 's' : ''} uploaded — results in ${waitStr}`)
       await loadData()
     }
     setUploading(false)
@@ -289,6 +304,8 @@ function DashboardContent() {
         return <CheckCircle className="w-4 h-4 text-emerald-500" />
       case 'processing':
         return <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+      case 'queued':
+        return <Clock className="w-4 h-4 text-blue-400 animate-pulse" />
       case 'failed':
         return <FileWarning className="w-4 h-4 text-red-500" />
       default:
@@ -658,10 +675,18 @@ function DashboardContent() {
                               </div>
                             )}
                             <div className="flex items-center gap-4 mt-2">
-                              <span className="text-[11px] text-ink-500 font-mono uppercase tracking-wide">
+                              <span className={`text-[11px] font-mono uppercase tracking-wide ${
+                                doc.status === 'completed' ? 'text-ink-500'
+                                : doc.status === 'queued' ? 'text-blue-400'
+                                : doc.status === 'processing' ? 'text-amber-400'
+                                : 'text-ink-500'
+                              }`}>
                                 {doc.status === 'completed'
                                   ? doc.page_count ? `${doc.page_count} pages` : 'Unknown pages'
-                                  : 'Processing...'
+                                  : doc.status === 'queued' ? 'Queued · ~30s'
+                                  : doc.status === 'processing' ? 'Processing...'
+                                  : doc.status === 'failed' ? 'Failed'
+                                  : doc.status
                                 }
                               </span>
                               {doc.chunk_count > 0 && (

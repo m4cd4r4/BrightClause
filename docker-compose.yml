@@ -99,7 +99,7 @@ services:
         condition: service_started
       ollama:
         condition: service_started
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
 
   # Celery Worker for async document processing
   worker:
@@ -128,7 +128,7 @@ services:
         condition: service_started
       ollama:
         condition: service_started
-    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=2 -Q celery,documents,embeddings
+    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=4 -Q celery,documents,embeddings
 
   # Celery Beat for scheduled tasks (optional)
   # beat:

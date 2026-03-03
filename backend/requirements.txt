@@ -39,6 +39,9 @@ tiktoken>=0.5.2
 # HTTP Client (for Ollama)
 httpx==0.26.0
 
+# Rate Limiting
+slowapi==0.1.9
+
 # Utilities
 python-dotenv==1.0.0
 tenacity==8.2.3
