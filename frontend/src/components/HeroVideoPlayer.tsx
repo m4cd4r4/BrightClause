@@ -174,8 +174,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             className={`cursor-pointer ${isExpanded ? 'flex-1 min-h-0' : ''}`}
             onClick={handleToggleExpanded}
             title={isExpanded ? 'Click to exit fullscreen' : 'Click to fullscreen'}
-            role="img"
-            aria-label="BrightClause product demo video showing contract analysis features"
+            aria-hidden="true"
           >
             <Player
               ref={playerRef}
@@ -195,8 +194,8 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             />
           </div>
 
-          {/* Segmented scene progress bar */}
-          <div className="flex bg-ink-900/80 h-2">
+          {/* Segmented scene progress bar — visual h-2, touch target 44px via padding */}
+          <div className="relative flex h-2">
           {SCENES.map((scene, i) => {
             const widthPct = (scene.duration / TOTAL_FRAMES) * 100
             const isActive = i === activeSceneIndex
@@ -208,18 +207,18 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <button
                 key={scene.name}
                 onClick={() => handleSeekToScene(scene.from)}
-                className="relative h-full transition-colors"
+                className="relative h-2 py-5 -my-4 box-content transition-colors cursor-pointer"
                 style={{ width: `${widthPct}%` }}
                 aria-label={`Jump to ${scene.name}`}
               >
-                <div className={`absolute inset-0 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
+                <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
                 {isActive && (
                   <div
-                    className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-100"
+                    className="absolute top-1/2 -translate-y-1/2 left-0 h-2 bg-accent transition-[width] duration-100"
                     style={{ width: `${progressInScene}%` }}
                   />
                 )}
-                {i > 0 && <div className="absolute left-0 inset-y-0 w-px bg-ink-700/30" />}
+                {i > 0 && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-2 w-px bg-ink-700/30" />}
               </button>
             )
           })}
@@ -234,7 +233,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <button
                 key={scene.name}
                 onClick={() => handleSeekToScene(scene.from)}
-                className={`font-mono transition-colors truncate text-[9px] py-1.5
+                className={`font-mono transition-colors truncate text-[9px] py-3
                   ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}
                 style={{ width: `${widthPct}%` }}
               >

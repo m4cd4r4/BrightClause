@@ -179,7 +179,7 @@ export function WalkthroughOverlay({
           <div className="px-5 py-4 border-b border-ink-800/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-accent" />
-              <span className="text-xs font-mono text-ink-400 uppercase tracking-wide">
+              <span className="text-xs font-mono text-ink-300 uppercase tracking-wide">
                 Step {step + 1} of {totalSteps}
               </span>
             </div>
@@ -188,7 +188,7 @@ export function WalkthroughOverlay({
               className="p-1 hover:bg-ink-800 rounded-lg transition-colors"
               aria-label="Close walkthrough"
             >
-              <X className="w-4 h-4 text-ink-400" />
+              <X className="w-4 h-4 text-ink-300" />
             </button>
           </div>
 
@@ -197,7 +197,7 @@ export function WalkthroughOverlay({
             <h3 className="font-display text-lg font-semibold text-ink-50 mb-2">
               {currentStep.title}
             </h3>
-            <p className="text-sm text-ink-400 leading-relaxed">
+            <p className="text-sm text-ink-300 leading-relaxed">
               {currentStep.description}
             </p>
           </div>
@@ -218,7 +218,7 @@ export function WalkthroughOverlay({
           <div className="px-5 py-4 flex items-center justify-between">
             <button
               onClick={dismiss}
-              className="text-sm text-ink-400 hover:text-ink-300 transition-colors"
+              className="text-sm text-ink-300 hover:text-ink-100 transition-colors"
             >
               Skip tour
             </button>
