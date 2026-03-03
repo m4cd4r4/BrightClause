@@ -233,7 +233,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <button
                 key={scene.name}
                 onClick={() => handleSeekToScene(scene.from)}
-                className={`font-mono transition-colors truncate text-[9px] py-3
+                className={`font-mono transition-colors truncate text-[9px] py-4
                   ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}
                 style={{ width: `${widthPct}%` }}
               >
