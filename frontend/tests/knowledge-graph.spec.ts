@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test'
 
-const API_URL = 'http://45.77.233.102:8003'
 const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
 
 test.describe('Knowledge Graph Features', () => {
@@ -8,23 +7,20 @@ test.describe('Knowledge Graph Features', () => {
     await page.addInitScript(() => {
       localStorage.setItem('bc_walkthrough_seen', 'true')
     })
-    await page.goto(`${FRONTEND_URL}/dashboard`, { waitUntil: 'domcontentloaded' })
-    await page.waitForTimeout(3000)
 
-    // Click first document to select it
-    const pdfFiles = page.locator('h3').filter({ hasText: /\.pdf$/i })
-    const docCount = await pdfFiles.count()
+    // Find a completed document via API and navigate directly to its graph page
+    const res = await page.request.get(`${FRONTEND_URL}/api/documents?limit=10`)
+    const data = await res.json() as { documents: any[] }
+    const completed = data.documents.find((d: any) => d.status === 'completed')
 
-    if (docCount > 0) {
-      await pdfFiles.first().click()
-      await page.waitForTimeout(1000)
-
-      // Navigate to graph page if Knowledge Graph button exists
-      const graphButton = page.getByRole('button', { name: /Knowledge Graph/i }).first()
-      if (await graphButton.isVisible({ timeout: 5000 })) {
-        await graphButton.click()
-        await page.waitForURL(/\/documents\/[a-f0-9-]+\/graph$/, { timeout: 10000 })
-      }
+    if (completed) {
+      await page.goto(`${FRONTEND_URL}/documents/${completed.id}/graph`, {
+        waitUntil: 'domcontentloaded',
+      })
+      await page.waitForTimeout(3000)
+    } else {
+      // No documents — tests will be skipped via individual checks
+      await page.goto(`${FRONTEND_URL}/dashboard`, { waitUntil: 'domcontentloaded' })
     }
   })
 

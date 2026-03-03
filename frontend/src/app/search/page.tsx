@@ -157,7 +157,7 @@ export default function SearchPage() {
             </div>
 
             {/* Search Options Row */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 {/* Search Mode Buttons */}
                 {(Object.keys(searchModes) as SearchMode[]).map((mode) => {
@@ -168,7 +168,7 @@ export default function SearchPage() {
                       key={mode}
                       type="button"
                       onClick={() => setSearchMode(mode)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-all
                                 ${searchMode === mode
                                   ? 'bg-accent/20 text-accent border border-accent/30'
                                   : 'bg-ink-800/50 text-ink-400 border border-transparent hover:bg-ink-800'}`}

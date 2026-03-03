@@ -626,13 +626,16 @@ export default function LandingPage() {
             <span className="text-ink-700">&middot;</span>
             <span>Built by Macdara</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-ink-500">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-500">
+            <Link href="/dashboard" className="hover:text-ink-300 transition-colors">Dashboard</Link>
+            <Link href="/analytics" className="hover:text-ink-300 transition-colors">Analytics</Link>
+            <Link href="/search" className="hover:text-ink-300 transition-colors">Search</Link>
+            <Link href="/compare" className="hover:text-ink-300 transition-colors">Compare</Link>
+            <Link href="/obligations" className="hover:text-ink-300 transition-colors">Obligations</Link>
+            <Link href="/deals" className="hover:text-ink-300 transition-colors">Deals</Link>
             <a href="https://github.com/m4cd4r4/BrightClause" target="_blank" rel="noopener noreferrer" className="hover:text-ink-300 transition-colors">
               GitHub
             </a>
-            <Link href="/dashboard" className="hover:text-ink-300 transition-colors">
-              Dashboard
-            </Link>
           </div>
         </div>
       </footer>

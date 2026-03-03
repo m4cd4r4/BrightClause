@@ -3,26 +3,23 @@ import { test, expect } from '@playwright/test'
 const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
 
 test.describe('Document Detail Page', () => {
-  let testDocId: string
-
-  test.beforeAll(async ({ request }) => {
-    test.setTimeout(60_000)
-    // Fetch a completed document with clauses from the API
-    const res = await request.get(`${FRONTEND_URL}/api/documents?limit=10`)
-    const data = await res.json()
-    // Prefer a document with chunks (more likely to have clauses)
-    const withChunks = data.documents?.find((d: any) => d.status === 'completed' && d.chunk_count > 1)
-    const completed = withChunks || data.documents?.find((d: any) => d.status === 'completed')
-    testDocId = completed?.id || ''
-  })
-
   test.beforeEach(async ({ page }) => {
-    test.skip(!testDocId, 'No completed documents available')
     await page.addInitScript(() => {
       localStorage.setItem('bc_walkthrough_seen', 'true')
     })
-    await page.goto(`${FRONTEND_URL}/documents/${testDocId}`, { waitUntil: 'domcontentloaded' })
-    await page.waitForTimeout(3000)
+
+    // Find a completed document via API and navigate directly
+    const res = await page.request.get(`${FRONTEND_URL}/api/documents?limit=10`)
+    const data = await res.json() as { documents: any[] }
+    const withChunks = data.documents?.find((d: any) => d.status === 'completed' && d.chunk_count > 1)
+    const completed = withChunks || data.documents?.find((d: any) => d.status === 'completed')
+
+    if (completed) {
+      await page.goto(`${FRONTEND_URL}/documents/${completed.id}`, { waitUntil: 'domcontentloaded' })
+      await page.waitForTimeout(3000)
+    } else {
+      test.skip()
+    }
   })
 
   test('should display document header with filename', async ({ page }) => {
