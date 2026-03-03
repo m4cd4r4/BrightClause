@@ -122,7 +122,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen light-editorial">
+    <div id="main-content" className="min-h-screen light-editorial">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/40 bg-ink-950/85 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">

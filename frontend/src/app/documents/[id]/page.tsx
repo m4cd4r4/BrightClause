@@ -281,7 +281,7 @@ export default function DocumentDetailPage() {
     return (
       <div className="min-h-screen">
         <Navigation />
-        <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+        <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
             <div className="skeleton h-28 rounded-lg col-span-2 md:col-span-3 lg:col-span-2" />
             {Array.from({ length: 4 }).map((_, i) => (
@@ -492,7 +492,7 @@ export default function DocumentDetailPage() {
         </div>
       </Navigation>
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* PDF Viewer Mode */}
         {viewMode === 'pdf' ? (
           <PdfViewer

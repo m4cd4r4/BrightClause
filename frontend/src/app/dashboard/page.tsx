@@ -388,7 +388,8 @@ function DashboardContent() {
         )}
       </AnimatePresence>
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+        <h1 className="sr-only">Contract Dashboard</h1>
         {/* Stats Row - Data Dense */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

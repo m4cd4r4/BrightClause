@@ -41,7 +41,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1">
             {navLinks.map(({ href, label, icon: Icon }) => {
               const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
               return (
@@ -54,7 +54,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
                       : 'text-ink-400 hover:text-ink-200 hover:bg-ink-800/50 border border-transparent'
                     }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4" aria-hidden="true" />
                   {label}
                 </Link>
               )
@@ -86,7 +86,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
 
         {/* Mobile Nav */}
         {mobileOpen && (
-          <nav className="md:hidden mt-3 pt-3 border-t border-ink-800/50 flex flex-col gap-1">
+          <nav aria-label="Mobile navigation" className="md:hidden mt-3 pt-3 border-t border-ink-800/50 flex flex-col gap-1">
             {navLinks.map(({ href, label, icon: Icon }) => {
               const active = pathname === href
               return (
@@ -100,7 +100,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
                       : 'text-ink-400 hover:text-ink-200 hover:bg-ink-800/50'
                     }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4" aria-hidden="true" />
                   {label}
                 </Link>
               )

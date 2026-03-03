@@ -144,7 +144,7 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen bg-ink-950">
         <Navigation />
-        <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+        <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="skeleton h-28 rounded-xl" />
@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-ink-950">
       <Navigation />
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

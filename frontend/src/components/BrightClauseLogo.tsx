@@ -12,6 +12,8 @@ export function BrightClauseMark({ size = 40, className = '' }: BrightClauseLogo
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      aria-label="BrightClause"
+      role="img"
     >
       {/* Document body */}
       <path

@@ -57,9 +57,44 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'SoftwareApplication',
+        name: 'BrightClause',
+        description: 'AI-powered contract intelligence platform. Upload contracts, extract clauses, assess risk levels, and visualize entity relationships.',
+        url: 'https://brightclause.com',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
+        featureList: 'AI Clause Extraction, Risk Assessment, Knowledge Graph, Hybrid Vector Search, Obligation Tracking, Executive Reports',
+        screenshot: 'https://brightclause.com/assets/screenshot-dashboard.png',
+      },
+      {
+        '@type': 'Organization',
+        name: 'BrightClause',
+        url: 'https://brightclause.com',
+        logo: 'https://brightclause.com/logo-minimal.png',
+        sameAs: ['https://github.com/m4cd4r4/BrightClause'],
+      },
+    ],
+  }
+
   return (
     <html lang="en" className={`${cormorant.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="antialiased">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-accent focus:text-ink-950 focus:rounded-lg focus:font-semibold">
+          Skip to content
+        </a>
         <Providers>
           {children}
         </Providers>

@@ -113,7 +113,7 @@ export default function SearchPage() {
     <div className="min-h-screen">
       <Navigation />
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Search Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -121,9 +121,9 @@ export default function SearchPage() {
           className="max-w-3xl mx-auto"
         >
           <div className="text-center mb-8">
-            <h2 className="font-display text-3xl font-bold tracking-tight text-ink-50 mb-2">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50 mb-2">
               Search Your Contract Portfolio
-            </h2>
+            </h1>
             <p className="text-ink-400">
               Use natural language or keywords to find relevant clauses and provisions
             </p>

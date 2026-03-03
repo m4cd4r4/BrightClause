@@ -149,7 +149,7 @@ export function HeroVisual() {
             </div>
 
             <div className="flex-1 flex items-center justify-center">
-              <svg viewBox="0 0 300 185" className="w-full max-h-[240px]">
+              <svg viewBox="0 0 300 185" className="w-full max-h-[240px]" aria-hidden="true">
                 {graphEdges.map(([fromId, toId], i) => {
                   const from = nodeMap[fromId]
                   const to = nodeMap[toId]

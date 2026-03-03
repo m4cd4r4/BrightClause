@@ -76,7 +76,7 @@ export default function ObligationsPage() {
     <div className="min-h-screen bg-ink-950">
       <Navigation />
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

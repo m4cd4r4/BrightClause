@@ -101,7 +101,7 @@ export default function DealDetailPage() {
     return (
       <div className="min-h-screen bg-ink-950">
         <Navigation />
-        <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+        <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
           <div className="skeleton h-8 w-60 rounded mb-6" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -117,7 +117,7 @@ export default function DealDetailPage() {
     return (
       <div className="min-h-screen bg-ink-950">
         <Navigation />
-        <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8 text-center">
+        <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8 text-center">
           <p className="text-ink-500">Deal not found.</p>
         </main>
       </div>
@@ -131,7 +131,7 @@ export default function DealDetailPage() {
     <div className="min-h-screen bg-ink-950">
       <Navigation />
 
-      <main className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Back + Header */}
         <button
           type="button"
