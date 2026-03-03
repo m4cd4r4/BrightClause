@@ -1,45 +1,40 @@
 import { test, expect } from '@playwright/test'
 
-const FRONTEND_URL = 'http://localhost:3000'
+const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
 
 test.describe('Document Detail Page', () => {
+  let testDocId: string
+
+  test.beforeAll(async ({ request }) => {
+    test.setTimeout(60_000)
+    // Fetch a completed document with clauses from the API
+    const res = await request.get(`${FRONTEND_URL}/api/documents?limit=10`)
+    const data = await res.json()
+    // Prefer a document with chunks (more likely to have clauses)
+    const withChunks = data.documents?.find((d: any) => d.status === 'completed' && d.chunk_count > 1)
+    const completed = withChunks || data.documents?.find((d: any) => d.status === 'completed')
+    testDocId = completed?.id || ''
+  })
+
   test.beforeEach(async ({ page }) => {
-    // Navigate to dashboard first
-    await page.goto(FRONTEND_URL)
-    await page.waitForLoadState('networkidle')
-    await page.waitForSelector('text=Contract Portfolio', { timeout: 10000 })
-    await page.waitForTimeout(1000)
-
-    // Click first document to select it
-    const pdfFiles = page.locator('h3').filter({ hasText: /\.pdf$/i })
-    const docCount = await pdfFiles.count()
-
-    if (docCount > 0) {
-      await pdfFiles.first().click()
-      await page.waitForTimeout(1000)
-
-      // Navigate to document detail page
-      const viewButton = page.getByRole('button', { name: /View Full Analysis|View Details/i }).first()
-      if (await viewButton.isVisible({ timeout: 5000 })) {
-        await viewButton.click()
-        await page.waitForURL(/\/documents\/[a-f0-9-]+$/, { timeout: 10000 })
-      }
-    }
+    test.skip(!testDocId, 'No completed documents available')
+    await page.addInitScript(() => {
+      localStorage.setItem('bc_walkthrough_seen', 'true')
+    })
+    await page.goto(`${FRONTEND_URL}/documents/${testDocId}`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(3000)
   })
 
   test('should display document header with filename', async ({ page }) => {
-    // Check we're on document detail page
     const url = page.url()
     if (!url.match(/\/documents\/[a-f0-9-]+$/)) {
       test.skip()
       return
     }
 
-    // Should show document filename
-    const header = page.locator('h1')
-    await expect(header).toBeVisible()
-    const text = await header.textContent()
-    expect(text).toMatch(/\.pdf$/i)
+    // Filename shown in the nav bar as a link/span
+    const filename = page.locator('text=/\\.pdf/i').first()
+    await expect(filename).toBeVisible()
   })
 
   test('should have Export dropdown button', async ({ page }) => {
@@ -111,7 +106,7 @@ test.describe('Document Detail Page', () => {
     }
 
     // Look for Knowledge Graph link
-    const graphLink = page.getByRole('link', { name: /Knowledge Graph/i })
+    const graphLink = page.locator('a:has-text("Graph")').first()
     await expect(graphLink).toBeVisible()
   })
 
@@ -124,7 +119,7 @@ test.describe('Document Detail Page', () => {
     }
 
     // Click Knowledge Graph link
-    const graphLink = page.getByRole('link', { name: /Knowledge Graph/i })
+    const graphLink = page.locator('a:has-text("Graph")').first()
     await graphLink.click()
 
     // Should navigate to graph page
@@ -177,18 +172,16 @@ test.describe('Document Detail Page', () => {
 
 test.describe('Export with Larger PDFs', () => {
   test('should upload and process 3MB PDF', async ({ page, browserName }) => {
-    // Skip on Firefox - file chooser events unreliable in headed mode
     test.skip(browserName === 'firefox', 'Firefox file chooser unreliable in headed mode')
 
-    // Navigate to dashboard
-    await page.goto(FRONTEND_URL)
-    await page.waitForLoadState('networkidle')
+    await page.addInitScript(() => {
+      localStorage.setItem('bc_walkthrough_seen', 'true')
+    })
+    await page.goto(`${FRONTEND_URL}/dashboard`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(3000)
 
-    // Set up file chooser listener
     const fileChooserPromise = page.waitForEvent('filechooser')
-
-    // Click upload button
-    await page.getByRole('button', { name: /Upload Contract/i }).click()
+    await page.getByRole('button', { name: /Upload/i }).click()
 
     // Get file chooser
     const fileChooser = await fileChooserPromise
@@ -220,18 +213,16 @@ test.describe('Export with Larger PDFs', () => {
   })
 
   test('should upload and process 562KB NDA PDF', async ({ page, browserName }) => {
-    // Skip on Firefox - file chooser events unreliable in headed mode
     test.skip(browserName === 'firefox', 'Firefox file chooser unreliable in headed mode')
 
-    // Navigate to dashboard
-    await page.goto(FRONTEND_URL)
-    await page.waitForLoadState('networkidle')
+    await page.addInitScript(() => {
+      localStorage.setItem('bc_walkthrough_seen', 'true')
+    })
+    await page.goto(`${FRONTEND_URL}/dashboard`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(3000)
 
-    // Set up file chooser listener
     const fileChooserPromise = page.waitForEvent('filechooser')
-
-    // Click upload button
-    await page.getByRole('button', { name: /Upload Contract/i }).click()
+    await page.getByRole('button', { name: /Upload/i }).click()
 
     // Get file chooser
     const fileChooser = await fileChooserPromise

@@ -18,7 +18,7 @@ test.describe('BrightClause Live Site Audit', () => {
     await page.waitForTimeout(3000)
 
     // Should see the landing page, NOT the access code gate
-    const heroHeading = page.getByRole('heading', { name: /AI-Powered/i })
+    const heroHeading = page.getByRole('heading', { name: /Read Every Clause/i })
     await expect(heroHeading).toBeVisible()
 
     // CTA
@@ -45,14 +45,14 @@ test.describe('BrightClause Live Site Audit', () => {
     await page.screenshot({ path: 'test-results/audit-03-landing-features.png', fullPage: false })
   })
 
-  test('Landing page - Tech Stack and Footer', async ({ page }) => {
+  test('Landing page - Trust Signals and Footer', async ({ page }) => {
     await page.goto(LIVE_URL, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(2000)
 
-    // Scroll to Tech Stack
-    await page.getByRole('heading', { name: /Tech Stack/i }).scrollIntoViewIfNeeded()
+    // Scroll to Built for Trust
+    await page.getByRole('heading', { name: /Built for Trust/i }).scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
-    await page.screenshot({ path: 'test-results/audit-04-landing-tech-stack.png', fullPage: false })
+    await page.screenshot({ path: 'test-results/audit-04-landing-trust.png', fullPage: false })
 
     // Footer
     const footer = page.locator('footer')
@@ -240,6 +240,79 @@ test.describe('BrightClause Live Site Audit', () => {
     expect(data.total).toBeGreaterThan(0)
   })
 
+  // ── Analytics Page ───────────────────────────────────────────
+  test('Analytics page', async ({ page }) => {
+    await page.goto(`${LIVE_URL}/analytics`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(4000)
+
+    // Either shows portfolio analytics or empty state
+    const heading = page.getByRole('heading', { name: /Portfolio Analytics/i })
+    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const hasData = await heading.isVisible().catch(() => false)
+    const isEmpty = await emptyState.isVisible().catch(() => false)
+    expect(hasData || isEmpty).toBeTruthy()
+
+    if (hasData) {
+      // Risk level stats should render
+      await expect(page.getByText(/Critical/i).first()).toBeVisible()
+      await expect(page.getByText(/High/i).first()).toBeVisible()
+      await expect(page.getByText(/Medium/i).first()).toBeVisible()
+      await expect(page.getByText(/Low/i).first()).toBeVisible()
+    }
+
+    await page.screenshot({ path: 'test-results/audit-17-analytics.png', fullPage: false })
+  })
+
+  // ── Compare Page ────────────────────────────────────────────
+  test('Compare page', async ({ page }) => {
+    await page.goto(`${LIVE_URL}/compare`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(3000)
+
+    await expect(page.getByRole('heading', { name: /Document Comparison/i })).toBeVisible()
+    await expect(page.getByText(/Compare clause coverage/i)).toBeVisible()
+
+    // Add Document button
+    await expect(page.getByRole('button', { name: /Add Document/i })).toBeVisible()
+
+    // Should show empty state prompting selection
+    await expect(page.getByText(/Select Documents to Compare|Add One More/i)).toBeVisible()
+
+    await page.screenshot({ path: 'test-results/audit-18-compare.png', fullPage: false })
+
+    // Open document picker
+    await page.getByRole('button', { name: /Add Document/i }).click()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: 'test-results/audit-19-compare-picker.png', fullPage: false })
+  })
+
+  // ── Search Page ─────────────────────────────────────────────
+  test('Search page', async ({ page }) => {
+    await page.goto(`${LIVE_URL}/search`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(3000)
+
+    await expect(page.getByRole('heading', { name: /Search Your Contract/i })).toBeVisible()
+
+    // Search input
+    const searchInput = page.getByPlaceholder(/search/i).first()
+    await expect(searchInput).toBeVisible()
+
+    // Search mode buttons
+    await expect(page.getByRole('button', { name: /Hybrid/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Semantic/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Keyword/i })).toBeVisible()
+
+    // Example searches shown before first search
+    await expect(page.getByText(/Example Searches|Search Tips/i)).toBeVisible()
+
+    await page.screenshot({ path: 'test-results/audit-20-search.png', fullPage: false })
+
+    // Perform a search
+    await searchInput.fill('termination')
+    await page.getByRole('button', { name: /Search/i }).first().click()
+    await page.waitForTimeout(3000)
+    await page.screenshot({ path: 'test-results/audit-21-search-results.png', fullPage: false })
+  })
+
   // ── Mobile ────────────────────────────────────────────────────
   test('Mobile - dashboard', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
@@ -258,6 +331,6 @@ test.describe('BrightClause Live Site Audit', () => {
     await page.waitForTimeout(3000)
 
     await page.screenshot({ path: 'test-results/audit-16-mobile-landing.png', fullPage: false })
-    await expect(page.getByRole('heading', { name: /AI-Powered/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Read Every Clause/i })).toBeVisible()
   })
 })

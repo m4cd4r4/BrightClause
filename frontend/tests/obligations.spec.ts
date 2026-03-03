@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const FRONTEND_URL = 'http://localhost:3000'
+const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
 
 test.describe('BrightClause Obligations Page', () => {
   test.beforeEach(async ({ page }) => {
