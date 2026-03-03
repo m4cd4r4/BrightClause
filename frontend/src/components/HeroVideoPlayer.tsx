@@ -194,8 +194,8 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             />
           </div>
 
-          {/* Segmented scene progress bar — visual h-2, touch target 44px via padding */}
-          <div className="relative flex h-2">
+          {/* Combined scene progress + labels — single row to avoid overlapping touch targets */}
+          <div className="flex bg-ink-950/60">
           {SCENES.map((scene, i) => {
             const widthPct = (scene.duration / TOTAL_FRAMES) * 100
             const isActive = i === activeSceneIndex
@@ -207,37 +207,26 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <button
                 key={scene.name}
                 onClick={() => handleSeekToScene(scene.from)}
-                className="relative h-2 py-5 -my-4 box-content transition-colors cursor-pointer"
+                className={`relative flex flex-col items-stretch transition-colors overflow-hidden
+                  ${i > 0 ? 'border-l border-ink-700/30' : ''}`}
                 style={{ width: `${widthPct}%` }}
                 aria-label={`Jump to ${scene.name}`}
               >
-                <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
-                {isActive && (
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 left-0 h-2 bg-accent transition-[width] duration-100"
-                    style={{ width: `${progressInScene}%` }}
-                  />
-                )}
-                {i > 0 && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-2 w-px bg-ink-700/30" />}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Scene labels */}
-        <div className="flex bg-ink-950/60 border-t border-ink-800/20">
-          {SCENES.map((scene, i) => {
-            const widthPct = (scene.duration / TOTAL_FRAMES) * 100
-            const isActive = i === activeSceneIndex
-            return (
-              <button
-                key={scene.name}
-                onClick={() => handleSeekToScene(scene.from)}
-                className={`font-mono transition-colors truncate text-[9px] py-4
-                  ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}
-                style={{ width: `${widthPct}%` }}
-              >
-                {scene.name}
+                {/* Progress indicator */}
+                <div className="relative h-1.5">
+                  <div className={`absolute inset-0 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
+                  {isActive && (
+                    <div
+                      className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-100"
+                      style={{ width: `${progressInScene}%` }}
+                    />
+                  )}
+                </div>
+                {/* Label */}
+                <span className={`font-mono truncate text-[9px] py-2.5 px-1 text-center
+                  ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}>
+                  {scene.name}
+                </span>
               </button>
             )
           })}
