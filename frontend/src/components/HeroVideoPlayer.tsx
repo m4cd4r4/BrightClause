@@ -174,6 +174,8 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
             className={`cursor-pointer ${isExpanded ? 'flex-1 min-h-0' : ''}`}
             onClick={handleToggleExpanded}
             title={isExpanded ? 'Click to exit fullscreen' : 'Click to fullscreen'}
+            role="img"
+            aria-label="BrightClause product demo video showing contract analysis features"
           >
             <Player
               ref={playerRef}
@@ -194,7 +196,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
           </div>
 
           {/* Segmented scene progress bar */}
-          <div className="flex bg-ink-900/80 h-1">
+          <div className="flex bg-ink-900/80 h-2">
           {SCENES.map((scene, i) => {
             const widthPct = (scene.duration / TOTAL_FRAMES) * 100
             const isActive = i === activeSceneIndex

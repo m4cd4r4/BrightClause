@@ -583,7 +583,7 @@ function DashboardContent() {
 
                       {/* What happens next */}
                       <div className="mt-8 pt-6 border-t border-ink-800/40">
-                        <p className="text-[10px] text-ink-600 font-mono uppercase tracking-wider mb-3">What happens next</p>
+                        <p className="text-[10px] text-ink-500 font-mono uppercase tracking-wider mb-3">What happens next</p>
                         <div className="flex items-center justify-center gap-3 text-[11px] text-ink-400">
                           <span className="flex items-center gap-1.5">
                             <Zap className="w-3 h-3 text-amber-500/70" />
@@ -920,14 +920,14 @@ function DashboardContent() {
                     {/* Preview of what the panel shows */}
                     <div className="p-5 rounded-xl border border-ink-800/30 bg-ink-900/20 mb-5">
                       <div className="text-center">
-                        <div className="text-[11px] text-ink-600 font-mono uppercase tracking-wide mb-2">
+                        <div className="text-[11px] text-ink-500 font-mono uppercase tracking-wide mb-2">
                           Overall Risk Level
                         </div>
-                        <div className="text-2xl font-bold text-ink-700 tracking-tight">
+                        <div className="text-2xl font-bold text-ink-500 tracking-tight">
                           — — —
                         </div>
                         <div className="mt-3 pt-3 border-t border-ink-800/30">
-                          <div className="text-[10px] text-ink-600 font-mono uppercase">
+                          <div className="text-[10px] text-ink-500 font-mono uppercase">
                             No document selected
                           </div>
                         </div>
@@ -938,8 +938,8 @@ function DashboardContent() {
                     <div className="grid grid-cols-2 gap-3 mb-5">
                       {['Critical', 'High', 'Medium', 'Low'].map((level) => (
                         <div key={level} className="p-3 rounded-lg border border-ink-800/20 bg-ink-900/10 text-center">
-                          <div className="text-lg font-bold font-mono text-ink-800">0</div>
-                          <div className="text-[10px] uppercase font-mono tracking-wide text-ink-700 mt-0.5">{level}</div>
+                          <div className="text-lg font-bold font-mono text-ink-500">0</div>
+                          <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-0.5">{level}</div>
                         </div>
                       ))}
                     </div>
