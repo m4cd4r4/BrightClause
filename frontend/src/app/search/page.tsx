@@ -393,7 +393,7 @@ export default function SearchPage() {
             transition={{ delay: 0.3 }}
             className="mt-16 max-w-2xl mx-auto"
           >
-            <h3 className="text-sm font-medium text-ink-400 mb-4 text-center">Example Searches</h3>
+            <h2 className="text-sm font-medium text-ink-400 mb-4 text-center">Example Searches</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 'termination for convenience',
