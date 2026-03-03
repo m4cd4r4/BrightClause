@@ -122,9 +122,9 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div id="main-content" className="min-h-screen light-editorial">
+    <main id="main-content" className="min-h-screen light-editorial">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/40 bg-ink-950/85 backdrop-blur-xl">
+      <nav aria-label="Landing navigation" className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/40 bg-ink-950/85 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image src="/logo-minimal.png" alt="BrightClause" width={36} height={36} className="object-contain" />
@@ -135,9 +135,10 @@ export default function LandingPage() {
               href="https://github.com/m4cd4r4/BrightClause"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Source Code on GitHub"
               className="flex items-center gap-2 text-sm text-ink-400 hover:text-ink-200 transition-colors"
             >
-              <Github className="w-4 h-4" />
+              <Github className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Source Code</span>
             </a>
             <Link
@@ -146,7 +147,7 @@ export default function LandingPage() {
                        hover:brightness-110 hover:shadow-lg hover:shadow-accent/20 transition-all text-sm"
             >
               Live Demo
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -640,6 +641,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-    </div>
+    </main>
   )
 }

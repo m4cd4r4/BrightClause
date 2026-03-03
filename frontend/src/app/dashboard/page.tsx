@@ -347,6 +347,7 @@ function DashboardContent() {
         <button
           type="button"
           data-tour="upload"
+          aria-label="Upload PDF"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
           className="flex items-center gap-2 px-4 py-2 bg-accent text-ink-950 font-semibold rounded-lg
@@ -521,7 +522,7 @@ function DashboardContent() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="font-display text-lg sm:text-xl font-semibold text-ink-50">Contract Portfolio</h2>
-                    <p className="text-[11px] text-ink-500 mt-1 font-mono">
+                    <p className="text-[11px] text-ink-400 mt-1 font-mono">
                       {documents.length} documents · Click to analyze
                     </p>
                   </div>
@@ -583,7 +584,7 @@ function DashboardContent() {
                       {/* What happens next */}
                       <div className="mt-8 pt-6 border-t border-ink-800/40">
                         <p className="text-[10px] text-ink-600 font-mono uppercase tracking-wider mb-3">What happens next</p>
-                        <div className="flex items-center justify-center gap-3 text-[11px] text-ink-500">
+                        <div className="flex items-center justify-center gap-3 text-[11px] text-ink-400">
                           <span className="flex items-center gap-1.5">
                             <Zap className="w-3 h-3 text-amber-500/70" />
                             Extract
@@ -693,7 +694,7 @@ function DashboardContent() {
                               {doc.chunk_count > 0 && (
                                 <>
                                   <span className="text-ink-700">·</span>
-                                  <span className="text-[11px] text-ink-500 font-mono uppercase tracking-wide">
+                                  <span className="text-[11px] text-ink-400 font-mono uppercase tracking-wide">
                                     {doc.chunk_count} chunks
                                   </span>
                                 </>
@@ -751,7 +752,7 @@ function DashboardContent() {
                   {/* Header */}
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-500 mt-1 font-mono uppercase tracking-wide">
+                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
                       AI-Powered Analysis
                     </p>
                   </div>
@@ -911,7 +912,7 @@ function DashboardContent() {
                 >
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-500 mt-1 font-mono uppercase tracking-wide">
+                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
                       Select a document
                     </p>
                   </div>
@@ -970,7 +971,7 @@ function DashboardContent() {
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-accent" />
                   <h2 className="font-display text-lg font-semibold text-ink-50">Recent Activity</h2>
-                  <span className="text-[11px] text-ink-500 font-mono ml-auto">{activities.length} events</span>
+                  <span className="text-[11px] text-ink-400 font-mono ml-auto">{activities.length} events</span>
                 </div>
               </div>
               <div className="divide-y divide-ink-800/30 max-h-[400px] overflow-y-auto">
@@ -1024,7 +1025,7 @@ function DashboardContent() {
                           </span>
                         )}
                       </p>
-                      <p className="text-[11px] text-ink-500 font-mono mt-0.5">
+                      <p className="text-[11px] text-ink-400 font-mono mt-0.5">
                         {formatRelativeTime(act.created_at)}
                       </p>
                     </div>
