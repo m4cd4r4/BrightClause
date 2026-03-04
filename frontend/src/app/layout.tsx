@@ -50,6 +50,12 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://brightclause.com' },
   robots: { index: true, follow: true },
   other: { 'theme-color': '#0a0a1a' },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BrightClause',
+  },
 }
 
 export default function RootLayout({
