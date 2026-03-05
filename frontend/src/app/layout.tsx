@@ -28,6 +28,14 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://brightclause.com'),
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/logo.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/logo.png',
+    shortcut: '/favicon.png',
+  },
   title: {
     default: 'BrightClause | AI-Powered Contract Intelligence',
     template: '%s | BrightClause',

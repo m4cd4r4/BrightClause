@@ -171,7 +171,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
 
           {/* Remotion Player — click to expand/collapse */}
           <div
-            className={`cursor-pointer ${isExpanded ? 'flex-1 min-h-0' : ''}`}
+            className={`cursor-pointer ${isExpanded ? 'flex-1 min-h-0 overflow-hidden' : ''}`}
             onClick={handleToggleExpanded}
             title={isExpanded ? 'Click to exit fullscreen' : 'Click to fullscreen'}
             aria-hidden="true"
@@ -186,9 +186,10 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               autoPlay
               style={{
                 width: '100%',
-                flex: isExpanded ? '1 1 0%' : undefined,
+                height: isExpanded ? '100%' : undefined,
                 aspectRatio: isExpanded ? undefined : '16 / 9',
                 pointerEvents: 'none',
+                display: 'block',
               }}
               controls={false}
             />

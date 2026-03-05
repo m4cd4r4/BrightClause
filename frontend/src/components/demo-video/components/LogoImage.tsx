@@ -42,7 +42,7 @@ export const LogoImage: React.FC<LogoImageProps> = ({
     >
       <Img
         src={staticFile("logo.png")}
-        style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "screen" }}
+        style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
     </div>
   );
