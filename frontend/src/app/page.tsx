@@ -181,7 +181,7 @@ export default function LandingPage() {
                 className="group flex items-center gap-3 px-8 py-4 bg-accent text-[#1a1a2e] rounded-xl font-semibold text-lg
                          hover:brightness-110 hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
               >
-                Explore the Demo
+                Try It Live
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               {heroVideoDismissed && (
@@ -605,7 +605,7 @@ export default function LandingPage() {
                 className="group flex items-center gap-3 px-8 py-4 bg-accent text-[#1a1a2e] rounded-xl font-semibold text-lg
                          hover:brightness-110 hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
               >
-                Explore the Demo
+                Try It Live
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <a

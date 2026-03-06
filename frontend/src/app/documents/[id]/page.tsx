@@ -136,11 +136,8 @@ export default function DocumentDetailPage() {
   }
 
   const triggerExtraction = async (apiKey?: string) => {
-    const keyToUse = apiKey ?? byokApiKey
-    if (!keyToUse) {
-      setShowByokModal(true)
-      return
-    }
+    // Use provided key, then stored BYOK key, then undefined (backend falls back to Ollama)
+    const keyToUse = apiKey || byokApiKey || undefined
     setExtracting(true)
     try {
       await api.analysis.extract(documentId, keyToUse)
