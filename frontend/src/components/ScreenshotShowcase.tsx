@@ -159,6 +159,7 @@ export function ScreenshotShowcase() {
               fill
               className="object-cover object-top"
               sizes="(max-width: 1200px) 100vw, 1152px"
+              unoptimized
               priority={active === 0}
             />
           </motion.div>
