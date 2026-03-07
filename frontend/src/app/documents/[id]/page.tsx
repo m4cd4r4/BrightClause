@@ -43,18 +43,26 @@ function ByokForm({ onSubmit, initialKey, onCancel }: {
   onCancel: () => void
 }) {
   const [key, setKey] = useState(initialKey)
+  const isValidKey = key.trim().startsWith('sk-ant-') && key.trim().length >= 20
+  const showValidationHint = key.trim().length > 0 && !isValidKey
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(key) }}>
+    <form onSubmit={(e) => { e.preventDefault(); if (isValidKey) onSubmit(key) }}>
       <input
         type="password"
         autoFocus
         placeholder="sk-ant-api03-..."
         value={key}
         onChange={(e) => setKey(e.target.value)}
-        className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-sm font-mono text-ink-200 placeholder-ink-600 focus:outline-none focus:border-accent mb-4"
+        className={`w-full px-3 py-2 bg-ink-900 border rounded-lg text-sm font-mono text-ink-200 placeholder-ink-600 focus:outline-none focus:border-accent mb-1 ${
+          showValidationHint ? 'border-red-500/50' : 'border-ink-700'
+        }`}
       />
+      {showValidationHint && (
+        <p className="text-[10px] text-red-400 mb-3">Key must start with &quot;sk-ant-&quot;</p>
+      )}
+      {!showValidationHint && <div className="mb-3" />}
       <div className="flex gap-2">
-        <button type="submit" disabled={!key.trim()} className="flex-1 btn-primary text-sm py-2">
+        <button type="submit" disabled={!isValidKey} className="flex-1 btn-primary text-sm py-2 disabled:opacity-40">
           <Zap className="w-4 h-4 mr-2" /> Extract Clauses
         </button>
         <button type="button" onClick={onCancel} className="px-4 py-2 text-sm text-ink-400 hover:text-ink-200 border border-ink-700 rounded-lg">
@@ -93,9 +101,7 @@ export default function DocumentDetailPage() {
   const [extractingObligations, setExtractingObligations] = useState(false)
   const [viewMode, setViewMode] = useState<'analysis' | 'pdf'>('analysis')
   const [showByokModal, setShowByokModal] = useState(false)
-  const [byokApiKey, setByokApiKey] = useState(() =>
-    typeof window !== 'undefined' ? sessionStorage.getItem('cc_claude_api_key') || '' : ''
-  )
+  const [byokApiKey, setByokApiKey] = useState('')
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { error: showError, success: showSuccess } = useToast()
@@ -141,7 +147,7 @@ export default function DocumentDetailPage() {
     setExtracting(true)
     try {
       await api.analysis.extract(documentId, keyToUse)
-      // Poll for completion with proper cleanup
+      // Poll for completion with timeout and error feedback
       pollIntervalRef.current = setInterval(async () => {
         const analysisRes = await api.analysis.summary(documentId).catch(() => null)
         if (analysisRes && analysisRes.status === 'completed') {
@@ -151,12 +157,19 @@ export default function DocumentDetailPage() {
           const clausesRes = await api.analysis.clauses(documentId)
           setClauses(clausesRes)
           setExtracting(false)
+          showSuccess('Clause extraction complete')
+        } else if (analysisRes && analysisRes.status === 'failed') {
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+          if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
+          setExtracting(false)
+          showError('Extraction failed. Please try again.')
         }
       }, 3000)
       pollTimeoutRef.current = setTimeout(() => {
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
         setExtracting(false)
-      }, 120000)
+        showError('Extraction timed out after 5 minutes. The server may be overloaded — try again later.')
+      }, 300000)
     } catch (error) {
       console.error('Extraction failed:', error)
       setExtracting(false)
@@ -165,7 +178,6 @@ export default function DocumentDetailPage() {
 
   const handleByokSubmit = (key: string) => {
     if (key.trim()) {
-      sessionStorage.setItem('cc_claude_api_key', key.trim())
       setByokApiKey(key.trim())
     }
     setShowByokModal(false)

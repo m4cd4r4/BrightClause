@@ -322,3 +322,127 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
 
+/* ── Light mode component overrides ───────────────────────────── */
+
+/* Cards: visible borders + subtle shadow instead of invisible border */
+html.light .card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html.light .card-hover:hover {
+  border-color: #d4d4d8;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Buttons */
+html.light .btn-secondary {
+  background: #f4f4f5;
+  color: #18181b;
+  border-color: #d4d4d8;
+}
+
+html.light .btn-secondary:hover {
+  background: #e4e4e7;
+  border-color: #a1a1aa;
+}
+
+/* Inputs: visible border + proper background */
+html.light .input {
+  background: #ffffff;
+  border-color: #d4d4d8;
+  color: #18181b;
+}
+
+html.light .input::placeholder {
+  color: #a1a1aa;
+}
+
+html.light .input:focus {
+  border-color: rgba(201, 162, 39, 0.5);
+}
+
+/* Labels and stats: readable contrast */
+html.light .label {
+  color: var(--text-secondary);
+}
+
+html.light .stat-label {
+  color: var(--text-muted);
+}
+
+/* ── Light mode navigation ────────────────────────────────────── */
+
+html.light header.sticky {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--border);
+}
+
+/* ── Light mode document rows ─────────────────────────────────── */
+
+html.light [role="button"].cursor-pointer:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light [role="button"].cursor-pointer[aria-selected="true"],
+html.light .doc-row-selected {
+  background: rgba(201, 162, 39, 0.06) !important;
+}
+
+/* ── Light mode dividers ──────────────────────────────────────── */
+
+html.light .border-ink-800\/50,
+html.light [class*="border-ink-800"] {
+  border-color: var(--border);
+}
+
+html.light .border-ink-700 {
+  border-color: #d4d4d8;
+}
+
+/* ── Light mode hover feedback ────────────────────────────────── */
+
+html.light .hover\:bg-ink-800\/50:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .hover\:bg-ink-900\/30:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Light mode text refinements ──────────────────────────────── */
+
+html.light .text-ink-400 {
+  color: #52525b;
+}
+
+html.light .text-ink-500 {
+  color: #71717a;
+}
+
+html.light .text-ink-600 {
+  color: #a1a1aa;
+}
+
+/* ── Light mode bg refinements ────────────────────────────────── */
+
+html.light .bg-ink-900\/50,
+html.light .bg-ink-900\/60 {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+html.light .bg-ink-950\/80,
+html.light .bg-ink-950\/95 {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+html.light .bg-ink-800 {
+  background: #f4f4f5;
+}
+
+html.light .bg-ink-800\/50 {
+  background: rgba(0, 0, 0, 0.04);
+}
+

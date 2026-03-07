@@ -3,7 +3,7 @@
 import json
 import httpx
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -17,6 +17,8 @@ from app.services.clause_extraction import (
     CLAUSE_TYPES,
 )
 from app.api.activity import log_activity
+from app.core.auth import validate_byok_key
+from app.core.rate_limit import limiter
 
 settings = get_settings()
 
@@ -256,7 +258,9 @@ async def generate_report(
 
 
 @router.post("/{document_id}/extract", response_model=AnalysisStatusResponse)
+@limiter.limit("10/minute")
 async def trigger_extraction(
+    http_request: Request,
     document_id: UUID,
     background_tasks: BackgroundTasks,
     request: ExtractionRequest | None = None,
@@ -268,7 +272,7 @@ async def trigger_extraction(
     Optionally accepts a `claude_api_key` in the request body to use
     Anthropic Claude for extraction instead of the default local Ollama model.
     """
-    claude_api_key = request.claude_api_key if request else None
+    claude_api_key = validate_byok_key(request.claude_api_key if request else None)
 
     # Verify document exists and is processed
     query = select(Document).where(Document.id == document_id)
@@ -328,7 +332,7 @@ async def reanalyze_document(
     This deletes existing clauses and runs extraction again.
     Optionally accepts a `claude_api_key` to use Claude instead of Ollama.
     """
-    claude_api_key = request.claude_api_key if request else None
+    claude_api_key = validate_byok_key(request.claude_api_key if request else None)
 
     query = select(Document).where(Document.id == document_id)
     result = await db.execute(query)
@@ -546,8 +550,8 @@ async def explain_clause(
         content=clause.content[:3000],
     )
 
-    # Per-request key takes priority over env var
-    effective_api_key = (request.claude_api_key if request else None) or settings.anthropic_api_key
+    # Per-request key (validated) takes priority over env var
+    effective_api_key = validate_byok_key(request.claude_api_key if request else None) or settings.anthropic_api_key or None
 
     try:
         if effective_api_key:
@@ -599,6 +603,8 @@ async def explain_clause(
 
 async def run_extraction(document_id: UUID, claude_api_key: str | None = None):
     """Background task to run clause extraction."""
+    import logging
+    logger = logging.getLogger(__name__)
     from app.core.database import AsyncSessionLocal
 
     effective_key = claude_api_key or settings.anthropic_api_key or None
@@ -606,7 +612,7 @@ async def run_extraction(document_id: UUID, claude_api_key: str | None = None):
         try:
             await extract_clauses_from_document(document_id, db, claude_api_key=effective_key)
         except Exception as e:
-            print(f"Extraction error for {document_id}: {e}")
+            logger.error(f"Extraction error for {document_id}: {e}", exc_info=True)
 
 
 # ── Obligation & Deadline Tracker ──────────────────────────────────────────
@@ -686,8 +692,8 @@ async def extract_obligations(
 
     prompt = OBLIGATION_PROMPT.format(clauses=clause_text)
 
-    # Per-request key takes priority over env var
-    effective_api_key = (request.claude_api_key if request else None) or settings.anthropic_api_key
+    # Per-request key (validated) takes priority over env var
+    effective_api_key = validate_byok_key(request.claude_api_key if request else None) or settings.anthropic_api_key or None
 
     extracted = []
     try:

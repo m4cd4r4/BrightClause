@@ -3,10 +3,11 @@
 import httpx
 from uuid import UUID
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.rate_limit import limiter
 from app.services.hybrid_search import hybrid_search
 from app.api.activity import log_activity
 
@@ -132,18 +133,20 @@ async def _call_ollama(context: str, history: list[ChatMessage], question: str) 
 
 
 @router.post("/{document_id}", response_model=ChatResponse)
+@limiter.limit("30/minute")
 async def chat_with_document(
+    request: Request,
     document_id: UUID,
-    request: ChatRequest,
+    chat_request: ChatRequest,
     db: AsyncSession = Depends(get_db),
 ):
     """Ask a question about a specific document using RAG."""
-    if not request.question.strip():
+    if not chat_request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
 
     # 1. Retrieve relevant chunks via hybrid search
     search_results = await hybrid_search(
-        query=request.question,
+        query=chat_request.question,
         db=db,
         limit=5,
         document_id=document_id,
@@ -166,9 +169,9 @@ async def chat_with_document(
     # 3. Generate answer — Claude Haiku if API key set, else Ollama
     try:
         if settings.anthropic_api_key:
-            answer = await _call_claude(context, request.history, request.question)
+            answer = await _call_claude(context, chat_request.history, chat_request.question)
         else:
-            answer = await _call_ollama(context, request.history, request.question)
+            answer = await _call_ollama(context, chat_request.history, chat_request.question)
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="AI service timed out. Please try a simpler question.")
     except httpx.ConnectError:
@@ -185,6 +188,6 @@ async def chat_with_document(
         for r in search_results[:3]
     ]
 
-    await log_activity(db, "chat_question", document_id, {"question": request.question[:200]})
+    await log_activity(db, "chat_question", document_id, {"question": chat_request.question[:200]})
 
     return ChatResponse(answer=answer, sources=sources)
