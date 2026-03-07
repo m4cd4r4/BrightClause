@@ -601,9 +601,10 @@ async def run_extraction(document_id: UUID, claude_api_key: str | None = None):
     """Background task to run clause extraction."""
     from app.core.database import AsyncSessionLocal
 
+    effective_key = claude_api_key or settings.anthropic_api_key or None
     async with AsyncSessionLocal() as db:
         try:
-            await extract_clauses_from_document(document_id, db, claude_api_key=claude_api_key)
+            await extract_clauses_from_document(document_id, db, claude_api_key=effective_key)
         except Exception as e:
             print(f"Extraction error for {document_id}: {e}")
 
