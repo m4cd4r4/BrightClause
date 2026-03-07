@@ -22,7 +22,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <header className="border-b border-ink-800/50 bg-ink-950/95 backdrop-blur-xl sticky top-0 z-50">
+    <header className="border-b border-ink-800/50 bg-ink-950/95 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
@@ -51,7 +51,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200
                     ${active
                       ? 'bg-accent/15 text-accent border border-accent/20'
-                      : 'text-ink-400 hover:text-ink-200 hover:bg-ink-800/50 border border-transparent'
+                      : 'text-ink-400 hover:text-ink-100 hover:bg-ink-800/50 border border-transparent'
                     }`}
                 >
                   <Icon className="w-4 h-4" aria-hidden="true" />
@@ -67,7 +67,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 text-ink-400 hover:text-ink-200 hover:bg-ink-800/50 rounded-lg transition-colors"
+              className="p-2 text-ink-400 hover:text-ink-100 hover:bg-ink-800/50 rounded-lg transition-colors"
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
@@ -76,7 +76,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 text-ink-400 hover:text-ink-200 hover:bg-ink-800/50 rounded-lg transition-colors"
+              className="md:hidden p-2 text-ink-400 hover:text-ink-100 hover:bg-ink-800/50 rounded-lg transition-colors"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -97,7 +97,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                     ${active
                       ? 'bg-accent/15 text-accent'
-                      : 'text-ink-400 hover:text-ink-200 hover:bg-ink-800/50'
+                      : 'text-ink-400 hover:text-ink-100 hover:bg-ink-800/50'
                     }`}
                 >
                   <Icon className="w-4 h-4" aria-hidden="true" />

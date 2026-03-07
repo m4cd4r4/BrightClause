@@ -55,10 +55,6 @@ async def hybrid_search(
 
     embedding_str = f"[{','.join(map(str, query_embedding))}]"
 
-    # Prepare query terms for full-text search
-    # Convert to tsquery format: word1 & word2 & word3
-    query_terms = " & ".join(query.split())
-
     # Build hybrid search SQL using RRF (Reciprocal Rank Fusion)
     # RRF score = sum(1 / (k + rank)) where k is a constant (typically 60)
     doc_filter = "AND c.document_id = :document_id" if document_id else ""
@@ -71,14 +67,14 @@ async def hybrid_search(
                 d.filename as document_name,
                 c.content,
                 c.page_number,
-                1 - (c.embedding <=> '{embedding_str}'::vector) as similarity,
-                ROW_NUMBER() OVER (ORDER BY c.embedding <=> '{embedding_str}'::vector) as semantic_rank
+                1 - (c.embedding <=> :embedding_vec::vector) as similarity,
+                ROW_NUMBER() OVER (ORDER BY c.embedding <=> :embedding_vec::vector) as semantic_rank
             FROM chunks c
             JOIN documents d ON c.document_id = d.id
             WHERE c.embedding IS NOT NULL
-            AND 1 - (c.embedding <=> '{embedding_str}'::vector) >= :min_similarity
+            AND 1 - (c.embedding <=> :embedding_vec::vector) >= :min_similarity
             {doc_filter}
-            ORDER BY c.embedding <=> '{embedding_str}'::vector
+            ORDER BY c.embedding <=> :embedding_vec::vector
             LIMIT :search_limit
         ),
         keyword_results AS (
@@ -115,6 +111,7 @@ async def hybrid_search(
 
     params = {
         "query": query,
+        "embedding_vec": embedding_str,
         "min_similarity": min_similarity,
         "search_limit": limit * 3,  # Get more candidates for RRF
         "limit": limit,
@@ -225,17 +222,17 @@ async def similar_chunks(
             d.filename as document_name,
             c.content,
             c.page_number,
-            1 - (c.embedding <=> '{embedding_str}'::vector) as similarity
+            1 - (c.embedding <=> :embedding_vec::vector) as similarity
         FROM chunks c
         JOIN documents d ON c.document_id = d.id
         WHERE c.embedding IS NOT NULL
         AND c.id != :chunk_id
         {doc_filter}
-        ORDER BY c.embedding <=> '{embedding_str}'::vector
+        ORDER BY c.embedding <=> :embedding_vec::vector
         LIMIT :limit
     """)
 
-    params = {"chunk_id": chunk_id, "limit": limit}
+    params = {"chunk_id": chunk_id, "embedding_vec": embedding_str, "limit": limit}
     if exclude_same_document:
         params["source_doc_id"] = row.document_id
 

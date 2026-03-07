@@ -149,7 +149,8 @@ async def extract_entities_from_text(
             return entities, relationships_data
 
     except Exception as e:
-        print(f"Entity extraction error: {e}")
+        import logging
+        logging.getLogger(__name__).error(f"Entity extraction error: {e}", exc_info=True)
         return [], []
 
 

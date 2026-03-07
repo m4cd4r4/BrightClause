@@ -1,7 +1,10 @@
 """BrightClause FastAPI application."""
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
+
+logger = logging.getLogger(__name__)
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from slowapi import _rate_limit_exceeded_handler
@@ -33,12 +36,12 @@ async def init_database():
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
-    print(f"Starting {settings.app_name} in {settings.environment} mode")
+    logger.info(f"Starting {settings.app_name} in {settings.environment} mode")
     await init_database()
-    print("Database initialized with pgvector extension")
+    logger.info("Database initialized with pgvector extension")
     yield
     # Shutdown
-    print(f"Shutting down {settings.app_name}")
+    logger.info(f"Shutting down {settings.app_name}")
 
 
 app = FastAPI(
@@ -48,22 +51,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware – tightened for production
-allowed_origins = [
+# CORS middleware – explicit origins, no wildcard
+allowed_origins: list[str] = [
     "https://frontend-jade-seven-48.vercel.app",
-    "http://localhost:3000",
+    "https://brightclause.com",
+    "https://www.brightclause.com",
 ]
 if settings.cors_origins:
     allowed_origins.extend(o.strip() for o in settings.cors_origins.split(",") if o.strip())
 if settings.environment == "development":
-    allowed_origins.append("*")
+    allowed_origins.extend(["http://localhost:3000", "http://localhost:3001"])
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
 
 # Rate limiting

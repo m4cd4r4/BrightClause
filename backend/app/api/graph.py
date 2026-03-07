@@ -557,4 +557,5 @@ async def run_entity_extraction(document_id: UUID):
         try:
             await extract_entities_from_document(document_id, db)
         except Exception as e:
-            print(f"Entity extraction error for {document_id}: {e}")
+            import logging
+            logging.getLogger(__name__).error(f"Entity extraction error for {document_id}: {e}", exc_info=True)

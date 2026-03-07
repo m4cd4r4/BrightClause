@@ -624,8 +624,8 @@ function DashboardContent() {
                       className={`px-6 py-5 cursor-pointer transition-all duration-200 relative group
                                 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
                                 ${selectedDoc === doc.id
-                                  ? 'bg-ink-900/60 border-l-2 border-accent'
-                                  : 'hover:bg-ink-900/30 border-l-2 border-transparent'
+                                  ? 'bg-accent/5 border-l-3 border-accent'
+                                  : 'hover:bg-ink-900/30 border-l-3 border-transparent hover:border-ink-600'
                                 }`}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -711,14 +711,15 @@ function DashboardContent() {
                           </div>
                         </div>
 
-                        {/* Action Buttons - Show on hover */}
+                        {/* Action Buttons */}
                         <div className={`flex items-center gap-2 transition-opacity duration-200 ${
-                          hoveredDoc === doc.id || selectedDoc === doc.id ? 'opacity-100' : 'opacity-0'
+                          hoveredDoc === doc.id || selectedDoc === doc.id ? 'opacity-100' : 'opacity-40'
                         }`}>
-                          <button
-                            type="button"
+                          <a
+                            href={`/documents/${doc.id}`}
                             onClick={(e) => {
                               e.stopPropagation()
+                              e.preventDefault()
                               navigateToDocument(doc.id)
                             }}
                             className="p-2 bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors"
@@ -726,7 +727,7 @@ function DashboardContent() {
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
-                          </button>
+                          </a>
                           <ChevronRight className="w-5 h-5 text-ink-600 group-hover:text-accent transition-colors" />
                         </div>
                       </div>

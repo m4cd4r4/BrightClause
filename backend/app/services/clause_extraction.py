@@ -197,7 +197,8 @@ async def extract_clauses_from_chunk(
         return clauses
 
     except Exception as e:
-        print(f"Clause extraction error: {e}")
+        import logging
+        logging.getLogger(__name__).error(f"Clause extraction error: {e}", exc_info=True)
         return []
 
 

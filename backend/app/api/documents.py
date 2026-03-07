@@ -79,9 +79,12 @@ async def upload_document(
     4. Generate embeddings
     5. Store in database
     """
-    # Validate file type
-    if not file.filename.lower().endswith(".pdf"):
+    # Validate file extension
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+    # Sanitize filename — strip path separators to prevent path traversal
+    safe_filename = file.filename.replace("/", "_").replace("\\", "_").replace("..", "_")
 
     # Read file content
     content = await file.read()
@@ -93,6 +96,10 @@ async def upload_document(
             detail=f"File too large. Maximum size is {settings.max_file_size // (1024*1024)}MB",
         )
 
+    # Validate PDF magic bytes — reject non-PDF content disguised with .pdf extension
+    if not content[:5].startswith(b"%PDF-"):
+        raise HTTPException(status_code=400, detail="File is not a valid PDF")
+
     # Queue back-pressure: reject uploads when queue is saturated
     queue_depth = _get_queue_depth()
     if queue_depth >= MAX_QUEUE_DEPTH:
@@ -103,7 +110,7 @@ async def upload_document(
 
     # Create document record
     doc = Document(
-        filename=file.filename,
+        filename=safe_filename,
         file_path="",  # Will be set after MinIO upload
         file_size=len(content),
         file_type="application/pdf",
@@ -145,11 +152,13 @@ async def upload_document(
         )
 
     except Exception as e:
-        # Cleanup on failure
+        # Cleanup on failure — log details server-side, return generic message to client
+        import logging
+        logging.getLogger(__name__).error(f"Upload failed for doc {doc.id}: {e}", exc_info=True)
         doc.status = "failed"
-        doc.doc_metadata = {"error": str(e)}
+        doc.doc_metadata = {"error": "Upload processing failed"}
         await db.commit()
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Upload failed. Please try again or contact support.")
 
 
 @router.get("", response_model=DocumentListResponse)
