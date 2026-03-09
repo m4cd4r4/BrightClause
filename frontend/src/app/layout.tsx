@@ -84,6 +84,23 @@ export default function RootLayout({
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
         featureList: 'AI Clause Extraction, Risk Assessment, Knowledge Graph, Hybrid Vector Search, Obligation Tracking, Executive Reports',
         screenshot: 'https://brightclause.com/assets/screenshot-dashboard.png',
+        author: {
+          '@type': 'Person',
+          name: 'Macdara Ó Murchú',
+          url: 'https://github.com/m4cd4r4',
+          worksFor: {
+            '@type': 'Organization',
+            name: 'Solaisoft',
+            legalName: 'Solaisoft Pty Ltd',
+            url: 'https://solaisoft.com',
+          },
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Solaisoft',
+          legalName: 'Solaisoft Pty Ltd',
+          url: 'https://solaisoft.com',
+        },
       },
       {
         '@type': 'Organization',
