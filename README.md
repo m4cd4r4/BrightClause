@@ -90,43 +90,25 @@ graph TD
 
 ## Document Processing Pipeline
 
-```
-Upload PDF
-    │
-    ▼
-┌────────────────────────────────────────────┐
-│  4-Tier OCR Pipeline                       │
-│  ├─ Tier 0: PyMuPDF (native text)          │
-│  ├─ Tier 1: Tesseract (clean scans)        │
-│  ├─ Tier 2: PaddleOCR (complex layouts)    │
-│  └─ Tier 3: Vision LLM (handwriting)       │
-└────────────────────────────────────────────┘
-    │
-    ▼
-┌────────────────────────────────────────────┐
-│  Chunking (6000 chars, 600 overlap)        │
-│  Semantic boundary preservation            │
-└────────────────────────────────────────────┘
-    │
-    ▼
-┌────────────────────────────────────────────┐
-│  Vector Embeddings (nomic-embed-text)      │
-│  768 dimensions, IVFFlat indexing          │
-└────────────────────────────────────────────┘
-    │
-    ├──────────────────────┐
-    ▼                      ▼
-┌───────────────┐   ┌───────────────┐
-│    Clause     │   │    Entity     │
-│  Extraction   │   │  Extraction   │
-│  (16+ types)  │   │  (7 types)    │
-└───────────────┘   └───────────────┘
-    │                      │
-    ▼                      ▼
-┌───────────────┐   ┌───────────────┐
-│     Risk      │   │   Knowledge   │
-│  Assessment   │   │     Graph     │
-└───────────────┘   └───────────────┘
+```mermaid
+flowchart TD
+    A([Upload PDF]) --> B
+
+    subgraph B["4-Tier OCR Pipeline"]
+        B0["Tier 0: PyMuPDF (native text)"]
+        B1["Tier 1: Tesseract (clean scans)"]
+        B2["Tier 2: PaddleOCR (complex layouts)"]
+        B3["Tier 3: Vision LLM (handwriting)"]
+    end
+
+    B --> C["Chunking\n6000 chars · 600 overlap\nSemantic boundary preservation"]
+    C --> D["Vector Embeddings\nnomic-embed-text · 768 dims · IVFFlat indexing"]
+
+    D --> E["Clause Extraction\n16+ types"]
+    D --> F["Entity Extraction\n7 types"]
+
+    E --> G["Risk Assessment"]
+    F --> H["Knowledge Graph"]
 ```
 
 ---

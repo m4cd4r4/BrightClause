@@ -7,7 +7,7 @@ import Image from 'next/image'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
-  CheckCircle, ChevronRight, Github, ExternalLink,
+  CheckCircle, ChevronRight, ExternalLink,
   MessageCircle, Lightbulb, ClipboardCheck, Calendar,
   Briefcase, Sun, Activity, Play, Server
 } from 'lucide-react'
@@ -201,16 +201,6 @@ export default function LandingPage() {
             <span className="font-display text-xl font-bold tracking-tight text-ink-100">BrightClause</span>
           </div>
           <div className="flex items-center gap-4">
-            <a
-              href="https://github.com/m4cd4r4/BrightClause"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Source Code on GitHub"
-              className="flex items-center gap-2 text-sm text-ink-400 hover:text-ink-200 transition-colors"
-            >
-              <Github className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Source Code</span>
-            </a>
             <Link
               href="/dashboard"
               className="flex items-center gap-2 px-5 py-2.5 bg-accent text-[#1a1a2e] font-semibold rounded-xl
@@ -529,18 +519,6 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="text-center">
-            <a
-              href="https://github.com/m4cd4r4/BrightClause"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-ink-400 hover:text-accent transition-colors font-medium"
-            >
-              <Github className="w-4 h-4" />
-              View full technical details on GitHub
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
         </div>
       </section>
 
@@ -704,16 +682,6 @@ export default function LandingPage() {
                 Try It Live
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <a
-                href="https://github.com/m4cd4r4/BrightClause"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-ink-400 hover:text-ink-200 transition-colors"
-              >
-                <Github className="w-5 h-5" />
-                View on GitHub
-                <ExternalLink className="w-4 h-4" />
-              </a>
             </div>
           </motion.div>
         </div>
@@ -735,9 +703,6 @@ export default function LandingPage() {
             <Link href="/compare" className="hover:text-ink-300 transition-colors">Compare</Link>
             <Link href="/obligations" className="hover:text-ink-300 transition-colors">Obligations</Link>
             <Link href="/deals" className="hover:text-ink-300 transition-colors">Deals</Link>
-            <a href="https://github.com/m4cd4r4/BrightClause" target="_blank" rel="noopener noreferrer" className="hover:text-ink-300 transition-colors">
-              GitHub
-            </a>
           </div>
         </div>
       </footer>
