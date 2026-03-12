@@ -17,6 +17,7 @@
     "@remotion/player": "4.0.427",
     "@remotion/shapes": "4.0.427",
     "@remotion/transitions": "4.0.427",
+    "@vercel/analytics": "^2.0.0",
     "docx": "^8.5.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^10.18.0",
