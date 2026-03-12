@@ -306,6 +306,12 @@ async def trigger_extraction(
             message="Document already analyzed. Use /analysis/{id}/reanalyze to re-extract.",
         )
 
+    # Clear any stale extraction_status before queuing
+    meta = dict(doc.doc_metadata or {})
+    meta.pop("extraction_status", None)
+    doc.doc_metadata = meta
+    await db.commit()
+
     # Queue background extraction
     background_tasks.add_task(run_extraction, document_id, claude_api_key)
 
@@ -344,6 +350,10 @@ async def reanalyze_document(
     from sqlalchemy import delete
     delete_query = delete(Clause).where(Clause.document_id == document_id)
     await db.execute(delete_query)
+    # Clear previous extraction_status so polling resets to "pending"
+    meta = dict(doc.doc_metadata or {})
+    meta.pop("extraction_status", None)
+    doc.doc_metadata = meta
     await db.commit()
 
     background_tasks.add_task(run_extraction, document_id, claude_api_key)
@@ -383,9 +393,16 @@ async def get_analysis_summary(
     count_result = await db.execute(count_query)
     clause_count = count_result.scalar()
 
+    if clause_count > 0:
+        status = "completed"
+    elif (doc.doc_metadata or {}).get("extraction_status") in ("no_clauses_found", "error"):
+        status = "failed"
+    else:
+        status = "pending"
+
     return AnalysisResponse(
         document_id=document_id,
-        status="completed" if clause_count > 0 else "pending",
+        status=status,
         clauses_extracted=clause_count,
         risk_summary=summary["risk_summary"],
         overall_risk=summary["overall_risk"],
@@ -610,9 +627,24 @@ async def run_extraction(document_id: UUID, claude_api_key: str | None = None):
     effective_key = claude_api_key or settings.anthropic_api_key or None
     async with AsyncSessionLocal() as db:
         try:
-            await extract_clauses_from_document(document_id, db, claude_api_key=effective_key)
+            clauses = await extract_clauses_from_document(document_id, db, claude_api_key=effective_key)
+            if not clauses:
+                # Extraction completed but found nothing — mark so the frontend can stop polling
+                doc_result = await db.execute(select(Document).where(Document.id == document_id))
+                doc = doc_result.scalar_one_or_none()
+                if doc:
+                    doc.doc_metadata = {**(doc.doc_metadata or {}), "extraction_status": "no_clauses_found"}
+                    await db.commit()
         except Exception as e:
             logger.error(f"Extraction error for {document_id}: {e}", exc_info=True)
+            try:
+                doc_result = await db.execute(select(Document).where(Document.id == document_id))
+                doc = doc_result.scalar_one_or_none()
+                if doc:
+                    doc.doc_metadata = {**(doc.doc_metadata or {}), "extraction_status": "error"}
+                    await db.commit()
+            except Exception:
+                pass
 
 
 # ── Obligation & Deadline Tracker ──────────────────────────────────────────
