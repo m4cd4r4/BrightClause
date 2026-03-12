@@ -127,11 +127,11 @@ export function HeroVisual() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.2 + i * 0.08 }}
-                  className="flex items-center justify-between py-2 px-3 bg-ink-900/40 rounded-lg border border-ink-800/20"
+                  className="flex items-center justify-between py-2 px-3 bg-ink-800/40 rounded-lg border border-ink-700/30"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-[10px] text-ink-600 font-mono shrink-0">{c.section}</span>
-                    <span className="text-xs text-ink-300 truncate">{c.type}</span>
+                    <span className="text-[10px] text-ink-400 font-mono shrink-0">{c.section}</span>
+                    <span className="text-xs text-ink-100 truncate">{c.type}</span>
                   </div>
                   <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded shrink-0 ml-2 ${clauseColors[c.risk]}`}>
                     {c.risk}
