@@ -89,64 +89,84 @@ async def extract_entities_from_text(
     prompt = EXTRACTION_PROMPT.format(text=text[:4000])  # Limit text length
 
     try:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                f"{settings.ollama_url}/api/generate",
-                json={
-                    "model": settings.llm_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "format": "json",
-                    "options": {"temperature": 0.1, "num_predict": 2048},
-                },
-            )
-
-            if response.status_code != 200:
-                return [], []
-
-            data = response.json()
-            response_text = data.get("response", "")
-
-            # Parse JSON response
-            try:
-                result = json.loads(response_text)
-            except json.JSONDecodeError:
-                # Try to extract JSON
-                json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-                if json_match:
-                    result = json.loads(json_match.group())
-                else:
-                    return [], []
-
-            entities = []
-            entities_data = result.get("entities", [])
-
-            for ent_data in entities_data:
-                if not ent_data.get("type") or not ent_data.get("name"):
-                    continue
-
-                entity_type = ent_data["type"].lower()
-                if entity_type not in ENTITY_TYPES:
-                    continue
-
-                entity = Entity(
-                    document_id=document_id,
-                    entity_type=entity_type,
-                    name=ent_data["name"][:500],
-                    normalized_name=normalize_entity_name(ent_data["name"], entity_type),
-                    value=ent_data.get("value"),
-                    confidence=0.8,
-                    context=ent_data.get("context", "")[:1000],
-                    page_number=page_number,
-                    entity_metadata={
-                        "extraction_model": settings.llm_model,
-                        "raw_value": ent_data.get("value"),
+        # Use Claude API if key is configured (faster and more reliable than Ollama)
+        if settings.anthropic_api_key:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": settings.anthropic_api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "max_tokens": 2048,
+                        "messages": [{"role": "user", "content": prompt}],
                     },
                 )
-                entities.append(entity)
+                if response.status_code != 200:
+                    return [], []
+                response_text = response.json()["content"][0]["text"].strip()
+        else:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                response = await client.post(
+                    f"{settings.ollama_url}/api/generate",
+                    json={
+                        "model": settings.llm_model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "format": "json",
+                        "options": {"temperature": 0.1, "num_predict": 2048},
+                    },
+                )
 
-            relationships_data = result.get("relationships", [])
-            return entities, relationships_data
+                if response.status_code != 200:
+                    return [], []
+
+                data = response.json()
+                response_text = data.get("response", "")
+
+        # Parse JSON response (shared by both Claude and Ollama paths)
+        try:
+            result = json.loads(response_text)
+        except json.JSONDecodeError:
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+            else:
+                return [], []
+
+        model_used = "claude-haiku-4-5-20251001" if settings.anthropic_api_key else settings.llm_model
+        entities = []
+        entities_data = result.get("entities", [])
+
+        for ent_data in entities_data:
+            if not ent_data.get("type") or not ent_data.get("name"):
+                continue
+
+            entity_type = ent_data["type"].lower()
+            if entity_type not in ENTITY_TYPES:
+                continue
+
+            entity = Entity(
+                document_id=document_id,
+                entity_type=entity_type,
+                name=ent_data["name"][:500],
+                normalized_name=normalize_entity_name(ent_data["name"], entity_type),
+                value=ent_data.get("value"),
+                confidence=0.8,
+                context=ent_data.get("context", "")[:1000],
+                page_number=page_number,
+                entity_metadata={
+                    "extraction_model": model_used,
+                    "raw_value": ent_data.get("value"),
+                },
+            )
+            entities.append(entity)
+
+        relationships_data = result.get("relationships", [])
+        return entities, relationships_data
 
     except Exception as e:
         import logging
