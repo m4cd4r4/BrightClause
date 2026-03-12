@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -62,7 +62,7 @@ function DashboardContent() {
   const [uploading, setUploading] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null)
   const [hoveredDoc, setHoveredDoc] = useState<string | null>(null)
-  const [analysis, setAnalysis] = useState<AnalysisSummary | null>(null)
+  const [analysisMap, setAnalysisMap] = useState<Map<string, AnalysisSummary>>(new Map())
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Array<{
     chunk_id: string
@@ -97,6 +97,21 @@ function DashboardContent() {
       setDocuments(docsResponse.documents)
       setStats(statsResponse)
       setActivities(activityResponse.activities)
+
+      // Load analyses for all completed documents in parallel
+      const completed = docsResponse.documents.filter(d => d.status === 'ready' || d.status === 'analyzed')
+      if (completed.length > 0) {
+        const results = await Promise.allSettled(
+          completed.map(doc => api.analysis.summary(doc.id))
+        )
+        const map = new Map<string, AnalysisSummary>()
+        results.forEach((result, i) => {
+          if (result.status === 'fulfilled' && result.value.clauses_extracted > 0) {
+            map.set(completed[i].id, result.value)
+          }
+        })
+        setAnalysisMap(map)
+      }
     } catch (err) {
       console.error('Failed to load data:', err)
       showError('Failed to connect to the server. Please check the API is running.')
@@ -189,12 +204,14 @@ function DashboardContent() {
 
   const loadAnalysis = async (docId: string) => {
     setSelectedDoc(docId)
+    if (analysisMap.has(docId)) return
     try {
       const response = await api.analysis.summary(docId)
-      setAnalysis(response)
+      if (response.clauses_extracted > 0) {
+        setAnalysisMap(prev => new Map(prev).set(docId, response))
+      }
     } catch (err) {
       console.error('Failed to load analysis:', err)
-      setAnalysis(null)
     }
   }
 
@@ -202,12 +219,40 @@ function DashboardContent() {
     try {
       await api.analysis.extract(docId)
       showSuccess('Analysis started. This may take a few minutes.')
-      setTimeout(() => loadAnalysis(docId), 2000)
+      setTimeout(async () => {
+        try {
+          const response = await api.analysis.summary(docId)
+          if (response.clauses_extracted > 0) {
+            setAnalysisMap(prev => new Map(prev).set(docId, response))
+          }
+          setSelectedDoc(docId)
+        } catch { /* ignore */ }
+      }, 2000)
     } catch (err) {
       console.error('Failed to trigger analysis:', err)
       showError('Failed to start analysis. Please try again.')
     }
   }
+
+  const selectedAnalysis = selectedDoc ? analysisMap.get(selectedDoc) ?? null : null
+
+  const portfolioRisk = useMemo(() => {
+    if (analysisMap.size === 0) return null
+    let critical = 0, high = 0, medium = 0, low = 0, totalClauses = 0
+    for (const s of Array.from(analysisMap.values())) {
+      critical += s.risk_summary.critical || 0
+      high += s.risk_summary.high || 0
+      medium += s.risk_summary.medium || 0
+      low += s.risk_summary.low || 0
+      totalClauses += s.clauses_extracted
+    }
+    const overall: RiskLevel = critical > 0 ? 'critical' : high > 0 ? 'high' : medium > 0 ? 'medium' : 'low'
+    const highlights = Array.from(analysisMap.values())
+      .flatMap(s => s.high_risk_highlights)
+      .filter(h => h.risk_level === 'critical' || h.risk_level === 'high')
+      .slice(0, 3)
+    return { critical, high, medium, low, totalClauses, overall, highlights, docCount: analysisMap.size }
+  }, [analysisMap])
 
   const startRename = (docId: string, currentName: string) => {
     setRenamingDoc(docId)
@@ -741,9 +786,9 @@ function DashboardContent() {
           {/* Risk Analysis Panel - Enhanced & Data Dense */}
           <div className="lg:col-span-1" data-tour="analysis">
             <AnimatePresence mode="wait">
-              {selectedDoc && analysis ? (
+              {(selectedDoc && selectedAnalysis) || (!selectedDoc && portfolioRisk) ? (
                 <motion.div
-                  key={selectedDoc}
+                  key={selectedDoc ?? 'portfolio'}
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
@@ -754,121 +799,144 @@ function DashboardContent() {
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
                     <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
-                      AI-Powered Analysis
+                      {selectedAnalysis ? 'Document Analysis' : `Portfolio · ${portfolioRisk?.docCount} Documents`}
                     </p>
                   </div>
 
-                  <div className="p-6 space-y-6">
-                    {/* Overall Risk - Prominent */}
-                    <div className={`p-5 rounded-xl border-2 ${riskGlow[analysis.overall_risk as RiskLevel]}
-                                  ${riskColors[analysis.overall_risk as RiskLevel]}`}>
-                      <div className="text-center">
-                        <div className="text-[11px] text-ink-400 font-mono uppercase tracking-wide mb-2">
-                          Overall Risk Level
-                        </div>
-                        <div className={`text-3xl font-bold uppercase tracking-tight ${
-                          analysis.overall_risk === 'critical' ? 'text-red-400' :
-                          analysis.overall_risk === 'high' ? 'text-orange-400' :
-                          analysis.overall_risk === 'medium' ? 'text-amber-400' : 'text-emerald-400'
-                        }`}>
-                          {analysis.overall_risk}
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-current/20">
-                          <div className="text-[10px] text-ink-500 font-mono uppercase">
-                            {analysis.clauses_extracted} Clauses Analyzed
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Risk Distribution - Data Dense Grid */}
-                    <div>
-                      <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
-                        Risk Distribution
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => {
-                          const count = analysis.risk_summary[level] || 0
-                          return (
-                            <div
-                              key={level}
-                              className={`p-4 rounded-lg border ${riskColors[level]} text-center`}
-                            >
-                              <div className={`text-2xl font-bold font-mono ${
-                                level === 'critical' ? 'text-red-400' :
-                                level === 'high' ? 'text-orange-400' :
-                                level === 'medium' ? 'text-amber-400' : 'text-emerald-400'
-                              }`}>
-                                {count}
-                              </div>
-                              <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-1">
-                                {level}
+                  {(() => {
+                    const risk = selectedAnalysis ?? portfolioRisk!
+                    const overallRisk = selectedAnalysis ? selectedAnalysis.overall_risk as RiskLevel : portfolioRisk!.overall
+                    const clauses = selectedAnalysis ? selectedAnalysis.clauses_extracted : portfolioRisk!.totalClauses
+                    const riskCounts = selectedAnalysis
+                      ? { critical: selectedAnalysis.risk_summary.critical || 0, high: selectedAnalysis.risk_summary.high || 0, medium: selectedAnalysis.risk_summary.medium || 0, low: selectedAnalysis.risk_summary.low || 0 }
+                      : { critical: portfolioRisk!.critical, high: portfolioRisk!.high, medium: portfolioRisk!.medium, low: portfolioRisk!.low }
+                    const highlights = selectedAnalysis ? selectedAnalysis.high_risk_highlights : portfolioRisk!.highlights
+                    return (
+                      <div className="p-6 space-y-6">
+                        {/* Overall Risk - Prominent */}
+                        <div className={`p-5 rounded-xl border-2 ${riskGlow[overallRisk]} ${riskColors[overallRisk]}`}>
+                          <div className="text-center">
+                            <div className="text-[11px] text-ink-400 font-mono uppercase tracking-wide mb-2">
+                              Overall Risk Level
+                            </div>
+                            <div className={`text-3xl font-bold uppercase tracking-tight ${
+                              overallRisk === 'critical' ? 'text-red-400' :
+                              overallRisk === 'high' ? 'text-orange-400' :
+                              overallRisk === 'medium' ? 'text-amber-400' : 'text-emerald-400'
+                            }`}>
+                              {overallRisk}
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-current/20">
+                              <div className="text-[10px] text-ink-500 font-mono uppercase">
+                                {clauses} Clauses Analyzed
                               </div>
                             </div>
-                          )
-                        })}
-                      </div>
-                    </div>
+                          </div>
+                        </div>
 
-                    {/* High Risk Highlights */}
-                    {analysis.high_risk_highlights.length > 0 && (
-                      <div>
-                        <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
-                          Attention Required
-                        </h3>
-                        <div className="space-y-3">
-                          {analysis.high_risk_highlights.slice(0, 3).map((highlight, i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ opacity: 0, x: -5 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: i * 0.05 }}
-                              className={`p-4 rounded-lg border text-sm ${
-                                highlight.risk_level === 'critical'
-                                  ? 'border-red-500/30 bg-red-500/5'
-                                  : 'border-orange-500/30 bg-orange-500/5'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 mb-2">
-                                <AlertTriangle className={`w-4 h-4 ${
-                                  highlight.risk_level === 'critical' ? 'text-red-400' : 'text-orange-400'
-                                }`} />
-                                <span className="font-semibold text-ink-100 text-xs uppercase tracking-wide">
-                                  {highlight.clause_type.replace(/_/g, ' ')}
-                                </span>
+                        {/* Risk Distribution - Data Dense Grid */}
+                        <div>
+                          <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
+                            Risk Distribution
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
+                              <div
+                                key={level}
+                                className={`p-4 rounded-lg border ${riskColors[level]} text-center`}
+                              >
+                                <div className={`text-2xl font-bold font-mono ${
+                                  level === 'critical' ? 'text-red-400' :
+                                  level === 'high' ? 'text-orange-400' :
+                                  level === 'medium' ? 'text-amber-400' : 'text-emerald-400'
+                                }`}>
+                                  {riskCounts[level]}
+                                </div>
+                                <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-1">
+                                  {level}
+                                </div>
                               </div>
-                              <p className="text-ink-400 text-xs leading-relaxed line-clamp-3">
-                                {highlight.summary}
-                              </p>
-                            </motion.div>
-                          ))}
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* High Risk Highlights */}
+                        {highlights.length > 0 && (
+                          <div>
+                            <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
+                              Attention Required
+                            </h3>
+                            <div className="space-y-3">
+                              {highlights.slice(0, 3).map((highlight, i) => (
+                                <motion.div
+                                  key={i}
+                                  initial={{ opacity: 0, x: -5 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: i * 0.05 }}
+                                  className={`p-4 rounded-lg border text-sm ${
+                                    highlight.risk_level === 'critical'
+                                      ? 'border-red-500/30 bg-red-500/5'
+                                      : 'border-orange-500/30 bg-orange-500/5'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <AlertTriangle className={`w-4 h-4 ${
+                                      highlight.risk_level === 'critical' ? 'text-red-400' : 'text-orange-400'
+                                    }`} />
+                                    <span className="font-semibold text-ink-100 text-xs uppercase tracking-wide">
+                                      {highlight.clause_type.replace(/_/g, ' ')}
+                                    </span>
+                                  </div>
+                                  <p className="text-ink-400 text-xs leading-relaxed line-clamp-3">
+                                    {highlight.summary}
+                                  </p>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="pt-4 border-t border-ink-800/50 space-y-3">
+                          {selectedDoc && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => navigateToDocument(selectedDoc)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
+                                         font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
+                                         transition-all duration-200"
+                              >
+                                <Eye className="w-4 h-4" />
+                                View Full Analysis
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/documents/${selectedDoc}/graph`)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-ink-800 text-ink-200
+                                         font-medium rounded-xl hover:bg-ink-700 transition-colors"
+                              >
+                                <Network className="w-4 h-4" />
+                                Knowledge Graph
+                              </button>
+                            </>
+                          )}
+                          {!selectedDoc && (
+                            <button
+                              type="button"
+                              onClick={() => router.push('/analytics')}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
+                                       font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
+                                       transition-all duration-200"
+                            >
+                              <BarChart3 className="w-4 h-4" />
+                              Portfolio Analytics
+                            </button>
+                          )}
                         </div>
                       </div>
-                    )}
-
-                    {/* Actions - Prominent CTAs */}
-                    <div className="pt-4 border-t border-ink-800/50 space-y-3">
-                      <button
-                        type="button"
-                        onClick={() => navigateToDocument(selectedDoc)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
-                                 font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
-                                 transition-all duration-200"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View Full Analysis
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/documents/${selectedDoc}/graph`)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-ink-800 text-ink-200
-                                 font-medium rounded-xl hover:bg-ink-700 transition-colors"
-                      >
-                        <Network className="w-4 h-4" />
-                        Knowledge Graph
-                      </button>
-                    </div>
-                  </div>
+                    )
+                  })()}
                 </motion.div>
               ) : selectedDoc ? (
                 <motion.div
