@@ -260,10 +260,10 @@ async def generate_report(
 @router.post("/{document_id}/extract", response_model=AnalysisStatusResponse)
 @limiter.limit("10/minute")
 async def trigger_extraction(
-    http_request: Request,
+    request: Request,
     document_id: UUID,
     background_tasks: BackgroundTasks,
-    request: ExtractionRequest | None = None,
+    body: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -272,7 +272,7 @@ async def trigger_extraction(
     Optionally accepts a `claude_api_key` in the request body to use
     Anthropic Claude for extraction instead of the default local Ollama model.
     """
-    claude_api_key = validate_byok_key(request.claude_api_key if request else None)
+    claude_api_key = validate_byok_key(body.claude_api_key if body else None)
 
     # Verify document exists and is processed
     query = select(Document).where(Document.id == document_id)
