@@ -945,32 +945,29 @@ function DashboardContent() {
                   className="card overflow-hidden"
                 >
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                    <div className="skeleton h-6 w-40 rounded mb-2" />
-                    <div className="skeleton h-3 w-28 rounded" />
+                    <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
+                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">Not Yet Analyzed</p>
                   </div>
-                  <div className="p-6 space-y-6">
-                    <div className="skeleton h-28 w-full rounded-xl" />
-                    <div className="grid grid-cols-2 gap-3">
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="skeleton h-20 rounded-lg" />
-                      ))}
+                  <div className="p-6 flex flex-col items-center text-center gap-6">
+                    <div className="mt-4 p-5 rounded-full bg-ink-800/60 border border-ink-700/50">
+                      <Shield className="w-10 h-10 text-ink-500" />
                     </div>
-                    <div className="space-y-3">
-                      <div className="skeleton h-3 w-28 rounded" />
-                      <div className="skeleton h-20 rounded-lg" />
-                      <div className="skeleton h-20 rounded-lg" />
+                    <div>
+                      <p className="text-ink-200 font-medium mb-1">No analysis yet</p>
+                      <p className="text-sm text-ink-400 leading-relaxed">
+                        Run AI analysis to extract clauses, assess risk levels, and identify key provisions in this document.
+                      </p>
                     </div>
-                    <div className="pt-4 border-t border-ink-800/50">
-                      <button
-                        type="button"
-                        onClick={() => triggerAnalysis(selectedDoc)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-ink-800 text-ink-200
-                                 font-medium rounded-xl hover:bg-ink-700 transition-colors text-sm"
-                      >
-                        <PlayCircle className="w-4 h-4" />
-                        Run Analysis
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => triggerAnalysis(selectedDoc)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
+                               font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
+                               transition-all duration-200"
+                    >
+                      <PlayCircle className="w-4 h-4" />
+                      Run Analysis
+                    </button>
                   </div>
                 </motion.div>
               ) : (
