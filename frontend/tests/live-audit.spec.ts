@@ -22,10 +22,7 @@ test.describe('BrightClause Live Site Audit', () => {
     await expect(heroHeading).toBeVisible()
 
     // CTA
-    await expect(page.getByRole('link', { name: /Explore the Demo/i }).first()).toBeVisible()
-
-    // GitHub link
-    await expect(page.getByRole('link', { name: /Source Code/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Try It Live/i }).first()).toBeVisible()
 
     await page.screenshot({ path: 'test-results/audit-01-landing-hero.png', fullPage: false })
   })

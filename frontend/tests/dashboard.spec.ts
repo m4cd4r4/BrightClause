@@ -120,7 +120,7 @@ test.describe('BrightClause Dashboard', () => {
       await docRow.hover()
       await page.waitForTimeout(500)
 
-      const eyeButton = page.locator('button[aria-label="View document details"]').first()
+      const eyeButton = page.locator('[aria-label="View document details"]').first()
       await expect(eyeButton).toBeVisible()
     }
   })

@@ -27,17 +27,10 @@ test.describe('BrightClause Landing Page', () => {
     ).toBeVisible()
   })
 
-  test('should have Explore the Demo CTA button linking to dashboard', async ({ page }) => {
-    const ctaLink = page.getByRole('link', { name: /Explore the Demo/i }).first()
+  test('should have Try It Live CTA button linking to dashboard', async ({ page }) => {
+    const ctaLink = page.getByRole('link', { name: /Try It Live/i }).first()
     await expect(ctaLink).toBeVisible()
     await expect(ctaLink).toHaveAttribute('href', '/dashboard')
-  })
-
-  test('should have Source Code navigation link pointing to GitHub', async ({ page }) => {
-    const sourceLink = page.getByRole('link', { name: /Source Code/i })
-    await expect(sourceLink).toBeVisible()
-    await expect(sourceLink).toHaveAttribute('href', 'https://github.com/m4cd4r4/BrightClause')
-    await expect(sourceLink).toHaveAttribute('target', '_blank')
   })
 
   test('should have Live Demo navigation link pointing to dashboard', async ({ page }) => {
@@ -65,8 +58,8 @@ test.describe('BrightClause Landing Page', () => {
     const featureTitles = [
       'Chat with Your Contract',
       'AI Clause Extraction',
-      'Plain-English Translator',
       'Risk Assessment',
+      'Plain-English Translator',
       'Obligation Tracker',
       'Executive Reports',
       'Timeline Extraction',
@@ -76,7 +69,6 @@ test.describe('BrightClause Landing Page', () => {
       'PDF Viewer & Export',
       'Dark & Light Mode',
     ]
-
     for (const title of featureTitles) {
       await expect(page.getByRole('heading', { name: title })).toBeVisible()
     }
@@ -96,12 +88,17 @@ test.describe('BrightClause Landing Page', () => {
     }
   })
 
-  test('should display Built for Trust section with 4 trust signals', async ({ page }) => {
+  test('should display Built for Trust section with 4 trust signal cards', async ({ page }) => {
     const heading = page.getByRole('heading', { name: /Built for Trust/i })
     await heading.scrollIntoViewIfNeeded()
     await expect(heading).toBeVisible()
 
-    const signals = ['Self-Hosted & Private', 'Analysis in Seconds', 'Enterprise Architecture', 'Complete Audit Trail']
+    const signals = [
+      'Your Data Stays Yours',
+      'AI You Can Verify',
+      'Seconds, Not Hours',
+      'Complete Audit Trail',
+    ]
     for (const signal of signals) {
       await expect(page.getByRole('heading', { name: signal })).toBeVisible()
     }
@@ -112,13 +109,13 @@ test.describe('BrightClause Landing Page', () => {
     await heading.scrollIntoViewIfNeeded()
     await expect(heading).toBeVisible()
 
-    await expect(page.getByText('RAG-Powered Chat')).toBeVisible()
-    await expect(page.getByText('Async Task Processing')).toBeVisible()
-    await expect(page.getByText('Full Audit Trail')).toBeVisible()
-    await expect(page.getByText('Secure Architecture')).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Ask Questions in Plain English/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Non-Blocking Analysis/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Full Audit Trail/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Secure by Design/i })).toBeVisible()
   })
 
-  test('should render footer with BrightClause branding and GitHub link', async ({ page }) => {
+  test('should render footer with BrightClause branding and nav links', async ({ page }) => {
     const footer = page.locator('footer')
     await footer.scrollIntoViewIfNeeded()
     await expect(footer).toBeVisible()
@@ -126,29 +123,23 @@ test.describe('BrightClause Landing Page', () => {
     await expect(footer.getByText('BrightClause')).toBeVisible()
     await expect(footer.getByText('Built by Macdara')).toBeVisible()
 
-    const footerGithubLink = footer.getByRole('link', { name: /GitHub/i })
-    await expect(footerGithubLink).toBeVisible()
-    await expect(footerGithubLink).toHaveAttribute('href', 'https://github.com/m4cd4r4/BrightClause')
-
     const dashboardLink = footer.getByRole('link', { name: /Dashboard/i })
     await expect(dashboardLink).toBeVisible()
     await expect(dashboardLink).toHaveAttribute('href', '/dashboard')
   })
 
-  test('should have Upload Your First Contract CTA section', async ({ page }) => {
+  test('should have Upload Your First Contract CTA section with Try It Live link', async ({ page }) => {
     const heading = page.getByRole('heading', { name: /Upload Your First Contract/i })
     await heading.scrollIntoViewIfNeeded()
     await expect(heading).toBeVisible()
 
-    const ctaLinks = page.getByRole('link', { name: /Explore the Demo/i })
-    const count = await ctaLinks.count()
-    expect(count).toBeGreaterThanOrEqual(2)
-
-    await expect(page.getByText('View on GitHub')).toBeVisible()
+    // CTA section contains a "Try It Live" link to the dashboard
+    const ctaSection = page.locator('section').filter({ has: heading })
+    await expect(ctaSection.getByRole('link', { name: /Try It Live/i })).toBeVisible()
   })
 
-  test('should navigate to dashboard when clicking Explore the Demo', async ({ page }) => {
-    const ctaLink = page.getByRole('link', { name: /Explore the Demo/i }).first()
+  test('should navigate to dashboard when clicking Try It Live', async ({ page }) => {
+    const ctaLink = page.getByRole('link', { name: /Try It Live/i }).first()
     await ctaLink.click()
     await page.waitForURL(/\/dashboard/, { timeout: 10000 })
     expect(page.url()).toContain('/dashboard')
