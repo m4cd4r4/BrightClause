@@ -3,7 +3,7 @@ import { request } from '@playwright/test'
 // Safety net: deletes any deals whose name starts with '__e2e__'
 // in case a test run fails before its afterAll cleanup runs.
 export default async function globalTeardown() {
-  const baseURL = process.env.BASE_URL || 'http://localhost:3000'
+  const baseURL = process.env.BASE_URL || 'http://localhost:3001'
   const ctx = await request.newContext({ baseURL })
 
   const res = await ctx.get('/api/deals')

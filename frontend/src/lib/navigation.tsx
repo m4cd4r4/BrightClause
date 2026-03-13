@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, BarChart3, GitCompareArrows, Search, Menu, X, Sun, Moon, ClipboardCheck, Briefcase } from 'lucide-react'
+import { LayoutDashboard, BarChart3, GitCompareArrows, Menu, X, Sun, Moon, ClipboardCheck, Briefcase } from 'lucide-react'
 import { useState } from 'react'
 import { useTheme } from '@/lib/theme'
 
@@ -13,7 +13,6 @@ const navLinks = [
   { href: '/compare', label: 'Compare', icon: GitCompareArrows },
   { href: '/obligations', label: 'Obligations', icon: ClipboardCheck },
   { href: '/deals', label: 'Deals', icon: Briefcase },
-  { href: '/search', label: 'Search', icon: Search },
 ]
 
 export function Navigation({ children }: { children?: React.ReactNode }) {
@@ -36,7 +35,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
             />
             <div className="hidden sm:block">
               <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
-              <p className="text-[10px] text-ink-500 tracking-wide uppercase font-mono">Contract Intelligence</p>
+              <p className="text-[10px] text-ink-500 tracking-wide">Contract Intelligence</p>
             </div>
           </Link>
 

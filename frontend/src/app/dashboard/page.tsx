@@ -5,10 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
   FileText, Search, Upload, AlertTriangle, CheckCircle,
-  Clock, Database, Zap, ChevronRight, X, Loader2,
-  FileWarning, Shield, Network, TrendingUp, BarChart3,
-  Eye, PlayCircle, Pencil, Check, Activity,
-  MessageCircle, FileBarChart, Trash2, RotateCcw
+  Clock, ChevronRight, X, Loader2,
+  FileWarning, Shield, Network, BarChart3,
+  Eye, PlayCircle, Pencil, Check
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -23,11 +22,11 @@ const riskColors: Record<RiskLevel, string> = {
   low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
 }
 
-const riskGlow: Record<RiskLevel, string> = {
-  critical: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
-  high: 'shadow-[0_0_15px_rgba(249,115,22,0.2)]',
-  medium: 'shadow-[0_0_10px_rgba(245,158,11,0.15)]',
-  low: 'shadow-none',
+const riskAccentBorder: Record<RiskLevel, string> = {
+  critical: 'border-l-red-500',
+  high: 'border-l-orange-500',
+  medium: 'border-l-amber-500',
+  low: 'border-l-emerald-500',
 }
 
 function formatRelativeTime(iso: string): string {
@@ -74,14 +73,6 @@ function DashboardContent() {
   const [renamingDoc, setRenamingDoc] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [dragOver, setDragOver] = useState(false)
-  const [activities, setActivities] = useState<Array<{
-    id: string
-    document_id: string | null
-    action: string
-    details: Record<string, unknown>
-    created_at: string
-    filename: string | null
-  }>>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -89,14 +80,12 @@ function DashboardContent() {
 
   const loadData = useCallback(async () => {
     try {
-      const [docsResponse, statsResponse, activityResponse] = await Promise.all([
+      const [docsResponse, statsResponse] = await Promise.all([
         api.documents.list({ limit: 50 }),
         api.search.stats(),
-        api.activity.list(15).catch(() => ({ activities: [], total: 0 })),
       ])
       setDocuments(docsResponse.documents)
       setStats(statsResponse)
-      setActivities(activityResponse.activities)
 
       // Load analyses for all completed documents in parallel
       const completed = docsResponse.documents.filter(d => d.status === 'ready' || d.status === 'analyzed')
@@ -186,7 +175,7 @@ function DashboardContent() {
   }
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return
+    if (!searchQuery.trim() || searching) return
     setSearching(true)
     try {
       const response = await api.search.query(searchQuery, { limit: 10 })
@@ -436,76 +425,45 @@ function DashboardContent() {
 
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         <h1 className="sr-only">Contract Dashboard</h1>
-        {/* Stats Row - Data Dense */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8"
+        {/* Portfolio Stats Strip */}
+        <div
+          className="grid grid-cols-3 divide-x divide-ink-800/40 border-b border-ink-800/40 mb-8"
           data-tour="stats"
         >
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="card p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="skeleton w-10 h-10 rounded-xl" />
-                  <div className="skeleton w-4 h-4 rounded" />
-                </div>
-                <div className="mt-2 space-y-2">
-                  <div className="skeleton h-8 w-16 rounded" />
-                  <div className="skeleton h-4 w-32 rounded" />
-                  <div className="skeleton h-3 w-24 rounded" />
-                </div>
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-2">
+                <div className="skeleton h-6 sm:h-9 w-8 sm:w-12 rounded" />
+                <div className="skeleton h-3 sm:h-4 w-16 sm:w-28 rounded" />
               </div>
             ))
           ) : (
             <>
-              <StatCard
-                icon={<FileText className="w-5 h-5" />}
+              <PortfolioStat
                 value={stats?.documents_indexed ?? 0}
-                label="Documents Indexed"
-                sublabel="Ready for analysis"
-                delay={0}
+                label="Contracts"
                 onClick={() => router.push('/search')}
               />
-              <StatCard
-                icon={<Database className="w-5 h-5" />}
-                value={stats?.chunks_with_embeddings ?? 0}
-                label="Text Chunks"
-                sublabel="Vector embeddings"
-                delay={0.05}
-                onClick={() => router.push('/search')}
-              />
-              <StatCard
-                icon={<Zap className="w-5 h-5" />}
+              <PortfolioStat
                 value={stats?.clauses_extracted ?? 0}
-                label="Clauses Extracted"
-                sublabel="AI-powered analysis"
-                delay={0.1}
+                label="Clauses found"
                 onClick={() => {
                   const docWithClauses = documents.find(d => d.status === 'completed')
-                  if (docWithClauses) {
-                    router.push(`/documents/${docWithClauses.id}`)
-                  } else {
-                    router.push('/search')
-                  }
+                  if (docWithClauses) router.push(`/documents/${docWithClauses.id}`)
+                  else router.push('/search')
                 }}
               />
-              <StatCard
-                icon={<TrendingUp className="w-5 h-5" />}
+              <PortfolioStat
                 value={documents.filter(d => d.status === 'completed').length}
-                label="Ready for Review"
-                sublabel="Completed processing"
-                delay={0.15}
+                label="Ready to review"
                 onClick={() => {
                   const completed = documents.find(d => d.status === 'completed')
-                  if (completed) {
-                    loadAnalysis(completed.id)
-                  }
+                  if (completed) loadAnalysis(completed.id)
                 }}
               />
             </>
           )}
-        </motion.div>
+        </div>
 
         {/* Search Results */}
         <AnimatePresence>
@@ -520,7 +478,7 @@ function DashboardContent() {
                 <div className="flex items-center justify-between mb-5">
                   <div>
                     <h2 className="font-display text-xl font-semibold text-ink-50">Search Results</h2>
-                    <p className="text-xs text-ink-500 mt-0.5 font-mono">{searchResults.length} matches found</p>
+                    <p className="text-xs text-ink-500 mt-0.5">{searchResults.length} matches found</p>
                   </div>
                   <button
                     type="button"
@@ -543,8 +501,8 @@ function DashboardContent() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-semibold text-accent">{result.document_name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-ink-500 font-mono uppercase">Relevance</span>
-                          <span className="text-xs text-ink-300 font-mono bg-ink-800/50 px-2 py-0.5 rounded">
+                          <span className="text-[10px] text-ink-500">Relevance</span>
+                          <span className="text-xs text-ink-300 bg-ink-800/50 px-2 py-0.5 rounded">
                             {(result.combined_score * 100).toFixed(0)}%
                           </span>
                         </div>
@@ -563,25 +521,14 @@ function DashboardContent() {
           {/* Document List - Enhanced */}
           <div className="lg:col-span-2" data-tour="documents">
             <div className="card overflow-hidden">
-              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-ink-800/50 bg-ink-925">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-display text-lg sm:text-xl font-semibold text-ink-50">Contract Portfolio</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono">
-                      {documents.length} documents · Click to analyze
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => router.push('/search')}
-                    className="text-xs text-ink-400 hover:text-accent transition-colors flex items-center gap-1.5"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5" />
-                    Advanced View
-                  </button>
+              {documents.length > 0 && (
+                <div className="px-4 sm:px-6 py-3 border-b border-ink-800/30">
+                  <p className="text-xs text-ink-500">
+                    {documents.length} {documents.length === 1 ? 'contract' : 'contracts'} · click to see risk
+                  </p>
                 </div>
-              </div>
-              <div className="divide-y divide-ink-800/30 max-h-[calc(100vh-320px)] overflow-y-auto">
+              )}
+              <div className="divide-y divide-ink-800/30 max-h-[60vh] sm:max-h-[calc(100vh-300px)] overflow-y-auto">
                 {loading ? (
                   <div className="divide-y divide-ink-800/30">
                     {Array.from({ length: 6 }).map((_, i) => (
@@ -612,9 +559,9 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      <h3 className="text-ink-200 font-semibold text-base">Upload your first contract</h3>
+                      <h3 className="text-ink-200 font-semibold text-base">Add your first contract</h3>
                       <p className="mt-2 text-ink-500 text-sm leading-relaxed">
-                        Drop a PDF here or click below. BrightClause will extract clauses, score risks, and build a searchable index automatically.
+                        Drop any PDF here. We read every clause, flag risky provisions, and surface what needs your attention - in minutes.
                       </p>
 
                       <button
@@ -626,23 +573,23 @@ function DashboardContent() {
                         Choose PDF
                       </button>
 
-                      {/* What happens next */}
+                      {/* Value outcome steps */}
                       <div className="mt-8 pt-6 border-t border-ink-800/40">
-                        <p className="text-[10px] text-ink-500 font-mono uppercase tracking-wider mb-3">What happens next</p>
+                        <p className="text-[10px] text-ink-500 mb-3">What you get</p>
                         <div className="flex items-center justify-center gap-3 text-[11px] text-ink-400">
                           <span className="flex items-center gap-1.5">
-                            <Zap className="w-3 h-3 text-amber-500/70" />
-                            Extract
+                            <FileText className="w-3 h-3 text-amber-500/70" />
+                            Every clause read
                           </span>
                           <ChevronRight className="w-3 h-3 text-ink-700" />
                           <span className="flex items-center gap-1.5">
                             <Shield className="w-3 h-3 text-orange-500/70" />
-                            Score
+                            Risk flagged
                           </span>
                           <ChevronRight className="w-3 h-3 text-ink-700" />
                           <span className="flex items-center gap-1.5">
                             <Search className="w-3 h-3 text-emerald-500/70" />
-                            Index
+                            Nothing missed
                           </span>
                         </div>
                       </div>
@@ -707,6 +654,26 @@ function DashboardContent() {
                                 <h3 className="font-medium text-ink-100 text-[15px] leading-snug truncate">
                                   {doc.filename}
                                 </h3>
+                                {analysisMap.has(doc.id) && (() => {
+                                  const a = analysisMap.get(doc.id)!
+                                  const risk = a.overall_risk as RiskLevel
+                                  const badge = {
+                                    critical: 'bg-red-500/15 text-red-400',
+                                    high: 'bg-orange-500/15 text-orange-400',
+                                    medium: 'bg-amber-500/15 text-amber-400',
+                                    low: 'bg-emerald-500/15 text-emerald-400',
+                                  }[risk]
+                                  return (
+                                    <motion.span
+                                      className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}
+                                      initial={{ opacity: 0, scale: 0.7 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+                                    >
+                                      {risk}
+                                    </motion.span>
+                                  )
+                                })()}
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -722,7 +689,7 @@ function DashboardContent() {
                               </div>
                             )}
                             <div className="flex items-center gap-4 mt-2">
-                              <span className={`text-[11px] font-mono uppercase tracking-wide ${
+                              <span className={`text-xs ${
                                 doc.status === 'completed' ? 'text-ink-500'
                                 : doc.status === 'queued' ? 'text-blue-400'
                                 : doc.status === 'processing' ? 'text-amber-400'
@@ -739,15 +706,15 @@ function DashboardContent() {
                               {doc.chunk_count > 0 && (
                                 <>
                                   <span className="text-ink-700">·</span>
-                                  <span className="text-[11px] text-ink-400 font-mono uppercase tracking-wide">
-                                    {doc.chunk_count} chunks
+                                  <span className="text-xs text-ink-500">
+                                    {doc.chunk_count} sections
                                   </span>
                                 </>
                               )}
                               {doc.status === 'completed' && (
                                 <>
                                   <span className="text-ink-700">·</span>
-                                  <span className="text-[11px] text-emerald-500 font-mono uppercase tracking-wide">
+                                  <span className="text-xs text-emerald-500">
                                     Ready
                                   </span>
                                 </>
@@ -767,7 +734,7 @@ function DashboardContent() {
                               e.preventDefault()
                               navigateToDocument(doc.id)
                             }}
-                            className="p-2 bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors"
+                            className="p-3 sm:p-2 min-w-[44px] sm:min-w-0 min-h-[44px] sm:min-h-0 flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors"
                             aria-label="View document details"
                             title="View Details"
                           >
@@ -798,14 +765,16 @@ function DashboardContent() {
                   {/* Header */}
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
-                      {selectedAnalysis ? 'Document Analysis' : `Portfolio · ${portfolioRisk?.docCount} Documents`}
+                    <p className="text-xs text-ink-500 mt-1">
+                      {selectedAnalysis ? 'Document analysis' : `Portfolio · ${portfolioRisk?.docCount} contracts`}
                     </p>
                   </div>
 
                   {(() => {
                     const risk = selectedAnalysis ?? portfolioRisk!
-                    const overallRisk = selectedAnalysis ? selectedAnalysis.overall_risk as RiskLevel : portfolioRisk!.overall
+                    const validRiskLevels: RiskLevel[] = ['critical', 'high', 'medium', 'low']
+                    const rawRisk = selectedAnalysis ? selectedAnalysis.overall_risk : portfolioRisk!.overall
+                    const overallRisk: RiskLevel = validRiskLevels.includes(rawRisk as RiskLevel) ? rawRisk as RiskLevel : 'low'
                     const clauses = selectedAnalysis ? selectedAnalysis.clauses_extracted : portfolioRisk!.totalClauses
                     const riskCounts = selectedAnalysis
                       ? { critical: selectedAnalysis.risk_summary.critical || 0, high: selectedAnalysis.risk_summary.high || 0, medium: selectedAnalysis.risk_summary.medium || 0, low: selectedAnalysis.risk_summary.low || 0 }
@@ -813,12 +782,14 @@ function DashboardContent() {
                     const highlights = selectedAnalysis ? selectedAnalysis.high_risk_highlights : portfolioRisk!.highlights
                     return (
                       <div className="p-6 space-y-6">
-                        {/* Overall Risk - Prominent */}
-                        <div className={`p-5 rounded-xl border-2 ${riskGlow[overallRisk]} ${riskColors[overallRisk]}`}>
-                          <div className="text-center">
-                            <div className="text-[11px] text-ink-400 font-mono uppercase tracking-wide mb-2">
-                              Overall Risk Level
-                            </div>
+                        {/* Overall Risk - Left-border treatment */}
+                        <motion.div
+                          className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk] ?? 'border-l-ink-600'}`}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+                        >
+                          <div>
                             <div className={`text-3xl font-bold uppercase tracking-tight ${
                               overallRisk === 'critical' ? 'text-red-400' :
                               overallRisk === 'high' ? 'text-orange-400' :
@@ -826,46 +797,57 @@ function DashboardContent() {
                             }`}>
                               {overallRisk}
                             </div>
-                            <div className="mt-3 pt-3 border-t border-current/20">
-                              <div className="text-[10px] text-ink-500 font-mono uppercase">
-                                {clauses} Clauses Analyzed
-                              </div>
-                            </div>
+                            <div className="text-xs text-ink-400 mt-0.5">{clauses} clauses analyzed</div>
                           </div>
-                        </div>
+                        </motion.div>
 
-                        {/* Risk Distribution - Data Dense Grid */}
+                        {/* Risk Distribution - data row + stacked bar */}
                         <div>
-                          <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
-                            Risk Distribution
-                          </h3>
-                          <div className="grid grid-cols-2 gap-3">
-                            {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
-                              <div
+                          <p className="text-xs text-ink-500 mb-3">Risk breakdown</p>
+                          <div className="flex mb-3">
+                            {([
+                              { level: 'critical' as RiskLevel, color: 'text-red-400' },
+                              { level: 'high' as RiskLevel, color: 'text-orange-400' },
+                              { level: 'medium' as RiskLevel, color: 'text-amber-400' },
+                              { level: 'low' as RiskLevel, color: 'text-emerald-400' },
+                            ]).map(({ level, color }, idx) => (
+                              <motion.div
                                 key={level}
-                                className={`p-4 rounded-lg border ${riskColors[level]} text-center`}
+                                className="flex-1 text-center"
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.06, duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
                               >
-                                <div className={`text-2xl font-bold font-mono ${
-                                  level === 'critical' ? 'text-red-400' :
-                                  level === 'high' ? 'text-orange-400' :
-                                  level === 'medium' ? 'text-amber-400' : 'text-emerald-400'
-                                }`}>
-                                  {riskCounts[level]}
-                                </div>
-                                <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-1">
-                                  {level}
-                                </div>
-                              </div>
+                                <div className={`text-2xl font-bold tabular-nums ${color}`}>{riskCounts[level]}</div>
+                                <div className="text-[10px] text-ink-600 mt-0.5 capitalize">{level}</div>
+                              </motion.div>
                             ))}
                           </div>
+                          {clauses > 0 && (
+                            <div className="flex h-1 rounded-full overflow-hidden">
+                              {([
+                                { count: riskCounts.critical, color: 'bg-red-500' },
+                                { count: riskCounts.high, color: 'bg-orange-400' },
+                                { count: riskCounts.medium, color: 'bg-amber-400' },
+                                { count: riskCounts.low, color: 'bg-emerald-500' },
+                              ] as { count: number; color: string }[]).filter(s => s.count > 0).map((s, i) => (
+                                <motion.div
+                                  key={s.color}
+                                  className={s.color}
+                                  style={{ flex: s.count, originX: 0 }}
+                                  initial={{ scaleX: 0 }}
+                                  animate={{ scaleX: 1 }}
+                                  transition={{ delay: i * 0.07, duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* High Risk Highlights */}
                         {highlights.length > 0 && (
                           <div>
-                            <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
-                              Attention Required
-                            </h3>
+                            <h3 className="text-xs text-ink-500 mb-3">Attention required</h3>
                             <div className="space-y-3">
                               {highlights.slice(0, 3).map((highlight, i) => (
                                 <motion.div
@@ -884,7 +866,7 @@ function DashboardContent() {
                                       highlight.risk_level === 'critical' ? 'text-red-400' : 'text-orange-400'
                                     }`} />
                                     <span className="font-semibold text-ink-100 text-xs uppercase tracking-wide">
-                                      {highlight.clause_type.replace(/_/g, ' ')}
+                                      {(highlight.clause_type ?? '').replace(/_/g, ' ')}
                                     </span>
                                   </div>
                                   <p className="text-ink-400 text-xs leading-relaxed line-clamp-3">
@@ -946,16 +928,16 @@ function DashboardContent() {
                 >
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">Not Yet Analyzed</p>
+                    <p className="text-xs text-ink-400 mt-1">Not yet analyzed</p>
                   </div>
-                  <div className="p-6 flex flex-col items-center text-center gap-6">
-                    <div className="mt-4 p-5 rounded-full bg-ink-800/60 border border-ink-700/50">
-                      <Shield className="w-10 h-10 text-ink-500" />
+                  <div className="p-6 flex flex-col items-center text-center gap-5">
+                    <div className="mt-2 p-4 rounded-full bg-ink-800/60 border border-ink-700/50">
+                      <Shield className="w-9 h-9 text-ink-500" />
                     </div>
                     <div>
-                      <p className="text-ink-200 font-medium mb-1">No analysis yet</p>
+                      <p className="text-ink-200 font-medium mb-1">Analyze this contract</p>
                       <p className="text-sm text-ink-400 leading-relaxed">
-                        Run AI analysis to extract clauses, assess risk levels, and identify key provisions in this document.
+                        We&apos;ll read every clause, identify the risky ones, and flag anything that needs your attention.
                       </p>
                     </div>
                     <button
@@ -974,133 +956,16 @@ function DashboardContent() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="card overflow-hidden"
+                  className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[200px]"
                 >
-                  <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                    <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
-                      Select a document
-                    </p>
-                  </div>
-                  <div className="p-6">
-                    {/* Preview of what the panel shows */}
-                    <div className="p-5 rounded-xl border border-ink-800/30 bg-ink-900/20 mb-5">
-                      <div className="text-center">
-                        <div className="text-[11px] text-ink-500 font-mono uppercase tracking-wide mb-2">
-                          Overall Risk Level
-                        </div>
-                        <div className="text-2xl font-bold text-ink-500 tracking-tight">
-                          — — —
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-ink-800/30">
-                          <div className="text-[10px] text-ink-500 font-mono uppercase">
-                            No document selected
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Ghost risk grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-5">
-                      {['Critical', 'High', 'Medium', 'Low'].map((level) => (
-                        <div key={level} className="p-3 rounded-lg border border-ink-800/20 bg-ink-900/10 text-center">
-                          <div className="text-lg font-bold font-mono text-ink-500">0</div>
-                          <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-0.5">{level}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Guidance */}
-                    <div className="text-center py-4">
-                      <Shield className="w-10 h-10 text-ink-800 mx-auto mb-3" />
-                      <p className="text-sm text-ink-500">
-                        Click a contract from the portfolio to see its risk breakdown, flagged clauses, and recommended actions.
-                      </p>
-                    </div>
-                  </div>
+                  <Shield className="w-8 h-8 text-ink-700" />
+                  <p className="text-sm text-ink-500">Select a contract to see its risk breakdown</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
-        {/* Activity Feed */}
-        {activities.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6 sm:mt-8"
-          >
-            <div className="card overflow-hidden">
-              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-ink-800/50 bg-ink-925">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-accent" />
-                  <h2 className="font-display text-lg font-semibold text-ink-50">Recent Activity</h2>
-                  <span className="text-[11px] text-ink-400 font-mono ml-auto">{activities.length} events</span>
-                </div>
-              </div>
-              <div className="divide-y divide-ink-800/30 max-h-[400px] overflow-y-auto">
-                {activities.map((act, i) => (
-                  <motion.div
-                    key={act.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="px-4 sm:px-6 py-3 flex items-start gap-3 hover:bg-ink-900/30 transition-colors"
-                  >
-                    <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
-                      act.action === 'uploaded' ? 'bg-emerald-500/10 text-emerald-400' :
-                      act.action === 'deleted' ? 'bg-red-500/10 text-red-400' :
-                      act.action === 'chat_question' ? 'bg-blue-500/10 text-blue-400' :
-                      act.action === 'extraction_started' ? 'bg-amber-500/10 text-amber-400' :
-                      act.action === 'report_generated' ? 'bg-purple-500/10 text-purple-400' :
-                      'bg-ink-800/50 text-ink-400'
-                    }`}>
-                      {act.action === 'uploaded' && <Upload className="w-3.5 h-3.5" />}
-                      {act.action === 'deleted' && <Trash2 className="w-3.5 h-3.5" />}
-                      {act.action === 'chat_question' && <MessageCircle className="w-3.5 h-3.5" />}
-                      {act.action === 'extraction_started' && <Zap className="w-3.5 h-3.5" />}
-                      {act.action === 'report_generated' && <FileBarChart className="w-3.5 h-3.5" />}
-                      {!['uploaded', 'deleted', 'chat_question', 'extraction_started', 'report_generated'].includes(act.action) && (
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-ink-200">
-                        <span className="font-medium text-ink-100 capitalize">{act.action.replace(/_/g, ' ')}</span>
-                        {act.filename && (
-                          <>
-                            {' — '}
-                            {act.document_id ? (
-                              <button
-                                type="button"
-                                onClick={() => router.push(`/documents/${act.document_id}`)}
-                                className="text-accent hover:text-accent-light transition-colors"
-                              >
-                                {act.filename}
-                              </button>
-                            ) : (
-                              <span className="text-ink-400">{act.filename}</span>
-                            )}
-                          </>
-                        )}
-                        {act.action === 'chat_question' && typeof act.details?.question === 'string' && (
-                          <span className="text-ink-400 ml-1 italic">
-                            &quot;{act.details.question.slice(0, 80)}{act.details.question.length > 80 ? '...' : ''}&quot;
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-[11px] text-ink-400 font-mono mt-0.5">
-                        {formatRelativeTime(act.created_at)}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
       </main>
 
       <WalkthroughOverlay
@@ -1116,46 +981,35 @@ function DashboardContent() {
   )
 }
 
-function StatCard({
-  icon,
+function PortfolioStat({
   value,
   label,
-  sublabel,
-  delay,
   onClick,
 }: {
-  icon: React.ReactNode
   value: number
   label: string
-  sublabel: string
-  delay: number
   onClick?: () => void
 }) {
-  const Wrapper = onClick ? motion.button : motion.div
-  return (
-    <Wrapper
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className={`card p-6 hover:border-accent/20 transition-all duration-300 group text-left
-                ${onClick ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}`}
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className="p-2.5 rounded-xl bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors">
-          {icon}
-        </div>
-        {onClick && (
-          <ChevronRight className="w-4 h-4 text-ink-600 group-hover:text-accent transition-colors" />
-        )}
-      </div>
-      <div className="mt-2">
-        <p className="text-3xl font-bold font-mono text-ink-50 tracking-tight">
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 text-left cursor-pointer hover:bg-ink-900/40 group transition-colors"
+      >
+        <span className="text-xl sm:text-3xl lg:text-4xl font-bold tabular-nums tracking-tight text-ink-50 group-hover:text-accent transition-colors block">
           {value.toLocaleString()}
-        </p>
-        <p className="text-sm font-semibold text-ink-300 mt-1">{label}</p>
-        <p className="text-[10px] text-ink-500 mt-1 font-mono uppercase tracking-wide">{sublabel}</p>
-      </div>
-    </Wrapper>
+        </span>
+        <p className="text-[11px] sm:text-sm text-ink-500 mt-0.5 sm:mt-1 leading-tight">{label}</p>
+      </button>
+    )
+  }
+  return (
+    <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5">
+      <span className="text-xl sm:text-3xl lg:text-4xl font-bold tabular-nums tracking-tight text-ink-50 block">
+        {value.toLocaleString()}
+      </span>
+      <p className="text-[11px] sm:text-sm text-ink-500 mt-0.5 sm:mt-1 leading-tight">{label}</p>
+    </div>
   )
 }

@@ -14,32 +14,32 @@ interface WalkthroughStep {
 const WALKTHROUGH_STEPS: WalkthroughStep[] = [
   {
     target: '[data-tour="stats"]',
-    title: 'Portfolio Overview',
-    description: 'Real-time statistics showing your indexed documents, text chunks with vector embeddings, extracted clauses, and documents ready for review.',
+    title: 'Your contract portfolio',
+    description: 'A live snapshot of every contract in your portfolio - how many you have, how many clauses have been found, and which ones are ready to review.',
     position: 'bottom',
   },
   {
     target: '[data-tour="search"]',
-    title: 'Semantic Search',
-    description: 'Search across all contracts using natural language. Our hybrid search combines AI semantic understanding with keyword matching for precise results.',
+    title: 'Search across all contracts',
+    description: 'Ask a question in plain English and find the answer across every contract at once. Try: "does any contract limit our liability to under $50k?"',
     position: 'bottom',
   },
   {
     target: '[data-tour="upload"]',
-    title: 'Upload Contracts',
-    description: 'Upload PDF contracts for automated processing. Documents are parsed, chunked, embedded, and analyzed by our AI pipeline.',
+    title: 'Add a contract',
+    description: 'Drop any PDF contract here. Within a few minutes, every clause is read, categorized by type, and given a risk rating - automatically.',
     position: 'bottom',
   },
   {
     target: '[data-tour="documents"]',
-    title: 'Contract Portfolio',
-    description: 'Click any document to view its AI risk assessment. Each contract is analyzed for clause types, risk levels, and key provisions.',
+    title: 'Click to see risk',
+    description: 'Click any contract to see its overall risk rating. Contracts with critical or high-risk clauses are flagged so you know where to focus first.',
     position: 'right',
   },
   {
     target: '[data-tour="analysis"]',
-    title: 'Risk Assessment Panel',
-    description: 'AI-powered analysis shows overall risk, risk distribution, and highlights clauses that need attention. Click "View Full Analysis" for detailed clause-by-clause review.',
+    title: 'Risk breakdown',
+    description: 'The risk panel shows the overall exposure and which specific clauses need attention. Click "View Full Analysis" to read each flagged clause with a plain-English explanation.',
     position: 'left',
   },
 ]
@@ -179,8 +179,8 @@ export function WalkthroughOverlay({
           <div className="px-5 py-4 border-b border-ink-800/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-accent" />
-              <span className="text-xs font-mono text-ink-300 uppercase tracking-wide">
-                Step {step + 1} of {totalSteps}
+              <span className="text-xs text-ink-400">
+                {step + 1} of {totalSteps}
               </span>
             </div>
             <button
