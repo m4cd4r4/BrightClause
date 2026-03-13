@@ -7,8 +7,7 @@ import {
   FileText, Search, Upload, AlertTriangle, CheckCircle,
   Clock, Zap, ChevronRight, X, Loader2,
   FileWarning, Shield, Network, BarChart3,
-  Eye, PlayCircle, Pencil, Check, Activity,
-  MessageCircle, FileBarChart, Trash2, RotateCcw
+  Eye, PlayCircle, Pencil, Check
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -74,14 +73,6 @@ function DashboardContent() {
   const [renamingDoc, setRenamingDoc] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [dragOver, setDragOver] = useState(false)
-  const [activities, setActivities] = useState<Array<{
-    id: string
-    document_id: string | null
-    action: string
-    details: Record<string, unknown>
-    created_at: string
-    filename: string | null
-  }>>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -89,14 +80,12 @@ function DashboardContent() {
 
   const loadData = useCallback(async () => {
     try {
-      const [docsResponse, statsResponse, activityResponse] = await Promise.all([
+      const [docsResponse, statsResponse] = await Promise.all([
         api.documents.list({ limit: 50 }),
         api.search.stats(),
-        api.activity.list(15).catch(() => ({ activities: [], total: 0 })),
       ])
       setDocuments(docsResponse.documents)
       setStats(statsResponse)
-      setActivities(activityResponse.activities)
 
       // Load analyses for all completed documents in parallel
       const completed = docsResponse.documents.filter(d => d.status === 'ready' || d.status === 'analyzed')
@@ -438,11 +427,11 @@ function DashboardContent() {
         <h1 className="sr-only">Contract Dashboard</h1>
         {/* Portfolio Stats Strip */}
         <div
-          className="grid grid-cols-4 divide-x divide-ink-800/40 border-b border-ink-800/40 mb-8"
+          className="grid grid-cols-3 divide-x divide-ink-800/40 border-b border-ink-800/40 mb-8"
           data-tour="stats"
         >
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
+            Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-2">
                 <div className="skeleton h-6 sm:h-9 w-8 sm:w-12 rounded" />
                 <div className="skeleton h-3 sm:h-4 w-16 sm:w-28 rounded" />
@@ -453,11 +442,6 @@ function DashboardContent() {
               <PortfolioStat
                 value={stats?.documents_indexed ?? 0}
                 label="Contracts"
-                onClick={() => router.push('/search')}
-              />
-              <PortfolioStat
-                value={stats?.chunks_with_embeddings ?? 0}
-                label="Sections analyzed"
                 onClick={() => router.push('/search')}
               />
               <PortfolioStat
@@ -494,7 +478,7 @@ function DashboardContent() {
                 <div className="flex items-center justify-between mb-5">
                   <div>
                     <h2 className="font-display text-xl font-semibold text-ink-50">Search Results</h2>
-                    <p className="text-xs text-ink-500 mt-0.5 font-mono">{searchResults.length} matches found</p>
+                    <p className="text-xs text-ink-500 mt-0.5">{searchResults.length} matches found</p>
                   </div>
                   <button
                     type="button"
@@ -517,8 +501,8 @@ function DashboardContent() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-semibold text-accent">{result.document_name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-ink-500 font-mono uppercase">Relevance</span>
-                          <span className="text-xs text-ink-300 font-mono bg-ink-800/50 px-2 py-0.5 rounded">
+                          <span className="text-[10px] text-ink-500">Relevance</span>
+                          <span className="text-xs text-ink-300 bg-ink-800/50 px-2 py-0.5 rounded">
                             {(result.combined_score * 100).toFixed(0)}%
                           </span>
                         </div>
@@ -537,24 +521,13 @@ function DashboardContent() {
           {/* Document List - Enhanced */}
           <div className="lg:col-span-2" data-tour="documents">
             <div className="card overflow-hidden">
-              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-ink-800/50 bg-ink-925">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-display text-lg sm:text-xl font-semibold text-ink-50">Contract Portfolio</h2>
-                    <p className="text-xs text-ink-500 mt-1">
-                      {documents.length} {documents.length === 1 ? 'contract' : 'contracts'} · Click to see risk
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => router.push('/search')}
-                    className="text-xs text-ink-400 hover:text-accent transition-colors flex items-center gap-1.5"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    Search
-                  </button>
+              {documents.length > 0 && (
+                <div className="px-4 sm:px-6 py-3 border-b border-ink-800/30">
+                  <p className="text-xs text-ink-500">
+                    {documents.length} {documents.length === 1 ? 'contract' : 'contracts'} · click to see risk
+                  </p>
                 </div>
-              </div>
+              )}
               <div className="divide-y divide-ink-800/30 max-h-[60vh] sm:max-h-[calc(100vh-300px)] overflow-y-auto">
                 {loading ? (
                   <div className="divide-y divide-ink-800/30">
@@ -981,124 +954,16 @@ function DashboardContent() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="card overflow-hidden"
+                  className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[200px]"
                 >
-                  <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                    <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-xs text-ink-500 mt-1">Click a contract to see its risk</p>
-                  </div>
-                  <div className="p-6">
-                    {/* Ghost risk display */}
-                    <div className="pl-5 py-3 border-l-4 border-l-ink-700 mb-5">
-                      <div className="text-2xl font-bold text-ink-600 uppercase tracking-tight">— —</div>
-                      <div className="text-xs text-ink-600 mt-0.5">Select a contract</div>
-                    </div>
-
-                    {/* Ghost risk breakdown */}
-                    <div className="mb-5">
-                      <p className="text-xs text-ink-600 mb-3">Risk breakdown</p>
-                      <div className="flex mb-3">
-                        {['Critical', 'High', 'Medium', 'Low'].map((level) => (
-                          <div key={level} className="flex-1 text-center">
-                            <div className="text-2xl font-bold tabular-nums text-ink-700">0</div>
-                            <div className="text-[10px] text-ink-700 mt-0.5">{level}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="h-1 rounded-full bg-ink-800/40" />
-                    </div>
-
-                    {/* Guidance */}
-                    <div className="text-center py-4">
-                      <Shield className="w-10 h-10 text-ink-800 mx-auto mb-3" />
-                      <p className="text-sm text-ink-500">
-                        Click a contract from the portfolio to see its risk breakdown, flagged clauses, and recommended actions.
-                      </p>
-                    </div>
-                  </div>
+                  <Shield className="w-8 h-8 text-ink-700" />
+                  <p className="text-sm text-ink-500">Select a contract to see its risk breakdown</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
-        {/* Activity Feed */}
-        {activities.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6 sm:mt-8"
-          >
-            <div className="card overflow-hidden">
-              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-ink-800/50 bg-ink-925">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-accent" />
-                  <h2 className="font-display text-lg font-semibold text-ink-50">Recent Activity</h2>
-                  <span className="text-xs text-ink-500 ml-auto">{activities.length} events</span>
-                </div>
-              </div>
-              <div className="divide-y divide-ink-800/30 max-h-[400px] overflow-y-auto">
-                {activities.map((act, i) => (
-                  <motion.div
-                    key={act.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="px-4 sm:px-6 py-3 flex items-start gap-3 hover:bg-ink-900/30 transition-colors"
-                  >
-                    <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
-                      act.action === 'uploaded' ? 'bg-emerald-500/10 text-emerald-400' :
-                      act.action === 'deleted' ? 'bg-red-500/10 text-red-400' :
-                      act.action === 'chat_question' ? 'bg-blue-500/10 text-blue-400' :
-                      act.action === 'extraction_started' ? 'bg-amber-500/10 text-amber-400' :
-                      act.action === 'report_generated' ? 'bg-purple-500/10 text-purple-400' :
-                      'bg-ink-800/50 text-ink-400'
-                    }`}>
-                      {act.action === 'uploaded' && <Upload className="w-3.5 h-3.5" />}
-                      {act.action === 'deleted' && <Trash2 className="w-3.5 h-3.5" />}
-                      {act.action === 'chat_question' && <MessageCircle className="w-3.5 h-3.5" />}
-                      {act.action === 'extraction_started' && <Zap className="w-3.5 h-3.5" />}
-                      {act.action === 'report_generated' && <FileBarChart className="w-3.5 h-3.5" />}
-                      {!['uploaded', 'deleted', 'chat_question', 'extraction_started', 'report_generated'].includes(act.action) && (
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-ink-200">
-                        <span className="font-medium text-ink-100 capitalize">{act.action.replace(/_/g, ' ')}</span>
-                        {act.filename && (
-                          <>
-                            {' — '}
-                            {act.document_id ? (
-                              <button
-                                type="button"
-                                onClick={() => router.push(`/documents/${act.document_id}`)}
-                                className="text-accent hover:text-accent-light transition-colors"
-                              >
-                                {act.filename}
-                              </button>
-                            ) : (
-                              <span className="text-ink-400">{act.filename}</span>
-                            )}
-                          </>
-                        )}
-                        {act.action === 'chat_question' && typeof act.details?.question === 'string' && (
-                          <span className="text-ink-400 ml-1 italic">
-                            &quot;{act.details.question.slice(0, 80)}{act.details.question.length > 80 ? '...' : ''}&quot;
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-[11px] text-ink-400 font-mono mt-0.5">
-                        {formatRelativeTime(act.created_at)}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
       </main>
 
       <WalkthroughOverlay
