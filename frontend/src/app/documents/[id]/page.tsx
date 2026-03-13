@@ -708,11 +708,7 @@ export default function DocumentDetailPage() {
                                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${risk.color} ${risk.bg}/10`}>
                                     {clause.risk_level}
                                   </span>
-                                  {clause.confidence && (
-                                    <span className="text-xs text-ink-500">
-                                      {(clause.confidence * 100).toFixed(0)}% confidence
-                                    </span>
-                                  )}
+
                                   {clause.page_number != null && (
                                     <span className="text-xs text-ink-600 font-mono">
                                       p.{clause.page_number}

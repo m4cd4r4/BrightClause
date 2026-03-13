@@ -206,7 +206,7 @@ export default function LandingPage() {
               className="flex items-center gap-2 px-5 py-2.5 bg-accent text-[#1a1a2e] font-semibold rounded-xl
                        hover:brightness-110 hover:shadow-lg hover:shadow-accent/20 transition-all text-sm"
             >
-              Live Demo
+              Try It Live
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>

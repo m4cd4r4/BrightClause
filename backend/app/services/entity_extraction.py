@@ -330,6 +330,15 @@ async def get_document_graph(
     rel_result = await db.execute(rel_query)
     relationships = rel_result.scalars().all()
 
+    # Filter out junk entities (none, N/A, empty, too short)
+    _junk = {"none", "n/a", "na", "null", "unknown", "not specified", "no specific parties", ""}
+    def _is_valid_entity(e: Entity) -> bool:
+        name = (e.name or "").strip()
+        return len(name) >= 2 and name.lower() not in _junk and not name.lower().startswith("no specific")
+
+    valid_entities = [e for e in entities if _is_valid_entity(e)]
+    valid_entity_ids = {e.id for e in valid_entities}
+
     # Build graph structure
     nodes = [
         {
@@ -339,7 +348,7 @@ async def get_document_graph(
             "value": e.value,
             "normalized": e.normalized_name,
         }
-        for e in entities
+        for e in valid_entities
     ]
 
     edges = [
@@ -351,6 +360,7 @@ async def get_document_graph(
             "label": r.description or r.relationship_type,
         }
         for r in relationships
+        if r.source_entity_id in valid_entity_ids and r.target_entity_id in valid_entity_ids
     ]
 
     return {
@@ -358,8 +368,8 @@ async def get_document_graph(
         "nodes": nodes,
         "edges": edges,
         "stats": {
-            "total_entities": len(entities),
-            "total_relationships": len(relationships),
+            "total_entities": len(valid_entities),
+            "total_relationships": len(edges),
             "entity_types": _count_by_type(entities),
             "relationship_types": _count_by_rel_type(relationships),
         },
