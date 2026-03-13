@@ -179,8 +179,8 @@ export function WalkthroughOverlay({
           <div className="px-5 py-4 border-b border-ink-800/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-accent" />
-              <span className="text-xs font-mono text-ink-300 uppercase tracking-wide">
-                Step {step + 1} of {totalSteps}
+              <span className="text-xs text-ink-400">
+                {step + 1} of {totalSteps}
               </span>
             </div>
             <button

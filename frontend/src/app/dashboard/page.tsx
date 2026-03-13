@@ -541,8 +541,8 @@ function DashboardContent() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="font-display text-lg sm:text-xl font-semibold text-ink-50">Contract Portfolio</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono">
-                      {documents.length} documents · Click to analyze
+                    <p className="text-xs text-ink-500 mt-1">
+                      {documents.length} {documents.length === 1 ? 'contract' : 'contracts'} · Click to see risk
                     </p>
                   </div>
                   <button
@@ -550,8 +550,8 @@ function DashboardContent() {
                     onClick={() => router.push('/search')}
                     className="text-xs text-ink-400 hover:text-accent transition-colors flex items-center gap-1.5"
                   >
-                    <BarChart3 className="w-3.5 h-3.5" />
-                    Advanced View
+                    <Search className="w-3.5 h-3.5" />
+                    Search
                   </button>
                 </div>
               </div>
@@ -716,7 +716,7 @@ function DashboardContent() {
                               </div>
                             )}
                             <div className="flex items-center gap-4 mt-2">
-                              <span className={`text-[11px] font-mono uppercase tracking-wide ${
+                              <span className={`text-xs ${
                                 doc.status === 'completed' ? 'text-ink-500'
                                 : doc.status === 'queued' ? 'text-blue-400'
                                 : doc.status === 'processing' ? 'text-amber-400'
@@ -733,15 +733,15 @@ function DashboardContent() {
                               {doc.chunk_count > 0 && (
                                 <>
                                   <span className="text-ink-700">·</span>
-                                  <span className="text-[11px] text-ink-400 font-mono uppercase tracking-wide">
-                                    {doc.chunk_count} chunks
+                                  <span className="text-xs text-ink-500">
+                                    {doc.chunk_count} sections
                                   </span>
                                 </>
                               )}
                               {doc.status === 'completed' && (
                                 <>
                                   <span className="text-ink-700">·</span>
-                                  <span className="text-[11px] text-emerald-500 font-mono uppercase tracking-wide">
+                                  <span className="text-xs text-emerald-500">
                                     Ready
                                   </span>
                                 </>
@@ -792,8 +792,8 @@ function DashboardContent() {
                   {/* Header */}
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
-                      {selectedAnalysis ? 'Document Analysis' : `Portfolio · ${portfolioRisk?.docCount} Documents`}
+                    <p className="text-xs text-ink-500 mt-1">
+                      {selectedAnalysis ? 'Document analysis' : `Portfolio · ${portfolioRisk?.docCount} contracts`}
                     </p>
                   </div>
 
@@ -872,9 +872,7 @@ function DashboardContent() {
                         {/* High Risk Highlights */}
                         {highlights.length > 0 && (
                           <div>
-                            <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
-                              Attention Required
-                            </h3>
+                            <h3 className="text-xs text-ink-500 mb-3">Attention required</h3>
                             <div className="space-y-3">
                               {highlights.slice(0, 3).map((highlight, i) => (
                                 <motion.div
@@ -987,9 +985,7 @@ function DashboardContent() {
                 >
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
-                      Click a contract to see its risk
-                    </p>
+                    <p className="text-xs text-ink-500 mt-1">Click a contract to see its risk</p>
                   </div>
                   <div className="p-6">
                     {/* Ghost risk display */}
@@ -1039,7 +1035,7 @@ function DashboardContent() {
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-accent" />
                   <h2 className="font-display text-lg font-semibold text-ink-50">Recent Activity</h2>
-                  <span className="text-[11px] text-ink-400 font-mono ml-auto">{activities.length} events</span>
+                  <span className="text-xs text-ink-500 ml-auto">{activities.length} events</span>
                 </div>
               </div>
               <div className="divide-y divide-ink-800/30 max-h-[400px] overflow-y-auto">
