@@ -438,14 +438,14 @@ function DashboardContent() {
         <h1 className="sr-only">Contract Dashboard</h1>
         {/* Portfolio Stats Strip */}
         <div
-          className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-ink-800/40 border-b border-ink-800/40 mb-8"
+          className="grid grid-cols-4 divide-x divide-ink-800/40 border-b border-ink-800/40 mb-8"
           data-tour="stats"
         >
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="px-6 sm:px-8 py-5 space-y-2">
-                <div className="skeleton h-9 w-12 rounded" />
-                <div className="skeleton h-4 w-28 rounded" />
+              <div key={i} className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-2">
+                <div className="skeleton h-6 sm:h-9 w-8 sm:w-12 rounded" />
+                <div className="skeleton h-3 sm:h-4 w-16 sm:w-28 rounded" />
               </div>
             ))
           ) : (
@@ -555,7 +555,7 @@ function DashboardContent() {
                   </button>
                 </div>
               </div>
-              <div className="divide-y divide-ink-800/30 max-h-[calc(100vh-320px)] overflow-y-auto">
+              <div className="divide-y divide-ink-800/30 max-h-[60vh] sm:max-h-[calc(100vh-300px)] overflow-y-auto">
                 {loading ? (
                   <div className="divide-y divide-ink-800/30">
                     {Array.from({ length: 6 }).map((_, i) => (
@@ -761,7 +761,7 @@ function DashboardContent() {
                               e.preventDefault()
                               navigateToDocument(doc.id)
                             }}
-                            className="p-2 bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors"
+                            className="p-3 sm:p-2 min-w-[44px] sm:min-w-0 min-h-[44px] sm:min-h-0 flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors"
                             aria-label="View document details"
                             title="View Details"
                           >
@@ -1128,21 +1128,21 @@ function PortfolioStat({
       <button
         type="button"
         onClick={onClick}
-        className="px-6 sm:px-8 py-5 text-left cursor-pointer hover:bg-ink-900/40 group transition-colors"
+        className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 text-left cursor-pointer hover:bg-ink-900/40 group transition-colors"
       >
-        <span className="text-4xl font-bold tabular-nums tracking-tight text-ink-50 group-hover:text-accent transition-colors">
+        <span className="text-xl sm:text-3xl lg:text-4xl font-bold tabular-nums tracking-tight text-ink-50 group-hover:text-accent transition-colors block">
           {value.toLocaleString()}
         </span>
-        <p className="text-sm text-ink-500 mt-1">{label}</p>
+        <p className="text-[11px] sm:text-sm text-ink-500 mt-0.5 sm:mt-1 leading-tight">{label}</p>
       </button>
     )
   }
   return (
-    <div className="px-6 sm:px-8 py-5">
-      <span className="text-4xl font-bold tabular-nums tracking-tight text-ink-50">
+    <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5">
+      <span className="text-xl sm:text-3xl lg:text-4xl font-bold tabular-nums tracking-tight text-ink-50 block">
         {value.toLocaleString()}
       </span>
-      <p className="text-sm text-ink-500 mt-1">{label}</p>
+      <p className="text-[11px] sm:text-sm text-ink-500 mt-0.5 sm:mt-1 leading-tight">{label}</p>
     </div>
   )
 }

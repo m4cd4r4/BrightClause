@@ -36,7 +36,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
             />
             <div className="hidden sm:block">
               <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
-              <p className="text-[10px] text-ink-500 tracking-wide uppercase font-mono">Contract Intelligence</p>
+              <p className="text-[10px] text-ink-500 tracking-wide">Contract Intelligence</p>
             </div>
           </Link>
 
