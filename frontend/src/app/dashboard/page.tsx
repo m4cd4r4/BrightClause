@@ -586,9 +586,9 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      <h3 className="text-ink-200 font-semibold text-base">Upload your first contract</h3>
+                      <h3 className="text-ink-200 font-semibold text-base">Add your first contract</h3>
                       <p className="mt-2 text-ink-500 text-sm leading-relaxed">
-                        Drop a PDF here or click below. BrightClause will extract clauses, score risks, and build a searchable index automatically.
+                        Drop any PDF here. We read every clause, flag risky provisions, and surface what needs your attention - in minutes.
                       </p>
 
                       <button
@@ -600,23 +600,23 @@ function DashboardContent() {
                         Choose PDF
                       </button>
 
-                      {/* What happens next */}
+                      {/* Value outcome steps */}
                       <div className="mt-8 pt-6 border-t border-ink-800/40">
-                        <p className="text-[10px] text-ink-500 font-mono uppercase tracking-wider mb-3">What happens next</p>
+                        <p className="text-[10px] text-ink-500 mb-3">What you get</p>
                         <div className="flex items-center justify-center gap-3 text-[11px] text-ink-400">
                           <span className="flex items-center gap-1.5">
-                            <Zap className="w-3 h-3 text-amber-500/70" />
-                            Extract
+                            <FileText className="w-3 h-3 text-amber-500/70" />
+                            Every clause read
                           </span>
                           <ChevronRight className="w-3 h-3 text-ink-700" />
                           <span className="flex items-center gap-1.5">
                             <Shield className="w-3 h-3 text-orange-500/70" />
-                            Score
+                            Risk flagged
                           </span>
                           <ChevronRight className="w-3 h-3 text-ink-700" />
                           <span className="flex items-center gap-1.5">
                             <Search className="w-3 h-3 text-emerald-500/70" />
-                            Index
+                            Nothing missed
                           </span>
                         </div>
                       </div>
@@ -928,16 +928,16 @@ function DashboardContent() {
                 >
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">Not Yet Analyzed</p>
+                    <p className="text-xs text-ink-400 mt-1">Not yet analyzed</p>
                   </div>
-                  <div className="p-6 flex flex-col items-center text-center gap-6">
-                    <div className="mt-4 p-5 rounded-full bg-ink-800/60 border border-ink-700/50">
-                      <Shield className="w-10 h-10 text-ink-500" />
+                  <div className="p-6 flex flex-col items-center text-center gap-5">
+                    <div className="mt-2 p-4 rounded-full bg-ink-800/60 border border-ink-700/50">
+                      <Shield className="w-9 h-9 text-ink-500" />
                     </div>
                     <div>
-                      <p className="text-ink-200 font-medium mb-1">No analysis yet</p>
+                      <p className="text-ink-200 font-medium mb-1">Analyze this contract</p>
                       <p className="text-sm text-ink-400 leading-relaxed">
-                        Run AI analysis to extract clauses, assess risk levels, and identify key provisions in this document.
+                        We&apos;ll read every clause, identify the risky ones, and flag anything that needs your attention.
                       </p>
                     </div>
                     <button
