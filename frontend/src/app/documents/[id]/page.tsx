@@ -104,6 +104,7 @@ export default function DocumentDetailPage() {
   const [byokApiKey, setByokApiKey] = useState('')
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
   const { error: showError, success: showSuccess } = useToast()
 
   // Cleanup polling on unmount
@@ -113,6 +114,18 @@ export default function DocumentDetailPage() {
       if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
     }
   }, [])
+
+  // Close export menu on outside click
+  useEffect(() => {
+    if (!showExportMenu) return
+    const handleClick = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false)
+      }
+    }
+    window.document.addEventListener('mousedown', handleClick)
+    return () => window.document.removeEventListener('mousedown', handleClick)
+  }, [showExportMenu])
 
   useEffect(() => {
     loadDocument()
@@ -341,7 +354,7 @@ export default function DocumentDetailPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-            onClick={(e) => e.target === e.currentTarget && setShowByokModal(false)}
+            onMouseDown={(e) => e.target === e.currentTarget && setShowByokModal(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -435,7 +448,7 @@ export default function DocumentDetailPage() {
         </button>
 
         {/* Export Dropdown */}
-        <div className="relative">
+        <div ref={exportMenuRef} className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
             disabled={exporting !== null}
@@ -685,7 +698,10 @@ export default function DocumentDetailPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ delay: index * 0.02 }}
-                        className={`card overflow-hidden transition-all ${risk.border} border
+                        className={`card overflow-hidden transition-all ${risk.border} border border-l-4 ${
+                                  clause.risk_level === 'critical' ? 'border-l-red-500' :
+                                  clause.risk_level === 'high' ? 'border-l-orange-500' :
+                                  clause.risk_level === 'medium' ? 'border-l-amber-500' : 'border-l-emerald-500'}
                                   ${clause.risk_level === 'critical' ? 'risk-critical' : ''}
                                   ${clause.risk_level === 'high' ? 'risk-high' : ''}`}
                       >
@@ -843,7 +859,7 @@ export default function DocumentDetailPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) setShowReport(false) }}
+            onMouseDown={(e) => { if (e.target === e.currentTarget) setShowReport(false) }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}

@@ -162,32 +162,59 @@ export default function AnalyticsPage() {
 
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Page Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+        <div className="mb-8">
           <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50">Portfolio Analytics</h1>
           <p className="text-sm text-ink-500 mt-1">
             Risk assessment across {portfolioStats.totalDocs} analyzed contracts
           </p>
-        </motion.div>
+        </div>
 
         {docAnalyses.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="card p-16 text-center"
+            className="card p-10 sm:p-14"
           >
-            <BarChart3 className="w-16 h-16 text-ink-700 mx-auto" />
-            <h2 className="font-display text-xl font-semibold mt-6">No Analysis Data Yet</h2>
-            <p className="text-ink-500 mt-2 max-w-md mx-auto">
-              Upload and analyze contracts from the dashboard to see portfolio-wide risk analytics.
-            </p>
-            <Link href="/dashboard" className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-accent text-ink-950 font-semibold rounded-xl hover:bg-accent-light transition-colors">
-              Go to Dashboard
-              <ChevronRight className="w-4 h-4" />
-            </Link>
+            <div className="max-w-lg mx-auto text-center">
+              {/* Mini preview of what analytics will show */}
+              <div className="mb-8 opacity-40 pointer-events-none select-none" aria-hidden="true">
+                {/* Skeleton stat cards */}
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {['bg-red-500/20', 'bg-orange-500/20', 'bg-amber-500/20', 'bg-emerald-500/20'].map((bg, i) => (
+                    <div key={i} className="rounded-lg border border-ink-800/30 p-3">
+                      <div className={`w-6 h-6 rounded ${bg} mb-2`} />
+                      <div className="h-5 w-8 bg-ink-800/50 rounded mb-1" />
+                      <div className="h-2 w-12 bg-ink-800/30 rounded" />
+                    </div>
+                  ))}
+                </div>
+                {/* Skeleton heatmap grid */}
+                <div className="rounded-lg border border-ink-800/30 p-3">
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {Array.from({ length: 18 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-5 rounded-sm"
+                        style={{
+                          backgroundColor: ['rgba(239,68,68,0.15)', 'rgba(245,158,11,0.15)', 'rgba(16,185,129,0.12)', 'rgba(99,102,106,0.08)'][i % 4],
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <BarChart3 className="w-10 h-10 text-ink-600 mx-auto" />
+              <h2 className="font-display text-xl font-semibold mt-4">Your Portfolio Analytics</h2>
+              <p className="text-ink-500 mt-2 max-w-md mx-auto text-sm leading-relaxed">
+                Once you analyze your first contract, this page builds a risk heatmap, clause distribution chart,
+                and health score across your entire portfolio. Start by uploading a contract from the dashboard.
+              </p>
+              <Link href="/dashboard" className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-accent text-ink-950 font-semibold rounded-xl hover:bg-accent-light transition-colors">
+                Go to Dashboard
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </motion.div>
         ) : (
           <>
@@ -195,8 +222,9 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
               {/* Portfolio Health Score - Prominent */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 className="col-span-2 lg:col-span-1 card p-6"
               >
                 <div className="text-center">
@@ -228,13 +256,20 @@ export default function AnalyticsPage() {
               </motion.div>
 
               {/* Risk Level Stats */}
-              {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level, i) => (
+              {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level, i) => {
+                const borderColor = {
+                  critical: 'border-red-500',
+                  high: 'border-orange-500',
+                  medium: 'border-amber-500',
+                  low: 'border-emerald-500',
+                }[level]
+                return (
                 <motion.div
                   key={level}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * (i + 1) }}
-                  className="card p-5"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.05 * (i + 1), type: 'spring', stiffness: 300, damping: 25 }}
+                  className={`card p-5 border-l-4 ${borderColor}`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className={`p-2 rounded-lg ${riskConfig[level].bg}/10`}>
@@ -251,14 +286,14 @@ export default function AnalyticsPage() {
                     {riskConfig[level].label} Risk
                   </p>
                 </motion.div>
-              ))}
+              )})}
             </div>
 
             {/* Risk Heatmap */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
               className="card overflow-hidden mb-8"
             >
               <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
@@ -352,9 +387,9 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Clause Type Distribution */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 22 }}
                 className="card overflow-hidden"
               >
                 <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
@@ -403,9 +438,9 @@ export default function AnalyticsPage() {
 
               {/* Top Risk Highlights */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
+                initial={{ opacity: 0, x: 15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25, type: 'spring', stiffness: 200, damping: 22 }}
                 className="card overflow-hidden"
               >
                 <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
@@ -421,13 +456,20 @@ export default function AnalyticsPage() {
                       <p className="text-ink-500 text-sm mt-3">No high-risk clauses detected</p>
                     </div>
                   ) : (
-                    allHighlights.slice(0, 15).map((highlight, i) => (
+                    allHighlights.slice(0, 15).map((highlight, i) => {
+                      const highlightBorder = {
+                        critical: 'border-red-500',
+                        high: 'border-orange-500',
+                        medium: 'border-amber-500',
+                        low: 'border-emerald-500',
+                      }[highlight.risk_level] || 'border-ink-700'
+                      return (
                       <motion.div
                         key={`${highlight.docId}-${highlight.clause_type}-${i}`}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 + i * 0.03 }}
-                        className="px-6 py-4 hover:bg-ink-900/20 transition-colors"
+                        className={`px-6 py-4 hover:bg-ink-900/20 transition-colors border-l-4 ${highlightBorder}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
@@ -459,7 +501,7 @@ export default function AnalyticsPage() {
                           </Link>
                         </div>
                       </motion.div>
-                    ))
+                    )})
                   )}
                 </div>
               </motion.div>
@@ -468,9 +510,9 @@ export default function AnalyticsPage() {
             {/* Cross-Document Entity References */}
             {crossRefs.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.38 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
                 className="card overflow-hidden mb-8"
               >
                 <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
@@ -541,9 +583,9 @@ export default function AnalyticsPage() {
 
             {/* Risk by Document - Summary Table */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.35, type: 'spring', stiffness: 200, damping: 22 }}
               className="card overflow-hidden"
             >
               <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">

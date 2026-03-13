@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -29,7 +29,20 @@ function ComparePageContent() {
   const [showPicker, setShowPicker] = useState(false)
   const [expandedCell, setExpandedCell] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
+  const pickerRef = useRef<HTMLDivElement>(null)
   const { error: showError } = useToast()
+
+  // Close picker on outside click
+  useEffect(() => {
+    if (!showPicker) return
+    const handleClick = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showPicker])
 
   // Update URL whenever the selected doc IDs change
   const updateUrl = useCallback((docIds: string[]) => {
@@ -158,16 +171,12 @@ function ComparePageContent() {
 
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+        <div className="mb-8">
           <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50">Document Comparison</h1>
           <p className="text-sm text-ink-500 mt-1">
             Compare clause coverage and risk levels across contracts side-by-side
           </p>
-        </motion.div>
+        </div>
 
         {/* Selected Documents Bar */}
         <motion.div
@@ -205,7 +214,7 @@ function ComparePageContent() {
           ))}
 
           {compareDocs.length < 5 && (
-            <div className="relative">
+            <div ref={pickerRef} className="relative">
               <button
                 type="button"
                 onClick={() => setShowPicker(!showPicker)}
@@ -262,25 +271,55 @@ function ComparePageContent() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="card p-16 text-center"
+            className="card p-10 sm:p-14"
           >
-            <GitCompareArrows className="w-16 h-16 text-ink-700 mx-auto" />
-            <h2 className="font-display text-xl font-semibold mt-6">
-              {compareDocs.length === 0 ? 'Select Documents to Compare' : 'Add One More Document'}
-            </h2>
-            <p className="text-ink-500 mt-2 max-w-md mx-auto">
-              {compareDocs.length === 0
-                ? 'Choose 2-5 contracts from your portfolio to compare their clause coverage, risk levels, and key provisions side-by-side.'
-                : 'Select at least 2 documents to begin comparing clauses and risk levels.'
-              }
-            </p>
+            <div className="max-w-lg mx-auto text-center">
+              {/* Mini side-by-side comparison preview */}
+              <div className="mb-8 opacity-40 pointer-events-none select-none" aria-hidden="true">
+                <div className="flex gap-3 justify-center">
+                  {[0, 1].map((col) => (
+                    <div key={col} className="flex-1 max-w-[180px] rounded-lg border border-ink-800/30 p-3">
+                      <div className="flex items-center gap-2 mb-3">
+                        <FileText className="w-3.5 h-3.5 text-ink-600" />
+                        <div className="h-2.5 w-16 bg-ink-800/50 rounded" />
+                      </div>
+                      {Array.from({ length: 4 }).map((_, row) => (
+                        <div key={row} className="flex items-center gap-2 mb-2">
+                          <div className="h-2 w-14 bg-ink-800/30 rounded" />
+                          <div
+                            className="w-5 h-5 rounded-sm"
+                            style={{
+                              backgroundColor: col === 0
+                                ? ['rgba(239,68,68,0.2)', 'rgba(245,158,11,0.2)', 'rgba(16,185,129,0.15)', 'rgba(99,102,106,0.1)'][row]
+                                : ['rgba(245,158,11,0.2)', 'rgba(16,185,129,0.15)', 'rgba(99,102,106,0.1)', 'rgba(239,68,68,0.2)'][row],
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <GitCompareArrows className="w-10 h-10 text-ink-600 mx-auto" />
+              <h2 className="font-display text-xl font-semibold mt-4">
+                {compareDocs.length === 0 ? 'Compare Your Contracts' : 'Add One More Document'}
+              </h2>
+              <p className="text-ink-500 mt-2 max-w-md mx-auto text-sm leading-relaxed">
+                {compareDocs.length === 0
+                  ? 'Select 2-5 contracts to see a clause-by-clause comparison matrix. Spot coverage gaps, risk differences, and missing provisions across agreements.'
+                  : 'You need at least two documents to build the comparison matrix. Use the "Add Document" button above to pick another contract.'
+                }
+              </p>
+            </div>
           </motion.div>
         ) : (
           <>
             {/* Comparison Matrix */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 22 }}
               className="card overflow-hidden mb-8"
             >
               <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
@@ -406,9 +445,9 @@ function ComparePageContent() {
 
             {/* Coverage Gaps */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 22 }}
               className="card overflow-hidden"
             >
               <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">

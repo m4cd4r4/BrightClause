@@ -87,7 +87,7 @@ export default function SearchPage() {
       const regex = new RegExp(`(${escaped})`, 'gi')
       const parts = text.split(regex)
       return parts.map((part, i) =>
-        regex.test(part) ? (
+        part.toLowerCase() === searchQuery.trim().toLowerCase() ? (
           <mark key={i} className="bg-accent/30 text-accent-light px-0.5 rounded">
             {part}
           </mark>
@@ -113,13 +113,9 @@ export default function SearchPage() {
     <div className="min-h-screen">
       <Navigation />
 
-      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Search Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto"
-        >
+        <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50 mb-2">
               Search Your Contract Portfolio
@@ -282,7 +278,7 @@ export default function SearchPage() {
           <p className="text-center text-sm text-ink-500 mt-4">
             {searchModes[searchMode].description}
           </p>
-        </motion.div>
+        </div>
 
         {/* Results */}
         {hasSearched && (
@@ -306,9 +302,9 @@ export default function SearchPage() {
                   {Object.entries(groupedResults).map(([docName, docResults], groupIndex) => (
                     <motion.div
                       key={docName}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: groupIndex * 0.1 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: groupIndex * 0.08 }}
                       className="card overflow-hidden"
                     >
                       {/* Document Header */}
@@ -375,11 +371,42 @@ export default function SearchPage() {
                 animate={{ opacity: 1 }}
                 className="text-center py-16"
               >
-                <Search className="w-16 h-16 text-ink-700 mx-auto" />
+                <Search className="w-12 h-12 text-ink-600 mx-auto" />
                 <h3 className="font-display text-lg font-semibold mt-4">No Results Found</h3>
-                <p className="text-ink-500 mt-2 max-w-md mx-auto">
-                  Try adjusting your search terms or switching search modes for different results.
+                <p className="text-ink-500 mt-2 max-w-md mx-auto text-sm leading-relaxed">
+                  Nothing matched &ldquo;{query}&rdquo; in <span className="font-mono text-ink-400">{searchModes[searchMode].label}</span> mode.
+                  {selectedDocument && ' Results are also filtered to a single document.'}
                 </p>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                  {(Object.keys(searchModes) as SearchMode[])
+                    .filter(m => m !== searchMode)
+                    .map(mode => {
+                      const Icon = searchModes[mode].icon
+                      return (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => { setSearchMode(mode); handleSearch() }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm
+                                   bg-ink-800/50 text-ink-400 hover:text-ink-200 hover:bg-ink-800 transition-colors"
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                          Try {searchModes[mode].label}
+                        </button>
+                      )
+                    })}
+                  {selectedDocument && (
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedDocument(null); handleSearch() }}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm
+                               bg-ink-800/50 text-ink-400 hover:text-ink-200 hover:bg-ink-800 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      Search all documents
+                    </button>
+                  )}
+                </div>
               </motion.div>
             )}
           </motion.div>

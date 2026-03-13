@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   ClipboardCheck, Clock, AlertTriangle, CheckCircle, FileText,
   Filter, Loader2, CreditCard, Truck, Bell, ShieldCheck,
-  FileBarChart, ChevronDown, ExternalLink
+  FileBarChart, ChevronDown, ChevronRight, ExternalLink
 } from 'lucide-react'
 import { api, ObligationItem } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -78,24 +79,20 @@ export default function ObligationsPage() {
 
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 sm:mb-8"
-        >
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink-50">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50">
             Obligation Tracker
           </h1>
           <p className="text-sm text-ink-500 mt-1">
             Deadlines, commitments, and obligations across all contracts
           </p>
-        </motion.div>
+        </div>
 
         {/* Status Cards */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6"
         >
           {[
@@ -123,9 +120,9 @@ export default function ObligationsPage() {
 
         {/* Type Filter */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.05, duration: 0.3 }}
           className="flex items-center gap-2 mb-6 overflow-x-auto pb-1"
         >
           <Filter className="w-4 h-4 text-ink-500 shrink-0" />
@@ -161,14 +158,47 @@ export default function ObligationsPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="card p-12 text-center"
+            className="card p-10 sm:p-14"
           >
-            <ClipboardCheck className="w-14 h-14 text-ink-700 mx-auto" />
-            <p className="mt-5 text-ink-500 text-sm">
-              {filterStatus || filterType
-                ? 'No obligations match your filters.'
-                : 'No obligations extracted yet. Analyze a document to extract obligations.'}
-            </p>
+            <div className="max-w-md mx-auto text-center">
+              {filterStatus || filterType ? (
+                <>
+                  <Filter className="w-10 h-10 text-ink-600 mx-auto" />
+                  <h2 className="font-display text-xl font-semibold mt-4">No Matching Obligations</h2>
+                  <p className="text-ink-500 mt-2 text-sm leading-relaxed">
+                    No obligations found for
+                    {filterStatus && <span className="text-ink-300 font-medium"> {statusConfig[filterStatus]?.label || filterStatus}</span>}
+                    {filterStatus && filterType && ' +'}
+                    {filterType && <span className="text-ink-300 font-medium"> {typeConfig[filterType]?.label || filterType}</span>}
+                    . Try broadening your filters or check a different status.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setFilterStatus(''); setFilterType('') }}
+                    className="mt-5 text-sm text-accent hover:text-accent-light transition-colors font-medium"
+                  >
+                    Clear All Filters
+                  </button>
+                </>
+              ) : (
+                <>
+                  <ClipboardCheck className="w-10 h-10 text-ink-600 mx-auto" />
+                  <h2 className="font-display text-xl font-semibold mt-4">No Obligations Yet</h2>
+                  <p className="text-ink-500 mt-2 text-sm leading-relaxed">
+                    Obligations are extracted automatically when you analyze a contract - payment deadlines,
+                    delivery requirements, compliance milestones, and notification duties. Upload and analyze
+                    a contract from the dashboard to get started.
+                  </p>
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-accent text-ink-950 font-semibold rounded-xl hover:bg-accent-light transition-colors"
+                  >
+                    Go to Dashboard
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </>
+              )}
+            </div>
           </motion.div>
         ) : (
           <div className="space-y-6">
@@ -177,9 +207,9 @@ export default function ObligationsPage() {
               return (
                 <motion.div
                   key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: gi * 0.05 }}
+                  initial={{ opacity: 0, x: -15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: gi * 0.05, type: 'spring', stiffness: 200, damping: 22 }}
                   className="card overflow-hidden"
                 >
                   {/* Document Header */}
@@ -195,7 +225,7 @@ export default function ObligationsPage() {
                       type="button"
                       onClick={() => router.push(`/documents/${docId}`)}
                       className="p-2 text-ink-400 hover:text-accent transition-colors"
-                      title="View document"
+                      aria-label="View document"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>

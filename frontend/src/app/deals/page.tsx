@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
-  Briefcase, Plus, FileText, ChevronRight, Loader2, X
+  Briefcase, Plus, FileText, ChevronRight, Loader2, X,
+  AlertTriangle, ClipboardCheck, GitCompareArrows
 } from 'lucide-react'
 import { api, DealItem } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -59,10 +60,10 @@ export default function DealsPage() {
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink-50">Deals</h1>
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50">Deals</h1>
             <p className="text-sm text-ink-500 mt-1">Group related contracts into deals for aggregate analysis</p>
-          </motion.div>
+          </div>
           <button
             type="button"
             onClick={() => setShowCreate(true)}
@@ -80,7 +81,7 @@ export default function DealsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/80 backdrop-blur-sm p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) setShowCreate(false) }}
+            onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreate(false) }}
           >
             <motion.div
               initial={{ scale: 0.95 }}
@@ -134,25 +135,44 @@ export default function DealsPage() {
             ))}
           </div>
         ) : deals.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card p-12 text-center">
-            <Briefcase className="w-14 h-14 text-ink-700 mx-auto" />
-            <p className="mt-5 text-ink-500 text-sm">No deals yet. Create one to group related contracts.</p>
-            <button
-              type="button"
-              onClick={() => setShowCreate(true)}
-              className="mt-6 btn-primary"
-            >
-              Create Your First Deal
-            </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card p-10 sm:p-14">
+            <div className="max-w-md mx-auto text-center">
+              <Briefcase className="w-10 h-10 text-ink-600 mx-auto" />
+              <h2 className="font-display text-xl font-semibold mt-4">Organize by Deal</h2>
+              <p className="text-ink-500 mt-2 text-sm leading-relaxed">
+                Group related contracts into a single deal - an acquisition, partnership, or vendor relationship.
+                Each deal gives you aggregate risk scores, obligation tracking, and clause comparison
+                across all its documents.
+              </p>
+              <div className="mt-6 grid grid-cols-3 gap-3 text-center opacity-60" aria-hidden="true">
+                {[
+                  { label: 'Aggregate risk', icon: AlertTriangle },
+                  { label: 'Track obligations', icon: ClipboardCheck },
+                  { label: 'Compare clauses', icon: GitCompareArrows },
+                ].map(({ label, icon: Icon }) => (
+                  <div key={label} className="p-2.5 rounded-lg border border-ink-800/30">
+                    <Icon className="w-4 h-4 text-ink-500 mx-auto mb-1" />
+                    <p className="text-[10px] font-mono text-ink-500 uppercase">{label}</p>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreate(true)}
+                className="mt-8 btn-primary"
+              >
+                Create Your First Deal
+              </button>
+            </div>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {deals.map((deal, i) => (
               <motion.div
                 key={deal.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03, type: 'spring', stiffness: 300, damping: 25 }}
               >
                 <button
                   type="button"

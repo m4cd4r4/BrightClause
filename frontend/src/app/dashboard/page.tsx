@@ -426,7 +426,10 @@ function DashboardContent() {
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         <h1 className="sr-only">Contract Dashboard</h1>
         {/* Portfolio Stats Strip */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className="grid grid-cols-3 divide-x divide-ink-800/40 border-b border-ink-800/40 mb-8"
           data-tour="stats"
         >
@@ -463,7 +466,7 @@ function DashboardContent() {
               />
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* Search Results */}
         <AnimatePresence>

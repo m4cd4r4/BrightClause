@@ -87,7 +87,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
         {mobileOpen && (
           <nav aria-label="Mobile navigation" className="md:hidden mt-3 pt-3 border-t border-ink-800/50 flex flex-col gap-1">
             {navLinks.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href
+              const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
               return (
                 <Link
                   key={href}

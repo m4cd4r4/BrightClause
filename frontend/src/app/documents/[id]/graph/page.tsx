@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Network, Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2,
   RefreshCw, Building2, User, Calendar, DollarSign,
-  MapPin, Clock, Percent, FileText, Link2, ChevronRight, Quote
+  MapPin, Clock, Percent, FileText, Link2, ChevronRight, Quote, X
 } from 'lucide-react'
 import { api, Document, GraphData, Entity } from '@/lib/api'
 import { useToast } from '@/lib/toast'
@@ -100,6 +100,9 @@ export default function GraphPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [draggedNode, setDraggedNode] = useState<Node | null>(null)
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  const lastTouchRef = useRef<{ x: number; y: number } | null>(null)
+  const lastPinchDistRef = useRef<number | null>(null)
   const { error: showError } = useToast()
 
   useEffect(() => {
@@ -524,6 +527,109 @@ export default function GraphPage() {
     setZoom(newZoom)
   }
 
+  // Touch event handlers for mobile
+  const getTouchCanvasCoords = (touch: React.Touch) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+    const rect = canvas.getBoundingClientRect()
+    const currentZoom = zoomRef.current
+    const currentPan = panRef.current
+    return {
+      x: (touch.clientX - rect.left - currentPan.x) / currentZoom,
+      y: (touch.clientY - rect.top - currentPan.y) / currentZoom,
+    }
+  }
+
+  const getPinchDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX
+    const dy = touches[0].clientY - touches[1].clientY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 2) {
+      // Pinch zoom start - track initial distance
+      lastPinchDistRef.current = getPinchDistance(e.touches)
+      lastTouchRef.current = null
+      return
+    }
+
+    if (e.touches.length !== 1) return
+
+    const touch = e.touches[0]
+    const { x, y } = getTouchCanvasCoords(touch)
+    const currentPan = panRef.current
+
+    const clickedNode = nodesRef.current.find((node) => {
+      const dx = node.x - x
+      const dy = node.y - y
+      return Math.sqrt(dx * dx + dy * dy) < 30 // slightly larger hitbox for fingers
+    })
+
+    if (clickedNode) {
+      setDraggedNode(clickedNode)
+      clickedNode.fx = clickedNode.x
+      clickedNode.fy = clickedNode.y
+      setSelectedNode(clickedNode)
+      setMobileSheetOpen(true)
+      kickSimulation()
+      lastTouchRef.current = null
+    } else {
+      lastTouchRef.current = { x: touch.clientX - currentPan.x, y: touch.clientY - currentPan.y }
+    }
+  }
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault()
+
+    if (e.touches.length === 2) {
+      // Pinch zoom
+      const dist = getPinchDistance(e.touches)
+      if (lastPinchDistRef.current !== null) {
+        const scale = dist / lastPinchDistRef.current
+        const newZoom = Math.max(0.3, Math.min(3, zoomRef.current * scale))
+        setZoom(newZoom)
+      }
+      lastPinchDistRef.current = dist
+      return
+    }
+
+    if (e.touches.length !== 1) return
+
+    const touch = e.touches[0]
+    const { x, y } = getTouchCanvasCoords(touch)
+
+    if (draggedNode) {
+      draggedNode.fx = x
+      draggedNode.fy = y
+      kickSimulation()
+    } else if (lastTouchRef.current) {
+      setPan({
+        x: touch.clientX - lastTouchRef.current.x,
+        y: touch.clientY - lastTouchRef.current.y,
+      })
+    }
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 0) {
+      // All fingers lifted
+      if (draggedNode) {
+        draggedNode.fx = null
+        draggedNode.fy = null
+        setDraggedNode(null)
+      }
+      lastTouchRef.current = null
+      lastPinchDistRef.current = null
+    } else if (e.touches.length === 1) {
+      // Went from 2 fingers to 1 - reset to pan mode
+      lastPinchDistRef.current = null
+      const touch = e.touches[0]
+      const currentPan = panRef.current
+      lastTouchRef.current = { x: touch.clientX - currentPan.x, y: touch.clientY - currentPan.y }
+    }
+  }
+
   const resetView = () => {
     setZoom(1.0)
     setPan({ x: 0, y: 0 })
@@ -665,6 +771,31 @@ export default function GraphPage() {
           <span className="hidden sm:inline">Clauses</span>
         </Link>
       </Navigation>
+
+      {/* Mobile Entity Type Filter - horizontal scroll chips */}
+      {graphData && graphData.nodes.length > 0 && (
+        <div className="md:hidden border-b border-ink-800/50 px-3 py-2 overflow-x-auto">
+          <div className="flex items-center gap-2 min-w-max">
+            {Object.entries(entityTypeConfig).map(([type, config]) => {
+              const count = graphData.stats.entity_types[type] || 0
+              if (count === 0) return null
+              const active = selectedTypes.has(type) || selectedTypes.size === 0
+              return (
+                <button
+                  key={type}
+                  onClick={() => toggleType(type)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors
+                    ${active ? 'bg-ink-800 text-ink-200' : 'bg-ink-900/50 text-ink-500'}`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${config.bg}`} />
+                  <span className="capitalize">{type}</span>
+                  <span className="font-mono text-ink-500">{count}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 flex">
         {/* Entity Type Filter */}
@@ -824,19 +955,25 @@ export default function GraphPage() {
               role="img"
               aria-label={`Knowledge graph visualization showing ${graphData?.stats.total_entities || 0} entities and ${graphData?.stats.total_relationships || 0} relationships`}
               className="w-full h-full cursor-grab active:cursor-grabbing"
+              style={{ touchAction: 'none' }}
               onMouseDown={handleCanvasMouseDown}
               onMouseMove={handleCanvasMouseMove}
               onMouseUp={handleCanvasMouseUp}
               onMouseLeave={handleCanvasMouseLeave}
               onWheel={handleWheel}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <Network className="w-16 h-16 text-ink-700 mx-auto" />
-                <h3 className="font-display text-lg font-semibold mt-4">No knowledge graph yet</h3>
-                <p className="text-ink-500 mt-2 max-w-md">
-                  Build the graph for this contract - extract parties, dates, amounts, and the relationships between them.
+                <Network className="w-12 h-12 text-ink-600 mx-auto" />
+                <h3 className="font-display text-lg font-semibold mt-4">No Entities Extracted</h3>
+                <p className="text-ink-500 mt-2 max-w-md text-sm leading-relaxed">
+                  Extract parties, dates, monetary amounts, and other key entities from
+                  {contractDoc ? ` "${contractDoc.filename}"` : ' this document'} to build
+                  an interactive relationship graph.
                 </p>
                 <button
                   onClick={triggerExtraction}
@@ -863,6 +1000,121 @@ export default function GraphPage() {
           <div className="absolute bottom-4 right-4 px-3 py-1 bg-ink-900/80 rounded-lg text-xs text-ink-400">
             {Math.round(zoom * 100)}%
           </div>
+
+          {/* Mobile bottom sheet for selected node */}
+          <AnimatePresence>
+            {selectedNode && mobileSheetOpen && graphData && (
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="md:hidden absolute bottom-0 inset-x-0 bg-ink-900 border-t border-ink-700/50 rounded-t-2xl max-h-[60vh] overflow-y-auto z-10"
+              >
+                {/* Drag handle */}
+                <div className="flex justify-center pt-2 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-ink-600" />
+                </div>
+
+                <div className="px-4 pb-4 space-y-3">
+                  {/* Header with close button */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${entityTypeConfig[selectedNode.type]?.bg || 'bg-gray-500'}`} />
+                      <span className="text-xs uppercase tracking-wider text-ink-500">{selectedNode.type}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setMobileSheetOpen(false)
+                        setSelectedNode(null)
+                      }}
+                      className="p-1 hover:bg-ink-800 rounded-lg"
+                    >
+                      <X className="w-4 h-4 text-ink-400" />
+                    </button>
+                  </div>
+
+                  <p className="font-semibold text-ink-100 text-lg">{selectedNode.label}</p>
+                  {selectedNode.value && selectedNode.value !== selectedNode.label && (
+                    <p className="text-sm text-ink-400 italic">{selectedNode.value}</p>
+                  )}
+
+                  {/* Connected relationships */}
+                  {(() => {
+                    const connectedEdges = graphData.edges.filter(
+                      e => e.source === selectedNode.id || e.target === selectedNode.id
+                    )
+                    if (connectedEdges.length === 0) return null
+
+                    return (
+                      <div>
+                        <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <Link2 className="w-3 h-3" />
+                          Relationships ({connectedEdges.length})
+                        </h4>
+                        <div className="space-y-1.5">
+                          {connectedEdges.slice(0, 6).map((edge) => {
+                            const isSource = edge.source === selectedNode.id
+                            const otherId = isSource ? edge.target : edge.source
+                            const otherNode = graphData.nodes.find(n => n.id === otherId)
+                            if (!otherNode) return null
+
+                            return (
+                              <button
+                                key={edge.id}
+                                onClick={() => {
+                                  const targetNode = nodesRef.current.find(n => n.id === otherId)
+                                  if (targetNode) setSelectedNode(targetNode)
+                                }}
+                                className="w-full text-left p-2 bg-ink-800/50 hover:bg-ink-800 rounded-lg transition-colors"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${entityTypeConfig[otherNode.type]?.bg || 'bg-gray-500'}`} />
+                                    <span className="text-sm text-ink-200 truncate">{otherNode.label}</span>
+                                  </div>
+                                  <ChevronRight className="w-3.5 h-3.5 text-ink-600 flex-shrink-0" />
+                                </div>
+                                {edge.label && edge.label !== 'relates_to' && (
+                                  <span className="text-[10px] text-accent/70 mt-0.5 block">{edge.label.replace(/_/g, ' ')}</span>
+                                )}
+                              </button>
+                            )
+                          })}
+                          {connectedEdges.length > 6 && (
+                            <p className="text-xs text-ink-500 text-center py-1">
+                              +{connectedEdges.length - 6} more
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Quick stats */}
+                  {(() => {
+                    const connectedCount = graphData.edges.filter(
+                      e => e.source === selectedNode.id || e.target === selectedNode.id
+                    ).length
+                    const sameTypeCount = graphData.nodes.filter(n => n.type === selectedNode.type).length
+
+                    return (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-2 bg-ink-800/30 rounded-lg text-center">
+                          <p className="text-lg font-bold font-mono text-ink-200">{connectedCount}</p>
+                          <p className="text-[10px] text-ink-500 uppercase">Connections</p>
+                        </div>
+                        <div className="p-2 bg-ink-800/30 rounded-lg text-center">
+                          <p className="text-lg font-bold font-mono text-ink-200">{sameTypeCount}</p>
+                          <p className="text-[10px] text-ink-500 uppercase">Same Type</p>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
