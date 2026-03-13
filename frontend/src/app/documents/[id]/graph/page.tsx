@@ -152,7 +152,7 @@ export default function GraphPage() {
       pollTimeoutRef.current = setTimeout(() => {
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
         setExtracting(false)
-      }, 120000)
+      }, 300000)
     } catch (error) {
       console.error('Extraction failed:', error)
       setExtracting(false)
