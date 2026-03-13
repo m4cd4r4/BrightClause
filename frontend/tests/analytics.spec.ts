@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3001'
 
 test.describe('BrightClause Analytics Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,14 +11,14 @@ test.describe('BrightClause Analytics Page', () => {
 
   test('should load with Portfolio Analytics heading', async ({ page }) => {
     await page.goto(`${BASE_URL}/analytics`)
-    await expect(page.getByRole('heading', { name: /Portfolio Analytics/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Portfolio Analytics/i }).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('should display subtitle referencing analyzed contracts', async ({ page }) => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
     const subtitle = page.getByText(/across.*analyzed contracts/i)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     const hasSubtitle = await subtitle.isVisible().catch(() => false)
     const hasEmpty = await emptyState.isVisible().catch(() => false)
     expect(hasSubtitle || hasEmpty).toBeTruthy()
@@ -27,7 +27,7 @@ test.describe('BrightClause Analytics Page', () => {
   test('should show risk stats cards or empty state', async ({ page }) => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     if (await emptyState.isVisible().catch(() => false)) {
       await expect(page.getByRole('link', { name: /Go to Dashboard/i }).or(
         page.getByRole('button', { name: /Go to Dashboard/i })
@@ -50,7 +50,7 @@ test.describe('BrightClause Analytics Page', () => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
     const heatmap = page.getByText(/Risk Heatmap/i)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     const hasHeatmap = await heatmap.isVisible().catch(() => false)
     const hasEmpty = await emptyState.isVisible().catch(() => false)
     expect(hasHeatmap || hasEmpty).toBeTruthy()
@@ -60,7 +60,7 @@ test.describe('BrightClause Analytics Page', () => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
     const section = page.getByText(/Clause Distribution/i)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     const hasSection = await section.isVisible().catch(() => false)
     const hasEmpty = await emptyState.isVisible().catch(() => false)
     expect(hasSection || hasEmpty).toBeTruthy()
@@ -70,7 +70,7 @@ test.describe('BrightClause Analytics Page', () => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
     const section = page.getByText(/Document Risk Summary/i)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     const hasSection = await section.isVisible().catch(() => false)
     const hasEmpty = await emptyState.isVisible().catch(() => false)
     expect(hasSection || hasEmpty).toBeTruthy()
@@ -86,7 +86,7 @@ test.describe('BrightClause Analytics Page', () => {
   test('should have Portfolio Health Score indicator when data exists', async ({ page }) => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     if (await emptyState.isVisible().catch(() => false)) return
     // Health score shows one of: Good Standing, Needs Review, At Risk
     const healthLabels = ['Good Standing', 'Needs Review', 'At Risk']
@@ -103,7 +103,7 @@ test.describe('BrightClause Analytics Page', () => {
   test('should show Top Risk Items or empty message', async ({ page }) => {
     await page.goto(`${BASE_URL}/analytics`)
     await page.waitForTimeout(3000)
-    const emptyState = page.getByText(/No Analysis Data Yet/i)
+    const emptyState = page.getByText(/Your Portfolio Analytics/i)
     if (await emptyState.isVisible().catch(() => false)) return
     const topRisk = page.getByText(/Top Risk Items/i)
     const noRisk = page.getByText(/No high-risk clauses detected/i)

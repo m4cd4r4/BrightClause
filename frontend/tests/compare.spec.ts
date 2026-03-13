@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3001'
 
 test.describe('BrightClause Compare Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('BrightClause Compare Page', () => {
   test('should show empty state prompting to select documents', async ({ page }) => {
     await page.goto(`${BASE_URL}/compare`)
     await page.waitForTimeout(2000)
-    await expect(page.getByText(/Select Documents to Compare/i)).toBeVisible()
+    await expect(page.getByText(/Compare Your Contracts/i)).toBeVisible()
   })
 
   test('should have Add Document button', async ({ page }) => {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'http://localhost:3000'
+const BASE = process.env.BASE_URL || 'http://localhost:3001'
 
 test.describe('BrightClause Landing Page', () => {
   test.beforeEach(async ({ page }) => {

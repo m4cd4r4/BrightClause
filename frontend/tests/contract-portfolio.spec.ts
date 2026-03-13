@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import * as path from 'path'
 import * as fs from 'fs'
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3001'
 const SAMPLE_DIR = path.resolve('I:/Scratch/ContractClarity/sample-contracts/scribd-downloads')
 const REPORT_DIR = path.resolve('test-results/contract-portfolio')
 

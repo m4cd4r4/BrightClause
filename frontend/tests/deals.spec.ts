@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
+const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3001'
 
 test.describe('BrightClause Deals Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe('BrightClause Deals Page', () => {
     await page.waitForTimeout(3000)
 
     // Check for either deal cards with content or the empty state
-    const emptyState = page.getByText('No deals yet. Create one to group related contracts.')
+    const emptyState = page.getByText('Organize by Deal')
     const dealCards = page.locator('button.card')
 
     const hasEmptyState = await emptyState.isVisible().catch(() => false)

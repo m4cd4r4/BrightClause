@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
+const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3001'
 
 test.describe('BrightClause Obligations Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -63,9 +63,9 @@ test.describe('BrightClause Obligations Page', () => {
 
     // Check for either obligations grouped by document or empty state
     const emptyStateNoFilter = page.getByText(
-      'No obligations extracted yet. Analyze a document to extract obligations.'
+      'No Obligations Yet'
     )
-    const emptyStateFiltered = page.getByText('No obligations match your filters.')
+    const emptyStateFiltered = page.getByText('No Matching Obligations')
 
     const hasEmptyNoFilter = await emptyStateNoFilter.isVisible().catch(() => false)
     const hasEmptyFiltered = await emptyStateFiltered.isVisible().catch(() => false)
@@ -92,7 +92,7 @@ test.describe('BrightClause Obligations Page', () => {
 
     // The Pending card should now have active styling (border-accent)
     // After clicking, either obligations show with pending status or empty state appears
-    const emptyFiltered = page.getByText('No obligations match your filters.')
+    const emptyFiltered = page.getByText('No Matching Obligations')
     const hasPendingItems = await page.locator('text=Pending').count()
     const hasEmpty = await emptyFiltered.isVisible().catch(() => false)
 
@@ -108,7 +108,7 @@ test.describe('BrightClause Obligations Page', () => {
 
     await page.waitForTimeout(2000)
 
-    const emptyFiltered = page.getByText('No obligations match your filters.')
+    const emptyFiltered = page.getByText('No Matching Obligations')
     const hasCompletedItems = await page.locator('text=Completed').count()
     const hasEmpty = await emptyFiltered.isVisible().catch(() => false)
 
@@ -125,7 +125,7 @@ test.describe('BrightClause Obligations Page', () => {
     await page.waitForTimeout(2000)
 
     // Either payment obligations appear or empty state with filter message
-    const emptyFiltered = page.getByText('No obligations match your filters.')
+    const emptyFiltered = page.getByText('No Matching Obligations')
     const hasPaymentItems = await page.locator('text=Payment').count()
     const hasEmpty = await emptyFiltered.isVisible().catch(() => false)
 
@@ -148,7 +148,7 @@ test.describe('BrightClause Obligations Page', () => {
     // All card should now be the active filter
     // Either all obligations show or the generic empty state (not filter-specific)
     const emptyNoFilter = page.getByText(
-      'No obligations extracted yet. Analyze a document to extract obligations.'
+      'No Obligations Yet'
     )
     const hasObligations = await page.locator('.card.overflow-hidden').count() > 0
     const hasGenericEmpty = await emptyNoFilter.isVisible().catch(() => false)
@@ -184,7 +184,7 @@ test.describe('BrightClause Obligations Page', () => {
 
     // Check if there are any obligation items to click
     const emptyState = page.getByText(
-      'No obligations extracted yet. Analyze a document to extract obligations.'
+      'No Obligations Yet'
     )
     const hasEmpty = await emptyState.isVisible().catch(() => false)
 
@@ -208,13 +208,13 @@ test.describe('BrightClause Obligations Page', () => {
     await page.waitForTimeout(3000)
 
     const emptyState = page.getByText(
-      'No obligations extracted yet. Analyze a document to extract obligations.'
+      'No Obligations Yet'
     )
     const hasEmpty = await emptyState.isVisible().catch(() => false)
 
     if (!hasEmpty) {
       // Each document group should have an external link button to view the document
-      const viewDocButtons = page.locator('button[title="View document"]')
+      const viewDocButtons = page.locator('button[aria-label="View document"]')
       const btnCount = await viewDocButtons.count()
 
       if (btnCount > 0) {

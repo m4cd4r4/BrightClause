@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3000'
+const FRONTEND_URL = process.env.BASE_URL || 'http://localhost:3001'
 
 test.describe('Document Detail Page', () => {
   test.beforeEach(async ({ page }) => {
