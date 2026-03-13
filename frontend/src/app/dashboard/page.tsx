@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
   FileText, Search, Upload, AlertTriangle, CheckCircle,
-  Clock, Database, Zap, ChevronRight, X, Loader2,
-  FileWarning, Shield, Network, TrendingUp, BarChart3,
+  Clock, Zap, ChevronRight, X, Loader2,
+  FileWarning, Shield, Network, BarChart3,
   Eye, PlayCircle, Pencil, Check, Activity,
   MessageCircle, FileBarChart, Trash2, RotateCcw
 } from 'lucide-react'
@@ -23,11 +23,11 @@ const riskColors: Record<RiskLevel, string> = {
   low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
 }
 
-const riskGlow: Record<RiskLevel, string> = {
-  critical: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
-  high: 'shadow-[0_0_15px_rgba(249,115,22,0.2)]',
-  medium: 'shadow-[0_0_10px_rgba(245,158,11,0.15)]',
-  low: 'shadow-none',
+const riskAccentBorder: Record<RiskLevel, string> = {
+  critical: 'border-l-red-500',
+  high: 'border-l-orange-500',
+  medium: 'border-l-amber-500',
+  low: 'border-l-emerald-500',
 }
 
 function formatRelativeTime(iso: string): string {
@@ -436,76 +436,50 @@ function DashboardContent() {
 
       <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
         <h1 className="sr-only">Contract Dashboard</h1>
-        {/* Stats Row - Data Dense */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8"
+        {/* Portfolio Stats Strip */}
+        <div
+          className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-ink-800/40 border-b border-ink-800/40 mb-8"
           data-tour="stats"
         >
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="card p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="skeleton w-10 h-10 rounded-xl" />
-                  <div className="skeleton w-4 h-4 rounded" />
-                </div>
-                <div className="mt-2 space-y-2">
-                  <div className="skeleton h-8 w-16 rounded" />
-                  <div className="skeleton h-4 w-32 rounded" />
-                  <div className="skeleton h-3 w-24 rounded" />
-                </div>
+              <div key={i} className="px-6 sm:px-8 py-5 space-y-2">
+                <div className="skeleton h-9 w-12 rounded" />
+                <div className="skeleton h-4 w-28 rounded" />
               </div>
             ))
           ) : (
             <>
-              <StatCard
-                icon={<FileText className="w-5 h-5" />}
+              <PortfolioStat
                 value={stats?.documents_indexed ?? 0}
-                label="Documents Indexed"
-                sublabel="Ready for analysis"
-                delay={0}
+                label="Contracts"
                 onClick={() => router.push('/search')}
               />
-              <StatCard
-                icon={<Database className="w-5 h-5" />}
+              <PortfolioStat
                 value={stats?.chunks_with_embeddings ?? 0}
-                label="Text Chunks"
-                sublabel="Vector embeddings"
-                delay={0.05}
+                label="Sections analyzed"
                 onClick={() => router.push('/search')}
               />
-              <StatCard
-                icon={<Zap className="w-5 h-5" />}
+              <PortfolioStat
                 value={stats?.clauses_extracted ?? 0}
-                label="Clauses Extracted"
-                sublabel="AI-powered analysis"
-                delay={0.1}
+                label="Clauses found"
                 onClick={() => {
                   const docWithClauses = documents.find(d => d.status === 'completed')
-                  if (docWithClauses) {
-                    router.push(`/documents/${docWithClauses.id}`)
-                  } else {
-                    router.push('/search')
-                  }
+                  if (docWithClauses) router.push(`/documents/${docWithClauses.id}`)
+                  else router.push('/search')
                 }}
               />
-              <StatCard
-                icon={<TrendingUp className="w-5 h-5" />}
+              <PortfolioStat
                 value={documents.filter(d => d.status === 'completed').length}
-                label="Ready for Review"
-                sublabel="Completed processing"
-                delay={0.15}
+                label="Ready to review"
                 onClick={() => {
                   const completed = documents.find(d => d.status === 'completed')
-                  if (completed) {
-                    loadAnalysis(completed.id)
-                  }
+                  if (completed) loadAnalysis(completed.id)
                 }}
               />
             </>
           )}
-        </motion.div>
+        </div>
 
         {/* Search Results */}
         <AnimatePresence>
@@ -707,6 +681,21 @@ function DashboardContent() {
                                 <h3 className="font-medium text-ink-100 text-[15px] leading-snug truncate">
                                   {doc.filename}
                                 </h3>
+                                {analysisMap.has(doc.id) && (() => {
+                                  const a = analysisMap.get(doc.id)!
+                                  const risk = a.overall_risk as RiskLevel
+                                  const badge = {
+                                    critical: 'bg-red-500/15 text-red-400',
+                                    high: 'bg-orange-500/15 text-orange-400',
+                                    medium: 'bg-amber-500/15 text-amber-400',
+                                    low: 'bg-emerald-500/15 text-emerald-400',
+                                  }[risk]
+                                  return (
+                                    <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}>
+                                      {risk}
+                                    </span>
+                                  )
+                                })()}
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -813,12 +802,9 @@ function DashboardContent() {
                     const highlights = selectedAnalysis ? selectedAnalysis.high_risk_highlights : portfolioRisk!.highlights
                     return (
                       <div className="p-6 space-y-6">
-                        {/* Overall Risk - Prominent */}
-                        <div className={`p-5 rounded-xl border-2 ${riskGlow[overallRisk]} ${riskColors[overallRisk]}`}>
-                          <div className="text-center">
-                            <div className="text-[11px] text-ink-400 font-mono uppercase tracking-wide mb-2">
-                              Overall Risk Level
-                            </div>
+                        {/* Overall Risk - Left-border treatment */}
+                        <div className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk]}`}>
+                          <div>
                             <div className={`text-3xl font-bold uppercase tracking-tight ${
                               overallRisk === 'critical' ? 'text-red-400' :
                               overallRisk === 'high' ? 'text-orange-400' :
@@ -826,38 +812,34 @@ function DashboardContent() {
                             }`}>
                               {overallRisk}
                             </div>
-                            <div className="mt-3 pt-3 border-t border-current/20">
-                              <div className="text-[10px] text-ink-500 font-mono uppercase">
-                                {clauses} Clauses Analyzed
-                              </div>
-                            </div>
+                            <div className="text-xs text-ink-400 mt-0.5">{clauses} clauses analyzed</div>
                           </div>
                         </div>
 
-                        {/* Risk Distribution - Data Dense Grid */}
+                        {/* Risk Distribution - data row + stacked bar */}
                         <div>
-                          <h3 className="text-[11px] font-mono uppercase tracking-wide text-ink-400 mb-3">
-                            Risk Distribution
-                          </h3>
-                          <div className="grid grid-cols-2 gap-3">
-                            {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
-                              <div
-                                key={level}
-                                className={`p-4 rounded-lg border ${riskColors[level]} text-center`}
-                              >
-                                <div className={`text-2xl font-bold font-mono ${
-                                  level === 'critical' ? 'text-red-400' :
-                                  level === 'high' ? 'text-orange-400' :
-                                  level === 'medium' ? 'text-amber-400' : 'text-emerald-400'
-                                }`}>
-                                  {riskCounts[level]}
-                                </div>
-                                <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-1">
-                                  {level}
-                                </div>
+                          <p className="text-xs text-ink-500 mb-3">Risk breakdown</p>
+                          <div className="flex mb-3">
+                            {([
+                              { level: 'critical' as RiskLevel, color: 'text-red-400' },
+                              { level: 'high' as RiskLevel, color: 'text-orange-400' },
+                              { level: 'medium' as RiskLevel, color: 'text-amber-400' },
+                              { level: 'low' as RiskLevel, color: 'text-emerald-400' },
+                            ]).map(({ level, color }) => (
+                              <div key={level} className="flex-1 text-center">
+                                <div className={`text-2xl font-bold tabular-nums ${color}`}>{riskCounts[level]}</div>
+                                <div className="text-[10px] text-ink-600 mt-0.5 capitalize">{level}</div>
                               </div>
                             ))}
                           </div>
+                          {clauses > 0 && (
+                            <div className="flex h-1 rounded-full overflow-hidden">
+                              {riskCounts.critical > 0 && <div className="bg-red-500" style={{ flex: riskCounts.critical }} />}
+                              {riskCounts.high > 0 && <div className="bg-orange-400" style={{ flex: riskCounts.high }} />}
+                              {riskCounts.medium > 0 && <div className="bg-amber-400" style={{ flex: riskCounts.medium }} />}
+                              {riskCounts.low > 0 && <div className="bg-emerald-500" style={{ flex: riskCounts.low }} />}
+                            </div>
+                          )}
                         </div>
 
                         {/* High Risk Highlights */}
@@ -979,35 +961,28 @@ function DashboardContent() {
                   <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
                     <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
                     <p className="text-[11px] text-ink-400 mt-1 font-mono uppercase tracking-wide">
-                      Select a document
+                      Click a contract to see its risk
                     </p>
                   </div>
                   <div className="p-6">
-                    {/* Preview of what the panel shows */}
-                    <div className="p-5 rounded-xl border border-ink-800/30 bg-ink-900/20 mb-5">
-                      <div className="text-center">
-                        <div className="text-[11px] text-ink-500 font-mono uppercase tracking-wide mb-2">
-                          Overall Risk Level
-                        </div>
-                        <div className="text-2xl font-bold text-ink-500 tracking-tight">
-                          — — —
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-ink-800/30">
-                          <div className="text-[10px] text-ink-500 font-mono uppercase">
-                            No document selected
-                          </div>
-                        </div>
-                      </div>
+                    {/* Ghost risk display */}
+                    <div className="pl-5 py-3 border-l-4 border-l-ink-700 mb-5">
+                      <div className="text-2xl font-bold text-ink-600 uppercase tracking-tight">— —</div>
+                      <div className="text-xs text-ink-600 mt-0.5">Select a contract</div>
                     </div>
 
-                    {/* Ghost risk grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-5">
-                      {['Critical', 'High', 'Medium', 'Low'].map((level) => (
-                        <div key={level} className="p-3 rounded-lg border border-ink-800/20 bg-ink-900/10 text-center">
-                          <div className="text-lg font-bold font-mono text-ink-500">0</div>
-                          <div className="text-[10px] uppercase font-mono tracking-wide text-ink-500 mt-0.5">{level}</div>
-                        </div>
-                      ))}
+                    {/* Ghost risk breakdown */}
+                    <div className="mb-5">
+                      <p className="text-xs text-ink-600 mb-3">Risk breakdown</p>
+                      <div className="flex mb-3">
+                        {['Critical', 'High', 'Medium', 'Low'].map((level) => (
+                          <div key={level} className="flex-1 text-center">
+                            <div className="text-2xl font-bold tabular-nums text-ink-700">0</div>
+                            <div className="text-[10px] text-ink-700 mt-0.5">{level}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="h-1 rounded-full bg-ink-800/40" />
                     </div>
 
                     {/* Guidance */}
@@ -1116,46 +1091,35 @@ function DashboardContent() {
   )
 }
 
-function StatCard({
-  icon,
+function PortfolioStat({
   value,
   label,
-  sublabel,
-  delay,
   onClick,
 }: {
-  icon: React.ReactNode
   value: number
   label: string
-  sublabel: string
-  delay: number
   onClick?: () => void
 }) {
-  const Wrapper = onClick ? motion.button : motion.div
-  return (
-    <Wrapper
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className={`card p-6 hover:border-accent/20 transition-all duration-300 group text-left
-                ${onClick ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}`}
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className="p-2.5 rounded-xl bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors">
-          {icon}
-        </div>
-        {onClick && (
-          <ChevronRight className="w-4 h-4 text-ink-600 group-hover:text-accent transition-colors" />
-        )}
-      </div>
-      <div className="mt-2">
-        <p className="text-3xl font-bold font-mono text-ink-50 tracking-tight">
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="px-6 sm:px-8 py-5 text-left cursor-pointer hover:bg-ink-900/40 group transition-colors"
+      >
+        <span className="text-4xl font-bold tabular-nums tracking-tight text-ink-50 group-hover:text-accent transition-colors">
           {value.toLocaleString()}
-        </p>
-        <p className="text-sm font-semibold text-ink-300 mt-1">{label}</p>
-        <p className="text-[10px] text-ink-500 mt-1 font-mono uppercase tracking-wide">{sublabel}</p>
-      </div>
-    </Wrapper>
+        </span>
+        <p className="text-sm text-ink-500 mt-1">{label}</p>
+      </button>
+    )
+  }
+  return (
+    <div className="px-6 sm:px-8 py-5">
+      <span className="text-4xl font-bold tabular-nums tracking-tight text-ink-50">
+        {value.toLocaleString()}
+      </span>
+      <p className="text-sm text-ink-500 mt-1">{label}</p>
+    </div>
   )
 }
