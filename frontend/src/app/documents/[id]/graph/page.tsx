@@ -127,14 +127,35 @@ export default function GraphPage() {
 
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const elapsedIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const extractionStartRef = useRef<number | null>(null)
+  const [extractionElapsed, setExtractionElapsed] = useState(0)
 
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
       if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current)
+      if (elapsedIntervalRef.current) clearInterval(elapsedIntervalRef.current)
     }
   }, [])
+
+  // Track elapsed time during extraction
+  useEffect(() => {
+    if (extracting) {
+      extractionStartRef.current = Date.now()
+      setExtractionElapsed(0)
+      elapsedIntervalRef.current = setInterval(() => {
+        setExtractionElapsed(Math.floor((Date.now() - (extractionStartRef.current ?? Date.now())) / 1000))
+      }, 1000)
+    } else {
+      if (elapsedIntervalRef.current) clearInterval(elapsedIntervalRef.current)
+      extractionStartRef.current = null
+    }
+    return () => {
+      if (elapsedIntervalRef.current) clearInterval(elapsedIntervalRef.current)
+    }
+  }, [extracting])
 
   const triggerExtraction = async () => {
     setExtracting(true)
@@ -813,10 +834,9 @@ export default function GraphPage() {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <Network className="w-16 h-16 text-ink-700 mx-auto" />
-                <h3 className="font-display text-lg font-semibold mt-4">No Entities Extracted</h3>
+                <h3 className="font-display text-lg font-semibold mt-4">No knowledge graph yet</h3>
                 <p className="text-ink-500 mt-2 max-w-md">
-                  Extract entities and relationships from this document to visualize
-                  the knowledge graph.
+                  Build the graph for this contract - extract parties, dates, amounts, and the relationships between them.
                 </p>
                 <button
                   onClick={triggerExtraction}
@@ -826,12 +846,12 @@ export default function GraphPage() {
                   {extracting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Extracting...
+                      Analyzing{extractionElapsed > 0 ? ` · ${extractionElapsed}s` : '...'}
                     </>
                   ) : (
                     <>
                       <Network className="w-4 h-4 mr-2" />
-                      Extract Entities
+                      Build Knowledge Graph
                     </>
                   )}
                 </button>

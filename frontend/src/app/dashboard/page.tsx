@@ -691,9 +691,14 @@ function DashboardContent() {
                                     low: 'bg-emerald-500/15 text-emerald-400',
                                   }[risk]
                                   return (
-                                    <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}>
+                                    <motion.span
+                                      className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}
+                                      initial={{ opacity: 0, scale: 0.7 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+                                    >
                                       {risk}
-                                    </span>
+                                    </motion.span>
                                   )
                                 })()}
                                 <button
@@ -803,7 +808,12 @@ function DashboardContent() {
                     return (
                       <div className="p-6 space-y-6">
                         {/* Overall Risk - Left-border treatment */}
-                        <div className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk]}`}>
+                        <motion.div
+                          className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk]}`}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+                        >
                           <div>
                             <div className={`text-3xl font-bold uppercase tracking-tight ${
                               overallRisk === 'critical' ? 'text-red-400' :
@@ -814,7 +824,7 @@ function DashboardContent() {
                             </div>
                             <div className="text-xs text-ink-400 mt-0.5">{clauses} clauses analyzed</div>
                           </div>
-                        </div>
+                        </motion.div>
 
                         {/* Risk Distribution - data row + stacked bar */}
                         <div>
@@ -825,19 +835,36 @@ function DashboardContent() {
                               { level: 'high' as RiskLevel, color: 'text-orange-400' },
                               { level: 'medium' as RiskLevel, color: 'text-amber-400' },
                               { level: 'low' as RiskLevel, color: 'text-emerald-400' },
-                            ]).map(({ level, color }) => (
-                              <div key={level} className="flex-1 text-center">
+                            ]).map(({ level, color }, idx) => (
+                              <motion.div
+                                key={level}
+                                className="flex-1 text-center"
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.06, duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                              >
                                 <div className={`text-2xl font-bold tabular-nums ${color}`}>{riskCounts[level]}</div>
                                 <div className="text-[10px] text-ink-600 mt-0.5 capitalize">{level}</div>
-                              </div>
+                              </motion.div>
                             ))}
                           </div>
                           {clauses > 0 && (
                             <div className="flex h-1 rounded-full overflow-hidden">
-                              {riskCounts.critical > 0 && <div className="bg-red-500" style={{ flex: riskCounts.critical }} />}
-                              {riskCounts.high > 0 && <div className="bg-orange-400" style={{ flex: riskCounts.high }} />}
-                              {riskCounts.medium > 0 && <div className="bg-amber-400" style={{ flex: riskCounts.medium }} />}
-                              {riskCounts.low > 0 && <div className="bg-emerald-500" style={{ flex: riskCounts.low }} />}
+                              {([
+                                { count: riskCounts.critical, color: 'bg-red-500' },
+                                { count: riskCounts.high, color: 'bg-orange-400' },
+                                { count: riskCounts.medium, color: 'bg-amber-400' },
+                                { count: riskCounts.low, color: 'bg-emerald-500' },
+                              ] as { count: number; color: string }[]).filter(s => s.count > 0).map((s, i) => (
+                                <motion.div
+                                  key={s.color}
+                                  className={s.color}
+                                  style={{ flex: s.count, originX: 0 }}
+                                  initial={{ scaleX: 0 }}
+                                  animate={{ scaleX: 1 }}
+                                  transition={{ delay: i * 0.07, duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
+                                />
+                              ))}
                             </div>
                           )}
                         </div>
