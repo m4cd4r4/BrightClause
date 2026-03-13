@@ -703,7 +703,7 @@ export default function DocumentDetailPage() {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-ink-100">
-                                    {clauseTypeLabels[clause.clause_type] || clause.clause_type.replace(/_/g, ' ')}
+                                    {clauseTypeLabels[clause.clause_type] || (clause.clause_type ?? '').replace(/_/g, ' ')}
                                   </span>
                                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${risk.color} ${risk.bg}/10`}>
                                     {clause.risk_level}
@@ -930,7 +930,7 @@ export default function DocumentDetailPage() {
                                 {clause.risk_level}
                               </span>
                               <div>
-                                <span className="text-sm font-medium text-ink-200">{clause.clause_type}</span>
+                                <span className="text-sm font-medium text-ink-200">{clauseTypeLabels[clause.clause_type] || (clause.clause_type ?? '').replace(/_/g, ' ')}</span>
                                 <p className="text-xs text-ink-400 mt-0.5 line-clamp-2">{clause.summary}</p>
                               </div>
                             </div>

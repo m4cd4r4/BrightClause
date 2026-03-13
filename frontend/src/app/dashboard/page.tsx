@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
   FileText, Search, Upload, AlertTriangle, CheckCircle,
-  Clock, Zap, ChevronRight, X, Loader2,
+  Clock, ChevronRight, X, Loader2,
   FileWarning, Shield, Network, BarChart3,
   Eye, PlayCircle, Pencil, Check
 } from 'lucide-react'
@@ -175,7 +175,7 @@ function DashboardContent() {
   }
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return
+    if (!searchQuery.trim() || searching) return
     setSearching(true)
     try {
       const response = await api.search.query(searchQuery, { limit: 10 })
@@ -772,7 +772,9 @@ function DashboardContent() {
 
                   {(() => {
                     const risk = selectedAnalysis ?? portfolioRisk!
-                    const overallRisk = selectedAnalysis ? selectedAnalysis.overall_risk as RiskLevel : portfolioRisk!.overall
+                    const validRiskLevels: RiskLevel[] = ['critical', 'high', 'medium', 'low']
+                    const rawRisk = selectedAnalysis ? selectedAnalysis.overall_risk : portfolioRisk!.overall
+                    const overallRisk: RiskLevel = validRiskLevels.includes(rawRisk as RiskLevel) ? rawRisk as RiskLevel : 'low'
                     const clauses = selectedAnalysis ? selectedAnalysis.clauses_extracted : portfolioRisk!.totalClauses
                     const riskCounts = selectedAnalysis
                       ? { critical: selectedAnalysis.risk_summary.critical || 0, high: selectedAnalysis.risk_summary.high || 0, medium: selectedAnalysis.risk_summary.medium || 0, low: selectedAnalysis.risk_summary.low || 0 }
@@ -782,7 +784,7 @@ function DashboardContent() {
                       <div className="p-6 space-y-6">
                         {/* Overall Risk - Left-border treatment */}
                         <motion.div
-                          className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk]}`}
+                          className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk] ?? 'border-l-ink-600'}`}
                           initial={{ opacity: 0, x: -8 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
@@ -864,7 +866,7 @@ function DashboardContent() {
                                       highlight.risk_level === 'critical' ? 'text-red-400' : 'text-orange-400'
                                     }`} />
                                     <span className="font-semibold text-ink-100 text-xs uppercase tracking-wide">
-                                      {highlight.clause_type.replace(/_/g, ' ')}
+                                      {(highlight.clause_type ?? '').replace(/_/g, ' ')}
                                     </span>
                                   </div>
                                   <p className="text-ink-400 text-xs leading-relaxed line-clamp-3">
