@@ -10,9 +10,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 
-[Live Demo](https://brightclause.com) | [API Docs](http://45.77.233.102:8002/docs) | [Quick Start](#quick-start)
+[Live Demo](https://brightclause.com) | [API Docs](http://localhost:8002/docs) | [Quick Start](#quick-start)
 
-<img src="docs/demo-preview.gif" alt="BrightClause Demo" width="800" />
+<img src="docs/screenshot-readme.png" alt="BrightClause Portfolio Analytics — risk heatmap with cross-document clause scoring" width="800" />
+
+<img src="docs/screenshot-analysis.png" alt="BrightClause Document Analysis — extracted clauses with risk levels and AI summaries" width="800" />
 
 </div>
 
@@ -21,8 +23,6 @@
 ## Overview
 
 BrightClause transforms contract review from weeks to minutes. Upload PDFs, extract key clauses with AI, assess risk levels, compare documents side-by-side, and explore entity relationships through an interactive knowledge graph. Enhanced reading and analysis for any commercial contract.
-
-**Part of the Lens Suite** &mdash; BrightClause &middot; TaxLens &middot; PetLens
 
 ### Key Capabilities
 
@@ -154,8 +154,8 @@ cd BrightClause
 docker-compose up -d
 
 # Pull required Ollama models
-docker exec clauselens-ollama ollama pull llama3.2
-docker exec clauselens-ollama ollama pull nomic-embed-text
+docker exec brightclause-ollama ollama pull llama3.2
+docker exec brightclause-ollama ollama pull nomic-embed-text
 ```
 
 ### 2. Start Frontend
@@ -173,7 +173,7 @@ npm run dev
 | Frontend (local) | http://localhost:3000 |
 | Frontend (prod) | https://brightclause.com |
 | API Docs (local) | http://localhost:8002/docs |
-| API (prod) | http://45.77.233.102:8002 |
+| API (self-hosted) | http://localhost:8002 |
 | MinIO Console | http://localhost:9001 |
 
 ---
