@@ -53,7 +53,7 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#0f172a', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#c9a227', 'lineColor': '#c9a227', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0f1f2e'}}}%%
-graph TD
+flowchart TD
     classDef fe    fill:#0f1f3d,stroke:#60a5fa,color:#93c5fd
     classDef be    fill:#0a2520,stroke:#34d399,color:#6ee7b7
     classDef store fill:#1c1400,stroke:#c9a227,color:#fcd34d
@@ -62,28 +62,34 @@ graph TD
 
     subgraph FE["🖥  Next.js 14  ·  TypeScript  ·  TailwindCSS"]
         direction LR
-        Dashboard["Dashboard"] & DocDetail["Document\nAnalysis"] & Compare["Compare\nMatrix"] & Analytics["Portfolio\nAnalytics"] & Search["Hybrid\nSearch"] & Deals["Deals"] & Obligations["Obligations"] & KG["Knowledge\nGraph"]
+        Dashboard["Dashboard"]:::fe
+        DocDetail["Document\nAnalysis"]:::fe
+        Compare["Compare\nMatrix"]:::fe
+        Analytics["Portfolio\nAnalytics"]:::fe
+        Search["Hybrid\nSearch"]:::fe
+        Deals["Deals"]:::fe
+        Obligations["Obligations"]:::fe
+        KG["Knowledge\nGraph"]:::fe
     end
 
-    FE -->|"Next.js /api/* proxy\nAPI key kept server-side"| BE
+    Dashboard & DocDetail & Compare & Analytics & Search & Deals & Obligations & KG -->|"Next.js /api/* proxy"| BE
 
     subgraph BE["⚡  FastAPI  ·  Python  ·  SQLAlchemy 2.0  ·  Celery"]
         direction LR
-        DocsAPI["Documents"] & AnalysisAPI["Analysis\n+ BYOK"] & SearchAPI["Search"] & ChatAPI["RAG Chat"] & GraphAPI["Graph"] & DealsAPI["Deals"]
+        DocsAPI["Documents"]:::be
+        AnalysisAPI["Analysis\n+ BYOK"]:::be
+        SearchAPI["Search"]:::be
+        ChatAPI["RAG Chat"]:::be
+        GraphAPI["Graph"]:::be
+        DealsAPI["Deals"]:::be
     end
 
-    BE --> PG[("🗄 PostgreSQL\n+ pgvector")]
-    BE --> MinIO[("📦 MinIO\nS3 Storage")]
-    BE --> OllamaNode(["🤖 Ollama\nllama3.2"])
-    BE --> ClaudeNode(["✨ Claude API\nBYOK · Haiku"])
-    PG --> Redis[("⚡ Redis")]
-    Redis --> CeleryNode["⚙ Celery\nWorkers"]
-
-    class Dashboard,DocDetail,Compare,Analytics,Search,Deals,Obligations,KG fe
-    class DocsAPI,AnalysisAPI,SearchAPI,ChatAPI,GraphAPI,DealsAPI be
-    class PG,MinIO store
-    class OllamaNode,ClaudeNode ai
-    class Redis,CeleryNode task
+    DocsAPI & AnalysisAPI & SearchAPI & ChatAPI & GraphAPI & DealsAPI --> PG[("🗄 PostgreSQL\n+ pgvector")]:::store
+    DocsAPI --> MinIO[("📦 MinIO\nS3 Storage")]:::store
+    AnalysisAPI & ChatAPI --> OllamaNode(["🤖 Ollama\nllama3.2"]):::ai
+    AnalysisAPI & ChatAPI --> ClaudeNode(["✨ Claude API\nBYOK · Haiku"]):::ai
+    PG --> Redis[("⚡ Redis")]:::task
+    Redis --> CeleryNode["⚙ Celery\nWorkers"]:::task
 ```
 
 ---
