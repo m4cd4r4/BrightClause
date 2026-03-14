@@ -1,0 +1,448 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Dark theme (default) — RGB triplets for Tailwind opacity support */
+  --ink-50: 247 247 248;
+  --ink-100: 238 238 240;
+  --ink-200: 217 217 222;
+  --ink-300: 184 184 193;
+  --ink-400: 145 145 159;
+  --ink-500: 140 140 158;
+  --ink-600: 93 93 108;
+  --ink-700: 76 76 88;
+  --ink-800: 65 65 75;
+  --ink-900: 57 57 65;
+  --ink-925: 40 40 48;
+  --ink-950: 24 24 27;
+
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #111114;
+  --bg-tertiary: #18181b;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border: #27272a;
+  --accent: #c9a227;
+}
+
+/* Light theme — inverted ink palette */
+html.light {
+  --ink-50: 24 24 27;
+  --ink-100: 39 39 42;
+  --ink-200: 63 63 70;
+  --ink-300: 82 82 91;
+  --ink-400: 113 113 122;
+  --ink-500: 161 161 170;
+  --ink-600: 212 212 216;
+  --ink-700: 228 228 231;
+  --ink-800: 232 232 236;
+  --ink-900: 240 240 242;
+  --ink-925: 245 245 247;
+  --ink-950: 255 255 255;
+
+  --bg-primary: #f8f8fa;
+  --bg-secondary: #f0f0f2;
+  --bg-tertiary: #ffffff;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --border: #e4e4e7;
+}
+
+/* Light Editorial (Navy Variant) — warm cream palette for landing page */
+.light-editorial {
+  --ink-50: 26 26 46;
+  --ink-100: 36 36 56;
+  --ink-200: 52 52 78;
+  --ink-300: 74 74 106;
+  --ink-400: 100 100 130;
+  --ink-500: 122 122 142;
+  --ink-600: 165 165 180;
+  --ink-700: 200 196 188;
+  --ink-800: 212 207 197;
+  --ink-900: 240 237 230;
+  --ink-925: 245 243 238;
+  --ink-950: 250 249 246;
+
+  --bg-primary: #faf9f6;
+  --bg-secondary: #f0ede6;
+  --bg-tertiary: #e8e4db;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a6a;
+  --text-muted: #7a7a8e;
+  --border: #d4cfc5;
+  --accent: #b8941f;
+
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(184, 148, 31, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(184, 148, 31, 0.02) 0%, transparent 50%);
+}
+
+.light-editorial ::-webkit-scrollbar-track { background: #f0ede6; }
+.light-editorial ::-webkit-scrollbar-thumb { background: #d4cfc5; }
+.light-editorial ::-webkit-scrollbar-thumb:hover { background: #b8b0a3; }
+
+.light-editorial .skeleton {
+  background: linear-gradient(90deg, rgba(212,207,197,0.5) 25%, rgba(200,196,188,0.5) 50%, rgba(212,207,197,0.5) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Dark frame — preserves dark palette for product previews on light pages */
+.theme-dark-frame {
+  --ink-50: 247 247 248;
+  --ink-100: 238 238 240;
+  --ink-200: 217 217 222;
+  --ink-300: 184 184 193;
+  --ink-400: 145 145 159;
+  --ink-500: 140 140 158;
+  --ink-600: 93 93 108;
+  --ink-700: 76 76 88;
+  --ink-800: 65 65 75;
+  --ink-900: 57 57 65;
+  --ink-925: 40 40 48;
+  --ink-950: 24 24 27;
+  --accent: #c9a227;
+}
+
+/* Scroll-driven fade-in for sections */
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: scrollFadeUp 0.6s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+
+  .scroll-reveal-stagger {
+    animation: scrollFadeUp 0.5s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
+}
+
+@keyframes scrollFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-stagger {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(201, 162, 39, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(201, 162, 39, 0.02) 0%, transparent 50%);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Risk glow effects */
+.risk-critical {
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.3), 0 0 20px rgba(239, 68, 68, 0.15);
+  animation: pulse-critical 2s ease-in-out infinite;
+}
+
+.risk-high {
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.3), 0 0 15px rgba(249, 115, 22, 0.1);
+  animation: pulse-high 3s ease-in-out infinite;
+}
+
+.risk-medium {
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2);
+}
+
+.risk-low {
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
+}
+
+@keyframes pulse-critical {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.3), 0 0 20px rgba(239, 68, 68, 0.15); }
+  50% { box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.5), 0 0 30px rgba(239, 68, 68, 0.25); }
+}
+
+@keyframes pulse-high {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.3), 0 0 15px rgba(249, 115, 22, 0.1); }
+  50% { box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.15); }
+}
+
+/* Typography */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Focus indicators for keyboard navigation */
+:focus-visible {
+  outline: 2px solid rgba(201, 162, 39, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Utility classes */
+@layer components {
+  .card {
+    @apply bg-ink-950/80 border border-ink-800/50 rounded-lg backdrop-blur-sm;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:border-ink-700/70 hover:bg-ink-900/50;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-accent text-ink-950 font-medium rounded-md
+           hover:bg-accent-light transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-ink-800 text-ink-100 font-medium rounded-md
+           hover:bg-ink-700 border border-ink-700 transition-colors duration-200;
+  }
+
+  .input {
+    @apply w-full px-4 py-2.5 bg-ink-900/50 border border-ink-800 rounded-md
+           text-ink-100 placeholder:text-ink-500
+           focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20
+           transition-all duration-200;
+  }
+
+  .label {
+    @apply text-xs font-medium text-ink-400 uppercase tracking-wider;
+  }
+
+  .stat-value {
+    @apply font-display text-3xl font-bold text-ink-50;
+  }
+
+  .stat-label {
+    @apply text-xs text-ink-500 uppercase tracking-wider mt-1;
+  }
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(39, 39, 42, 0.4) 25%,
+    rgba(63, 63, 70, 0.4) 50%,
+    rgba(39, 39, 42, 0.4) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+html.light .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(228, 228, 231, 0.6) 25%,
+    rgba(212, 212, 216, 0.6) 50%,
+    rgba(228, 228, 231, 0.6) 75%
+  );
+  background-size: 200% 100%;
+}
+
+html.light body {
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(201, 162, 39, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(201, 162, 39, 0.03) 0%, transparent 50%);
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+/* ── Light mode component overrides ───────────────────────────── */
+
+/* Cards: visible borders + subtle shadow instead of invisible border */
+html.light .card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html.light .card-hover:hover {
+  border-color: #d4d4d8;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Buttons */
+html.light .btn-secondary {
+  background: #f4f4f5;
+  color: #18181b;
+  border-color: #d4d4d8;
+}
+
+html.light .btn-secondary:hover {
+  background: #e4e4e7;
+  border-color: #a1a1aa;
+}
+
+/* Inputs: visible border + proper background */
+html.light .input {
+  background: #ffffff;
+  border-color: #d4d4d8;
+  color: #18181b;
+}
+
+html.light .input::placeholder {
+  color: #a1a1aa;
+}
+
+html.light .input:focus {
+  border-color: rgba(201, 162, 39, 0.5);
+}
+
+/* Labels and stats: readable contrast */
+html.light .label {
+  color: var(--text-secondary);
+}
+
+html.light .stat-label {
+  color: var(--text-muted);
+}
+
+/* ── Light mode navigation ────────────────────────────────────── */
+
+html.light header.sticky {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--border);
+}
+
+/* ── Light mode document rows ─────────────────────────────────── */
+
+html.light [role="button"].cursor-pointer:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light [role="button"].cursor-pointer[aria-selected="true"],
+html.light .doc-row-selected {
+  background: rgba(201, 162, 39, 0.06) !important;
+}
+
+/* ── Light mode dividers ──────────────────────────────────────── */
+
+html.light .border-ink-800\/50,
+html.light [class*="border-ink-800"] {
+  border-color: var(--border);
+}
+
+html.light .border-ink-700 {
+  border-color: #d4d4d8;
+}
+
+/* ── Light mode hover feedback ────────────────────────────────── */
+
+html.light .hover\:bg-ink-800\/50:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .hover\:bg-ink-900\/30:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Light mode text refinements ──────────────────────────────── */
+
+html.light .text-ink-400 {
+  color: #52525b;
+}
+
+html.light .text-ink-500 {
+  color: #71717a;
+}
+
+html.light .text-ink-600 {
+  color: #a1a1aa;
+}
+
+/* ── Light mode bg refinements ────────────────────────────────── */
+
+html.light .bg-ink-900\/50,
+html.light .bg-ink-900\/60 {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+html.light .bg-ink-950\/80,
+html.light .bg-ink-950\/95 {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+html.light .bg-ink-800 {
+  background: #f4f4f5;
+}
+
+html.light .bg-ink-800\/50 {
+  background: rgba(0, 0, 0, 0.04);
+}
+

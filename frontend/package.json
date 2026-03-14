@@ -1,0 +1,47 @@
+{
+  "name": "brightclause-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
+  },
+  "dependencies": {
+    "@remotion/light-leaks": "4.0.427",
+    "@remotion/paths": "4.0.427",
+    "@remotion/player": "4.0.427",
+    "@remotion/shapes": "4.0.427",
+    "@remotion/transitions": "4.0.427",
+    "@vercel/analytics": "^2.0.0",
+    "docx": "^8.5.0",
+    "file-saver": "^2.0.5",
+    "framer-motion": "^10.18.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "lucide-react": "^0.309.0",
+    "next": "14.1.0",
+    "next-pwa": "^5.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "4.0.427",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/file-saver": "^2.0.7",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.0"
+  }
+}
