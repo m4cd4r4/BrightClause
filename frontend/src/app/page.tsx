@@ -703,6 +703,14 @@ export default function LandingPage() {
             <Link href="/compare" className="hover:text-ink-300 transition-colors">Compare</Link>
             <Link href="/obligations" className="hover:text-ink-300 transition-colors">Obligations</Link>
             <Link href="/deals" className="hover:text-ink-300 transition-colors">Deals</Link>
+            <a
+              href="https://github.com/m4cd4r4/BrightClause"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-ink-300 transition-colors"
+            >
+              GitHub
+            </a>
           </div>
         </div>
       </footer>

@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, BarChart3, GitCompareArrows, Menu, X, Sun, Moon, ClipboardCheck, Briefcase } from 'lucide-react'
+import { LayoutDashboard, BarChart3, GitCompareArrows, Menu, X, Sun, Moon, ClipboardCheck, Briefcase, Github } from 'lucide-react'
 import { useState } from 'react'
 import { useTheme } from '@/lib/theme'
 
@@ -63,6 +63,16 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
           {/* Right side actions (passed as children) + mobile toggle */}
           <div className="flex items-center gap-3">
             {children}
+            <a
+              href="https://github.com/m4cd4r4/BrightClause"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-ink-400 hover:text-ink-100 hover:bg-ink-800/50 rounded-lg transition-colors"
+              aria-label="View source on GitHub"
+              title="View source on GitHub"
+            >
+              <Github className="w-4 h-4" />
+            </a>
             <button
               type="button"
               onClick={toggleTheme}
