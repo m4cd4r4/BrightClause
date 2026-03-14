@@ -99,7 +99,7 @@ flowchart TD
     classDef clause fill:#2d1200,stroke:#f97316,color:#fdba74,font-weight:bold
     classDef entity fill:#1a0f2e,stroke:#a78bfa,color:#c4b5fd,font-weight:bold
     classDef risk   fill:#2d0f0f,stroke:#ef4444,color:#fca5a5,font-weight:bold
-    classDef graph  fill:#0a2520,stroke:#10b981,color:#6ee7b7,font-weight:bold
+    classDef kg     fill:#0a2520,stroke:#10b981,color:#6ee7b7,font-weight:bold
 
     Upload(["📄  Upload PDF"]):::upload --> OCR
 
@@ -118,7 +118,7 @@ flowchart TD
     Embed --> Entities["🔗  Entity Extraction\nparties · dates · amounts · locations"]:::entity
 
     Clauses --> Risk["⚠  Risk Assessment\nCritical · High · Medium · Low"]:::risk
-    Entities --> KGraph["🕸  Knowledge Graph\ninteractive relationship visualization"]:::graph
+    Entities --> KGraph["🕸  Knowledge Graph\ninteractive relationship visualization"]:::kg
 ```
 
 ---
