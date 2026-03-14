@@ -52,38 +52,38 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
 ## Architecture
 
 ```mermaid
-graph TD
-    subgraph FE["Frontend (Next.js 14)"]
-        Landing["Landing Page"]
-        Dashboard["Dashboard + Activity"]
-        DocDetail["Document Detail + Chat"]
-        Compare["Compare Matrix"]
-        Analytics["Analytics + CrossRef"]
-        Search["Search"]
-        Obligations["Obligations"]
-        Deals["Deals"]
-        KG["Knowledge Graph Viz"]
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#0f172a', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#c9a227', 'lineColor': '#c9a227', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0f1f2e'}}}%%
+graph LR
+    classDef fe    fill:#0f1f3d,stroke:#60a5fa,color:#93c5fd
+    classDef be    fill:#0a2520,stroke:#34d399,color:#6ee7b7
+    classDef store fill:#1c1400,stroke:#c9a227,color:#fcd34d
+    classDef ai    fill:#2d1200,stroke:#f97316,color:#fdba74
+    classDef task  fill:#1a0f2e,stroke:#a78bfa,color:#c4b5fd
+
+    subgraph FE["🖥  Next.js 14  ·  TypeScript  ·  TailwindCSS"]
+        direction TB
+        Dashboard["Dashboard"] & DocDetail["Document\nAnalysis"] & Compare["Compare\nMatrix"] & Analytics["Portfolio\nAnalytics"] & Search["Hybrid\nSearch"] & Deals["Deals"] & Obligations["Obligations"] & KG["Knowledge\nGraph"]
     end
 
-    FE -->|"/api/* proxy\nno mixed-content, API key server-side"| BE
+    FE -->|"Next.js /api/* proxy\nAPI key kept server-side"| BE
 
-    subgraph BE["Backend API (FastAPI)"]
-        DocsAPI["Documents API"]
-        SearchAPI["Search API"]
-        AnalysisAPI["Analysis API"]
-        ChatAPI["Chat (RAG)"]
-        GraphAPI["Graph API"]
-        DealsAPI["Deals API"]
-        ActivityAPI["Activity API"]
-        ObligationAPI["Obligation Extraction"]
+    subgraph BE["⚡  FastAPI  ·  Python  ·  SQLAlchemy 2.0  ·  Celery"]
+        direction TB
+        DocsAPI["Documents"] & AnalysisAPI["Analysis\n+ BYOK"] & SearchAPI["Search"] & ChatAPI["RAG Chat"] & GraphAPI["Graph"] & DealsAPI["Deals"]
     end
 
-    BE --> PG["PostgreSQL + pgvector\n768-dim vectors"]
-    BE --> MinIO["MinIO (Storage)\nS3-compatible"]
-    BE --> LLM["Ollama / Claude\nllama3.2 / BYOK"]
+    BE --> PG[("🗄 PostgreSQL\n+ pgvector")]
+    BE --> MinIO[("📦 MinIO\nS3 Storage")]
+    BE --> OllamaNode(["🤖 Ollama\nllama3.2"])
+    BE --> ClaudeNode(["✨ Claude API\nBYOK · Haiku"])
+    PG --> Redis[("⚡ Redis")]
+    Redis --> CeleryNode["⚙ Celery\nWorkers"]
 
-    PG --> Redis["Redis (Queue)"]
-    Redis --> Celery["Celery (Workers)"]
+    class Dashboard,DocDetail,Compare,Analytics,Search,Deals,Obligations,KG fe
+    class DocsAPI,AnalysisAPI,SearchAPI,ChatAPI,GraphAPI,DealsAPI be
+    class PG,MinIO store
+    class OllamaNode,ClaudeNode ai
+    class Redis,CeleryNode task
 ```
 
 ---
@@ -91,24 +91,34 @@ graph TD
 ## Document Processing Pipeline
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#0f172a', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#c9a227', 'lineColor': '#94a3b8'}}}%%
 flowchart TD
-    A([Upload PDF]) --> B
+    classDef upload fill:#0f1f3d,stroke:#60a5fa,color:#93c5fd,font-weight:bold
+    classDef ocr    fill:#0a2520,stroke:#34d399,color:#6ee7b7
+    classDef embed  fill:#1c1400,stroke:#c9a227,color:#fcd34d,font-weight:bold
+    classDef clause fill:#2d1200,stroke:#f97316,color:#fdba74,font-weight:bold
+    classDef entity fill:#1a0f2e,stroke:#a78bfa,color:#c4b5fd,font-weight:bold
+    classDef risk   fill:#2d0f0f,stroke:#ef4444,color:#fca5a5,font-weight:bold
+    classDef graph  fill:#0a2520,stroke:#10b981,color:#6ee7b7,font-weight:bold
 
-    subgraph B["4-Tier OCR Pipeline"]
-        B0["Tier 0: PyMuPDF (native text)"]
-        B1["Tier 1: Tesseract (clean scans)"]
-        B2["Tier 2: PaddleOCR (complex layouts)"]
-        B3["Tier 3: Vision LLM (handwriting)"]
+    Upload(["📄  Upload PDF"]):::upload --> OCR
+
+    subgraph OCR["4-Tier OCR Pipeline — fastest method wins"]
+        T0["Tier 0  PyMuPDF\nnative PDF text"]:::ocr
+        T1["Tier 1  Tesseract\nclean scans"]:::ocr
+        T2["Tier 2  PaddleOCR\ncomplex layouts"]:::ocr
+        T3["Tier 3  Vision LLM\nhandwriting / damaged"]:::ocr
+        T0 -.->|fallback| T1 -.->|fallback| T2 -.->|fallback| T3
     end
 
-    B --> C["Chunking\n6000 chars · 600 overlap\nSemantic boundary preservation"]
-    C --> D["Vector Embeddings\nnomic-embed-text · 768 dims · IVFFlat indexing"]
+    OCR --> Chunk["✂  Chunking\n6 000 chars · 600 overlap\nSemantic boundary preservation"]:::embed
+    Chunk --> Embed["🔢  Vector Embeddings\nnomic-embed-text · 768 dims · IVFFlat"]:::embed
 
-    D --> E["Clause Extraction\n16+ types"]
-    D --> F["Entity Extraction\n7 types"]
+    Embed --> Clauses["📋  Clause Extraction\n16+ types via LLM"]:::clause
+    Embed --> Entities["🔗  Entity Extraction\nparties · dates · amounts · locations"]:::entity
 
-    E --> G["Risk Assessment"]
-    F --> H["Knowledge Graph"]
+    Clauses --> Risk["⚠  Risk Assessment\nCritical · High · Medium · Low"]:::risk
+    Entities --> KGraph["🕸  Knowledge Graph\ninteractive relationship visualization"]:::graph
 ```
 
 ---
