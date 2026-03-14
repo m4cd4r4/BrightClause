@@ -53,7 +53,7 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#0f172a', 'primaryTextColor': '#e2e8f0', 'primaryBorderColor': '#c9a227', 'lineColor': '#c9a227', 'secondaryColor': '#1e293b', 'tertiaryColor': '#0f1f2e'}}}%%
-graph LR
+graph TD
     classDef fe    fill:#0f1f3d,stroke:#60a5fa,color:#93c5fd
     classDef be    fill:#0a2520,stroke:#34d399,color:#6ee7b7
     classDef store fill:#1c1400,stroke:#c9a227,color:#fcd34d
@@ -61,14 +61,14 @@ graph LR
     classDef task  fill:#1a0f2e,stroke:#a78bfa,color:#c4b5fd
 
     subgraph FE["🖥  Next.js 14  ·  TypeScript  ·  TailwindCSS"]
-        direction TB
+        direction LR
         Dashboard["Dashboard"] & DocDetail["Document\nAnalysis"] & Compare["Compare\nMatrix"] & Analytics["Portfolio\nAnalytics"] & Search["Hybrid\nSearch"] & Deals["Deals"] & Obligations["Obligations"] & KG["Knowledge\nGraph"]
     end
 
     FE -->|"Next.js /api/* proxy\nAPI key kept server-side"| BE
 
     subgraph BE["⚡  FastAPI  ·  Python  ·  SQLAlchemy 2.0  ·  Celery"]
-        direction TB
+        direction LR
         DocsAPI["Documents"] & AnalysisAPI["Analysis\n+ BYOK"] & SearchAPI["Search"] & ChatAPI["RAG Chat"] & GraphAPI["Graph"] & DealsAPI["Deals"]
     end
 
