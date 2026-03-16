@@ -135,17 +135,12 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
       )}
 
       <div className={isExpanded ? 'fixed inset-0 z-[60] flex items-center justify-center' : 'relative'}>
-        {/* Glow behind video (hidden when expanded) */}
-        {!isExpanded && (
-          <div className="absolute -inset-10 bg-accent/5 blur-[80px] rounded-full pointer-events-none" />
-        )}
-
         <div
           ref={containerRef}
           className={`relative bg-ink-950 overflow-hidden flex flex-col
             ${isExpanded
               ? 'w-full h-full'
-              : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(201,162,39,0.05)]'
+              : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_80px_rgba(201,162,39,0.08)]'
             }`}
         >
           {/* Browser chrome header */}
@@ -156,7 +151,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[10px] text-ink-500 font-mono">
+              <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[11px] text-ink-500 font-mono">
                 brightclause.com — Demo
               </div>
             </div>
@@ -218,13 +213,13 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
                   <div className={`absolute inset-0 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
                   {isActive && (
                     <div
-                      className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-100"
-                      style={{ width: `${progressInScene}%` }}
+                      className="absolute inset-0 bg-accent origin-left transition-transform duration-100"
+                      style={{ transform: `scaleX(${progressInScene / 100})` }}
                     />
                   )}
                 </div>
                 {/* Label */}
-                <span className={`font-mono truncate text-[9px] py-2.5 px-1 text-center
+                <span className={`font-mono truncate text-[11px] py-2.5 px-1 text-center
                   ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}>
                   {scene.name}
                 </span>

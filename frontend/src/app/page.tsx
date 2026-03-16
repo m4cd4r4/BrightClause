@@ -161,22 +161,19 @@ function TrustCard({ signal, index }: { signal: typeof trustSignals[number]; ind
       transition={{ delay: index * 0.1 }}
       className="p-6 bg-ink-900/30 border border-ink-800/40 rounded-xl group hover:border-accent/30 transition-all"
     >
-      <motion.div
-        className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors"
-        animate={{ y: [0, -2, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.5 }}
-      >
-        <signal.Icon className="w-5 h-5" />
-      </motion.div>
-      <div className="mb-3">
-        <span className="font-display text-2xl font-bold text-accent tabular-nums">
-          {signal.statPrefix ?? ''}{signal.statDisplay ?? count}{signal.statSuffix}
-        </span>
-        <span className="text-xs text-ink-500 ml-2 font-mono uppercase tracking-wider">
-          {signal.statLabel}
-        </span>
+      <div className="flex items-start gap-4 mb-3">
+        <div
+          className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors"
+        >
+          <signal.Icon className="w-5 h-5" />
+        </div>
+        <div className="min-w-0">
+          <h3 className="font-display text-base font-semibold text-ink-100">{signal.title}</h3>
+          <span className="text-xs font-mono text-accent/80 bg-accent/8 px-1.5 py-0.5 rounded mt-1 inline-block">
+            {signal.statPrefix ?? ''}{signal.statDisplay ?? count}{signal.statSuffix} {signal.statLabel}
+          </span>
+        </div>
       </div>
-      <h3 className="font-display text-base font-semibold text-ink-100 mb-2">{signal.title}</h3>
       <p className="text-sm text-ink-500 leading-relaxed">{signal.description}</p>
     </motion.div>
   )
@@ -357,7 +354,7 @@ export default function LandingPage() {
                       <item.Icon className="w-6 h-6" />
                     </div>
                     <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-ink-950 border border-accent/40 flex items-center justify-center">
-                      <span className="text-[9px] font-mono text-accent font-bold leading-none">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="text-[11px] font-mono text-accent font-bold leading-none">{String(i + 1).padStart(2, '0')}</span>
                     </div>
                   </div>
                   <h3 className="font-display text-sm font-semibold text-ink-100 mb-1">{item.title}</h3>
@@ -436,26 +433,32 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Remaining 9 features — compact */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {features.slice(3).map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.04 }}
-                className="flex items-start gap-4 p-5 bg-ink-900/20 border border-ink-800/40 rounded-xl hover:border-accent/20 hover:bg-ink-900/40 transition-all group"
-              >
-                <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
-                  <feature.Icon className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-display text-sm font-semibold text-ink-100 mb-1">{feature.title}</h3>
-                  <p className="text-xs text-ink-500 leading-relaxed">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
+          {/* Remaining 9 features — alternating wide/compact rhythm */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {features.slice(3).map((feature, i) => {
+              const isWide = i % 3 === 0
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04 }}
+                  className={`${isWide
+                    ? 'sm:col-span-2 flex items-center gap-6 p-6 bg-ink-900/30 border border-ink-800/50'
+                    : 'flex items-start gap-4 p-5 bg-ink-900/20 border border-ink-800/40'
+                  } rounded-xl hover:border-accent/20 hover:bg-ink-900/40 transition-all group`}
+                >
+                  <div className={`${isWide ? 'w-11 h-11 rounded-xl' : 'w-9 h-9 rounded-lg'} bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors`}>
+                    <feature.Icon className={isWide ? 'w-5 h-5' : 'w-4 h-4'} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className={`font-display ${isWide ? 'text-base' : 'text-sm'} font-semibold text-ink-100 mb-1`}>{feature.title}</h3>
+                    <p className={`${isWide ? 'text-sm' : 'text-xs'} text-ink-500 leading-relaxed`}>{feature.description}</p>
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -605,7 +608,7 @@ export default function LandingPage() {
                   >
                     <div className={`w-0.5 self-stretch ${tier.bar} opacity-70`} />
                     <div className="flex-1 px-5 py-3 flex items-center gap-4">
-                      <span className="text-[10px] font-mono uppercase tracking-[0.12em] w-[5.5rem] shrink-0 text-ink-500">
+                      <span className="text-[11px] font-mono uppercase tracking-[0.12em] w-[5.5rem] shrink-0 text-ink-500">
                         {tier.label}
                       </span>
                       <div className="flex gap-2 flex-wrap">

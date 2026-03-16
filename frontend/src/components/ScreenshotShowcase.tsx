@@ -109,7 +109,7 @@ export function ScreenshotShowcase() {
   const showcaseCard = (
     <div
       className="rounded-2xl overflow-hidden border border-ink-700/40 shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_40px_rgba(201,162,39,0.04)] theme-dark-frame"
-      style={{ backgroundColor: '#080d18' }}
+      style={{ backgroundColor: '#0d0b08' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -121,7 +121,7 @@ export function ScreenshotShowcase() {
           <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[10px] text-ink-500 font-mono">
+          <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[11px] text-ink-500 font-mono">
             brightclause.com/{SCREENS[active].id === 'dashboard' ? '' : SCREENS[active].id}
           </div>
         </div>
@@ -159,7 +159,6 @@ export function ScreenshotShowcase() {
               fill
               className="object-cover object-top"
               sizes="(max-width: 1200px) 100vw, 1152px"
-              unoptimized
               priority={active === 0}
             />
           </motion.div>

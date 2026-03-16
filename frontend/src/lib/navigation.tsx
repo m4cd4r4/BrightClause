@@ -43,7 +43,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
               />
               <div className="hidden sm:block">
                 <span className="font-display text-xl font-bold tracking-tight text-ink-50">BrightClause</span>
-                <p className="text-[10px] text-ink-500 tracking-wide">Contract Intelligence</p>
+                <p className="text-[11px] text-ink-500 tracking-wide">Contract Intelligence</p>
               </div>
             </Link>
 
@@ -107,7 +107,7 @@ export function Navigation({ children }: { children?: React.ReactNode }) {
               <Link
                 key={href}
                 href={href}
-                className={`flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors
+                className={`flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition-colors
                   ${active ? 'text-accent' : 'text-ink-500 hover:text-ink-200'}`}
               >
                 <Icon className={`w-5 h-5 ${active ? 'text-accent' : ''}`} aria-hidden="true" />

@@ -144,7 +144,7 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ open, onClose })
         )}
 
         {/* Player container */}
-        <div className="rounded-2xl overflow-hidden border border-ink-800/50 shadow-2xl shadow-black/50 bg-[#06060a]">
+        <div className="rounded-2xl overflow-hidden border border-ink-800/50 shadow-2xl shadow-black/50 bg-[#0d0b08]">
           <Player
             ref={playerRef}
             component={BrightClauseDemo}
@@ -181,8 +181,8 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ open, onClose })
                   <div className={`absolute inset-0 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
                   {isActive && (
                     <div
-                      className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-100"
-                      style={{ width: `${progressInScene}%` }}
+                      className="absolute inset-0 bg-accent origin-left transition-transform duration-100"
+                      style={{ transform: `scaleX(${progressInScene / 100})` }}
                     />
                   )}
                   {i > 0 && <div className="absolute left-0 inset-y-0 w-px bg-ink-700/30" />}
@@ -200,7 +200,7 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ open, onClose })
                 <button
                   key={scene.name}
                   onClick={() => handleSeekToScene(scene.from)}
-                  className={`text-[10px] sm:text-xs font-mono py-2 transition-colors truncate
+                  className={`text-[11px] sm:text-xs font-mono py-2 transition-colors truncate
                     ${isActive ? 'text-accent font-bold' : 'text-ink-600 hover:text-ink-300'}`}
                   style={{ width: `${widthPct}%` }}
                 >

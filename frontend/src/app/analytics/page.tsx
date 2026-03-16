@@ -228,7 +228,7 @@ export default function AnalyticsPage() {
                 className="col-span-2 lg:col-span-1 card p-6"
               >
                 <div className="text-center">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-ink-500 mb-3">
+                  <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
                     Portfolio Health
                   </div>
                   <div className="relative w-24 h-24 mx-auto">
@@ -249,7 +249,7 @@ export default function AnalyticsPage() {
                       </span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-ink-500 mt-2 font-mono uppercase">
+                  <p className="text-[11px] text-ink-500 mt-2 font-mono uppercase">
                     {portfolioStats.healthScore >= 70 ? 'Good Standing' : portfolioStats.healthScore >= 40 ? 'Needs Review' : 'At Risk'}
                   </p>
                 </div>
@@ -282,7 +282,7 @@ export default function AnalyticsPage() {
                   <p className={`text-2xl font-bold font-mono ${riskConfig[level].color}`}>
                     {portfolioStats[level]}
                   </p>
-                  <p className="text-[10px] text-ink-500 font-mono uppercase tracking-wide mt-1">
+                  <p className="text-[11px] text-ink-500 font-mono uppercase tracking-wide mt-1">
                     {riskConfig[level].label} Risk
                   </p>
                 </motion.div>
@@ -304,7 +304,7 @@ export default function AnalyticsPage() {
                       Clause types vs. documents &middot; {loadingAnalyses ? 'Loading...' : `${docAnalyses.length} contracts`}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] font-mono uppercase">
+                  <div className="flex items-center gap-3 text-[11px] font-mono uppercase">
                     {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map(level => (
                       <div key={level} className="flex items-center gap-1.5">
                         <div className={`w-3 h-3 rounded-sm ${riskCellColors[level]}`} />
@@ -323,17 +323,17 @@ export default function AnalyticsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-ink-800/30">
-                      <th className="sticky left-0 bg-ink-950 z-10 px-4 py-3 text-left text-[10px] font-mono uppercase tracking-widest text-ink-500 min-w-[180px]">
+                      <th className="sticky left-0 bg-ink-950 z-10 px-4 py-3 text-left text-[11px] font-mono uppercase tracking-widest text-ink-500 min-w-[180px]">
                         Document
                       </th>
                       {allClauseTypes.map(type => (
                         <th key={type} className="px-2 py-3 text-center min-w-[70px]">
-                          <span className="text-[9px] font-mono uppercase tracking-wide text-ink-500 whitespace-nowrap">
+                          <span className="text-[11px] font-mono uppercase tracking-wide text-ink-500 whitespace-nowrap">
                             {formatClauseType(type)}
                           </span>
                         </th>
                       ))}
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-ink-500">
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-ink-500">
                         Overall
                       </th>
                     </tr>
@@ -359,7 +359,7 @@ export default function AnalyticsPage() {
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: rowIdx * 0.02 + allClauseTypes.indexOf(type) * 0.01 }}
-                                className={`w-8 h-8 rounded-md mx-auto flex items-center justify-center text-[10px] font-mono font-bold
+                                className={`w-8 h-8 rounded-md mx-auto flex items-center justify-center text-[11px] font-mono font-bold
                                   ${topRisk ? riskCellColors[topRisk] : riskCellColors.none}
                                   ${topRisk ? 'text-ink-100' : 'text-ink-700'}`}
                                 title={clauseData ? `${clauseData.total} clause(s) - ${topRisk || 'unknown'} risk` : 'Not found'}
@@ -370,7 +370,7 @@ export default function AnalyticsPage() {
                           )
                         })}
                         <td className="px-4 py-3 text-center">
-                          <span className={`inline-flex px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase tracking-wide
+                          <span className={`inline-flex px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wide
                             ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.color : 'text-ink-500'}
                             ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.bg + '/10' : 'bg-ink-800/30'}`}>
                             {summary?.overall_risk || '?'}
@@ -415,7 +415,7 @@ export default function AnalyticsPage() {
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-medium text-ink-300">{formatClauseType(type)}</span>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-mono ${topRisk ? riskConfig[topRisk]?.color : 'text-ink-500'}`}>
+                            <span className={`text-[11px] font-mono ${topRisk ? riskConfig[topRisk]?.color : 'text-ink-500'}`}>
                               {topRisk?.toUpperCase() || 'N/A'}
                             </span>
                             <span className="text-xs font-mono text-ink-400">{data.total}</span>
@@ -423,10 +423,10 @@ export default function AnalyticsPage() {
                         </div>
                         <div className="h-2 bg-ink-800/50 rounded-full overflow-hidden">
                           <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${pct}%` }}
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: pct / 100 }}
                             transition={{ delay: 0.4 + i * 0.03, duration: 0.5 }}
-                            className={`h-full rounded-full ${topRisk ? riskConfig[topRisk]?.bg : 'bg-ink-600'}`}
+                            className={`h-full w-full rounded-full origin-left ${topRisk ? riskConfig[topRisk]?.bg : 'bg-ink-600'}`}
                             style={{ opacity: 0.6 }}
                           />
                         </div>
@@ -480,7 +480,7 @@ export default function AnalyticsPage() {
                               <span className="text-xs font-semibold uppercase tracking-wide text-ink-200">
                                 {formatClauseType(highlight.clause_type)}
                               </span>
-                              <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded ${
+                              <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded ${
                                 highlight.risk_level === 'critical'
                                   ? 'bg-red-500/15 text-red-400'
                                   : 'bg-orange-500/15 text-orange-400'
@@ -542,7 +542,7 @@ export default function AnalyticsPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-ink-800/50 text-ink-400">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-mono uppercase bg-ink-800/50 text-ink-400">
                               {entity.entity_type}
                             </span>
                             <span className="text-sm font-medium text-ink-200">{entity.normalized_name}</span>
@@ -598,15 +598,15 @@ export default function AnalyticsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-ink-800/30">
-                      <th className="px-6 py-3 text-left text-[10px] font-mono uppercase tracking-widest text-ink-500">Document</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-ink-500">Clauses</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-red-400/70">Crit</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-orange-400/70">High</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-amber-400/70">Med</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-emerald-400/70">Low</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-ink-500">Overall</th>
-                      <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-widest text-ink-500">Risk Bar</th>
-                      <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-ink-500"></th>
+                      <th className="px-6 py-3 text-left text-[11px] font-mono uppercase tracking-widest text-ink-500">Document</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-ink-500">Clauses</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-red-400/70">Crit</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-orange-400/70">High</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-amber-400/70">Med</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-emerald-400/70">Low</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-ink-500">Overall</th>
+                      <th className="px-4 py-3 text-center text-[11px] font-mono uppercase tracking-widest text-ink-500">Risk Bar</th>
+                      <th className="px-4 py-3 text-right text-[11px] font-mono uppercase tracking-widest text-ink-500"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-ink-800/20">
@@ -634,7 +634,7 @@ export default function AnalyticsPage() {
                             <td className="px-4 py-3 text-center text-xs font-mono text-amber-400">{summary?.risk_summary.medium || 0}</td>
                             <td className="px-4 py-3 text-center text-xs font-mono text-emerald-400">{summary?.risk_summary.low || 0}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase
+                              <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-mono font-bold uppercase
                                 ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.color : 'text-ink-500'}
                                 ${summary?.overall_risk ? riskConfig[summary.overall_risk]?.bg + '/10' : 'bg-ink-800/30'}`}>
                                 {summary?.overall_risk || '?'}

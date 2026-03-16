@@ -7,27 +7,27 @@
   --font-body: 'DM Sans', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Dark theme (default) — RGB triplets for Tailwind opacity support */
-  --ink-50: 247 247 248;
-  --ink-100: 238 238 240;
-  --ink-200: 217 217 222;
-  --ink-300: 184 184 193;
-  --ink-400: 145 145 159;
-  --ink-500: 140 140 158;
-  --ink-600: 93 93 108;
-  --ink-700: 76 76 88;
-  --ink-800: 65 65 75;
-  --ink-900: 57 57 65;
-  --ink-925: 40 40 48;
-  --ink-950: 24 24 27;
+  /* Dark theme (default) — warm ink palette echoing gold/cream editorial identity */
+  --ink-50: 248 247 244;
+  --ink-100: 240 238 234;
+  --ink-200: 222 219 213;
+  --ink-300: 190 186 178;
+  --ink-400: 154 148 138;
+  --ink-500: 148 143 132;
+  --ink-600: 138 133 124;
+  --ink-700: 84 79 70;
+  --ink-800: 72 67 58;
+  --ink-900: 62 58 52;
+  --ink-925: 44 41 36;
+  --ink-950: 26 24 21;
 
-  --bg-primary: #0a0a0c;
-  --bg-secondary: #111114;
-  --bg-tertiary: #18181b;
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --border: #27272a;
+  --bg-primary: #0d0b08;
+  --bg-secondary: #14120e;
+  --bg-tertiary: #1c1a15;
+  --text-primary: #f5f4f1;
+  --text-secondary: #a8a49c;
+  --text-muted: #7a7770;
+  --border: #2c2922;
   --accent: #c9a227;
 }
 
@@ -62,8 +62,8 @@ html.light {
   --ink-200: 52 52 78;
   --ink-300: 74 74 106;
   --ink-400: 100 100 130;
-  --ink-500: 122 122 142;
-  --ink-600: 165 165 180;
+  --ink-500: 105 105 125;
+  --ink-600: 140 140 155;
   --ink-700: 200 196 188;
   --ink-800: 212 207 197;
   --ink-900: 240 237 230;
@@ -96,20 +96,20 @@ html.light {
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-/* Dark frame — preserves dark palette for product previews on light pages */
+/* Dark frame — preserves warm dark palette for product previews on light pages */
 .theme-dark-frame {
-  --ink-50: 247 247 248;
-  --ink-100: 238 238 240;
-  --ink-200: 217 217 222;
-  --ink-300: 184 184 193;
-  --ink-400: 145 145 159;
-  --ink-500: 140 140 158;
-  --ink-600: 93 93 108;
-  --ink-700: 76 76 88;
-  --ink-800: 65 65 75;
-  --ink-900: 57 57 65;
-  --ink-925: 40 40 48;
-  --ink-950: 24 24 27;
+  --ink-50: 248 247 244;
+  --ink-100: 240 238 234;
+  --ink-200: 222 219 213;
+  --ink-300: 190 186 178;
+  --ink-400: 154 148 138;
+  --ink-500: 148 143 132;
+  --ink-600: 138 133 124;
+  --ink-700: 84 79 70;
+  --ink-800: 72 67 58;
+  --ink-900: 62 58 52;
+  --ink-925: 44 41 36;
+  --ink-950: 26 24 21;
   --accent: #c9a227;
 }
 
@@ -188,7 +188,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #46433c;
 }
 
 /* Risk glow effects */
@@ -296,9 +296,9 @@ body {
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(39, 39, 42, 0.4) 25%,
-    rgba(63, 63, 70, 0.4) 50%,
-    rgba(39, 39, 42, 0.4) 75%
+    rgba(44, 41, 36, 0.4) 25%,
+    rgba(62, 58, 52, 0.4) 50%,
+    rgba(44, 41, 36, 0.4) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
