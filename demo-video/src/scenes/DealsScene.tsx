@@ -9,7 +9,6 @@ import {
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { AnimatedCounter } from "../components/AnimatedCounter";
-import { GlowOrb } from "../components/GlowOrb";
 import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const deals = [
@@ -35,13 +34,17 @@ export const DealsScene: React.FC<DealsSceneProps> = ({ mobile }) => {
   const getCardProgress = (i: number) =>
     spring({ frame: frame - 10 - i * STAGGER.slow, fps, config: springs.panel });
 
-  const getProgress = (i: number, target: number) => {
+  const getProgressScale = (i: number) => {
     const start = 30 + i * STAGGER.slow;
-    return interpolate(frame, [start, start + 35], [0, target], {
+    return interpolate(frame, [start, start + 35], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
       easing: Easing.out(Easing.quad),
     });
+  };
+
+  const getProgressValue = (i: number, target: number) => {
+    return Math.floor(getProgressScale(i) * target);
   };
 
   const glowSweepProgress = interpolate(frame, [60, 140], [0, 3], {
@@ -76,8 +79,6 @@ export const DealsScene: React.FC<DealsSceneProps> = ({ mobile }) => {
         borderRadius={16}
         y={30}
       />
-      <GlowOrb color={colors.accent} size={mobile ? 300 : 400} x="50%" y="50%" maxOpacity={0.08} delay={10} />
-
       <SceneBadge title="Deal Grouping" subtitle="Batch Upload & Aggregate Analysis" mobile={mobile} />
 
       <div
@@ -130,13 +131,6 @@ export const DealsScene: React.FC<DealsSceneProps> = ({ mobile }) => {
                     : "none",
                 }}
               >
-                {/* Accent stripe */}
-                {mobile ? (
-                  <div style={{ width: 6, backgroundColor: riskCol }} />
-                ) : (
-                  <div style={{ height: 4, backgroundColor: riskCol }} />
-                )}
-
                 <div
                   style={{
                     padding: mobile ? "36px 32px" : "28px 28px 24px 28px",
@@ -199,16 +193,18 @@ export const DealsScene: React.FC<DealsSceneProps> = ({ mobile }) => {
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
-                        {Math.floor(getProgress(i, deal.progress))}%
+                        {getProgressValue(i, deal.progress)}%
                       </span>
                     </div>
                     <div style={{ height: mobile ? 10 : 6, backgroundColor: colors.bgCardHover, borderRadius: 3 }}>
                       <div
                         style={{
                           height: "100%",
-                          width: `${getProgress(i, deal.progress)}%`,
+                          width: `${deal.progress}%`,
                           backgroundColor: colors.accent,
                           borderRadius: 3,
+                          transformOrigin: "left",
+                          transform: `scaleX(${getProgressScale(i)})`,
                         }}
                       />
                     </div>

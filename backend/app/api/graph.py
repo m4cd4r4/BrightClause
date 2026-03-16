@@ -1,11 +1,12 @@
 """Knowledge graph API endpoints."""
 
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from app.core.database import get_db
+from app.core.rate_limit import limiter
 from app.models.document import Document
 from app.models.knowledge_graph import Entity, Relationship
 from app.services.entity_extraction import (
@@ -352,7 +353,9 @@ async def search_entity(
 # ============================================
 
 @router.post("/{document_id}/extract", response_model=ExtractionStatusResponse)
+@limiter.limit("10/minute")
 async def trigger_entity_extraction(
+    request: Request,
     document_id: UUID,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
@@ -408,7 +411,9 @@ async def trigger_entity_extraction(
 
 
 @router.post("/{document_id}/reextract", response_model=ExtractionStatusResponse)
+@limiter.limit("5/minute")
 async def reextract_entities(
+    request: Request,
     document_id: UUID,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),

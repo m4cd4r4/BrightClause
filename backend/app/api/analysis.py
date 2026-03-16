@@ -112,7 +112,9 @@ RECOMMENDATIONS:
 
 
 @router.post("/{document_id}/report", response_model=ReportResponse)
+@limiter.limit("5/minute")
 async def generate_report(
+    request: Request,
     document_id: UUID,
     db: AsyncSession = Depends(get_db),
 ):
@@ -326,10 +328,12 @@ async def trigger_extraction(
 
 
 @router.post("/{document_id}/reanalyze", response_model=AnalysisStatusResponse)
+@limiter.limit("5/minute")
 async def reanalyze_document(
+    request: Request,
     document_id: UUID,
     background_tasks: BackgroundTasks,
-    request: ExtractionRequest | None = None,
+    body: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -338,7 +342,7 @@ async def reanalyze_document(
     This deletes existing clauses and runs extraction again.
     Optionally accepts a `claude_api_key` to use Claude instead of Ollama.
     """
-    claude_api_key = validate_byok_key(request.claude_api_key if request else None)
+    claude_api_key = validate_byok_key(body.claude_api_key if body else None)
 
     query = select(Document).where(Document.id == document_id)
     result = await db.execute(query)
@@ -545,10 +549,12 @@ class ExplainResponse(BaseModel):
 
 
 @router.post("/{document_id}/clauses/{clause_id}/explain", response_model=ExplainResponse)
+@limiter.limit("15/minute")
 async def explain_clause(
+    request: Request,
     document_id: UUID,
     clause_id: UUID,
-    request: ExtractionRequest | None = None,
+    body: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Explain a clause in plain English using AI."""
@@ -568,7 +574,7 @@ async def explain_clause(
     )
 
     # Per-request key (validated) takes priority over env var
-    effective_api_key = validate_byok_key(request.claude_api_key if request else None) or settings.anthropic_api_key or None
+    effective_api_key = validate_byok_key(body.claude_api_key if body else None) or settings.anthropic_api_key or None
 
     try:
         if effective_api_key:
@@ -684,9 +690,11 @@ class ObligationResponse(BaseModel):
 
 
 @router.post("/{document_id}/obligations/extract")
+@limiter.limit("10/minute")
 async def extract_obligations(
+    request: Request,
     document_id: UUID,
-    request: ExtractionRequest | None = None,
+    body: ExtractionRequest | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Extract obligations and deadlines from document clauses using AI."""
@@ -725,7 +733,7 @@ async def extract_obligations(
     prompt = OBLIGATION_PROMPT.format(clauses=clause_text)
 
     # Per-request key (validated) takes priority over env var
-    effective_api_key = validate_byok_key(request.claude_api_key if request else None) or settings.anthropic_api_key or None
+    effective_api_key = validate_byok_key(body.claude_api_key if body else None) or settings.anthropic_api_key or None
 
     extracted = []
     try:

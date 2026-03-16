@@ -16,7 +16,11 @@ async def verify_api_key(x_api_key: str = Header(default="")):
     """
     if not settings.api_key:
         if settings.environment != "development":
-            logger.warning("API_KEY is not set — all endpoints are unprotected. Set API_KEY in production.")
+            logger.error("API_KEY is not set in %s environment. Rejecting request.", settings.environment)
+            raise HTTPException(
+                status_code=500,
+                detail="Server misconfiguration: authentication is not configured",
+            )
         return
     if x_api_key != settings.api_key:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
