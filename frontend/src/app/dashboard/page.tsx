@@ -22,12 +22,6 @@ const riskColors: Record<RiskLevel, string> = {
   low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
 }
 
-const riskAccentBorder: Record<RiskLevel, string> = {
-  critical: 'border-l-red-500',
-  high: 'border-l-orange-500',
-  medium: 'border-l-amber-500',
-  low: 'border-l-emerald-500',
-}
 
 function formatRelativeTime(iso: string): string {
   const now = Date.now()
@@ -469,6 +463,7 @@ function DashboardContent() {
         </motion.div>
 
         {/* Search Results */}
+        <div aria-live="polite">
         <AnimatePresence>
           {searchResults.length > 0 && (
             <motion.div
@@ -504,7 +499,7 @@ function DashboardContent() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-semibold text-accent">{result.document_name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-ink-500">Relevance</span>
+                          <span className="text-[11px] text-ink-500">Relevance</span>
                           <span className="text-xs text-ink-300 bg-ink-800/50 px-2 py-0.5 rounded">
                             {(result.combined_score * 100).toFixed(0)}%
                           </span>
@@ -518,6 +513,7 @@ function DashboardContent() {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -578,7 +574,7 @@ function DashboardContent() {
 
                       {/* Value outcome steps */}
                       <div className="mt-8 pt-6 border-t border-ink-800/40">
-                        <p className="text-[10px] text-ink-500 mb-3">What you get</p>
+                        <p className="text-[11px] text-ink-500 mb-3">What you get</p>
                         <div className="flex items-center justify-center gap-3 text-[11px] text-ink-400">
                           <span className="flex items-center gap-1.5">
                             <FileText className="w-3 h-3 text-amber-500/70" />
@@ -619,8 +615,8 @@ function DashboardContent() {
                       className={`px-6 py-5 cursor-pointer transition-all duration-200 relative group
                                 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
                                 ${selectedDoc === doc.id
-                                  ? 'bg-accent/5 border-l-3 border-accent'
-                                  : 'hover:bg-ink-900/30 border-l-3 border-transparent hover:border-ink-600'
+                                  ? 'bg-accent/5 ring-1 ring-inset ring-accent/25'
+                                  : 'hover:bg-ink-900/30'
                                 }`}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -668,7 +664,7 @@ function DashboardContent() {
                                   }[risk]
                                   return (
                                     <motion.span
-                                      className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}
+                                      className={`shrink-0 text-[11px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}
                                       initial={{ opacity: 0, scale: 0.7 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
@@ -753,8 +749,8 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Risk Analysis Panel - Enhanced & Data Dense */}
-          <div className="lg:col-span-1" data-tour="analysis">
+          {/* Risk Analysis Panel */}
+          <div className="lg:col-span-1" data-tour="analysis" aria-live="polite">
             <AnimatePresence mode="wait">
               {(selectedDoc && selectedAnalysis) || (!selectedDoc && portfolioRisk) ? (
                 <motion.div
@@ -785,13 +781,18 @@ function DashboardContent() {
                     const highlights = selectedAnalysis ? selectedAnalysis.high_risk_highlights : portfolioRisk!.highlights
                     return (
                       <div className="p-6 space-y-6">
-                        {/* Overall Risk - Left-border treatment */}
+                        {/* Overall Risk */}
                         <motion.div
-                          className={`flex items-center gap-4 pl-5 py-3 border-l-4 ${riskAccentBorder[overallRisk] ?? 'border-l-ink-600'}`}
+                          className="flex items-center gap-4 py-3"
                           initial={{ opacity: 0, x: -8 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
                         >
+                          <div className={`w-3.5 h-3.5 rounded-full shrink-0 ${
+                            overallRisk === 'critical' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' :
+                            overallRisk === 'high' ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]' :
+                            overallRisk === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                          }`} />
                           <div>
                             <div className={`text-3xl font-bold uppercase tracking-tight ${
                               overallRisk === 'critical' ? 'text-red-400' :
@@ -822,7 +823,7 @@ function DashboardContent() {
                                 transition={{ delay: idx * 0.06, duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
                               >
                                 <div className={`text-2xl font-bold tabular-nums ${color}`}>{riskCounts[level]}</div>
-                                <div className="text-[10px] text-ink-600 mt-0.5 capitalize">{level}</div>
+                                <div className="text-[11px] text-ink-600 mt-0.5 capitalize">{level}</div>
                               </motion.div>
                             ))}
                           </div>

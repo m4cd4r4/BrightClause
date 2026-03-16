@@ -258,10 +258,10 @@ export default function ObligationsPage() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-ink-100 leading-relaxed">{ob.description}</p>
                               <div className="flex flex-wrap items-center gap-2 mt-2">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono uppercase border ${sCfg.bg} ${sCfg.color}`}>
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono uppercase border ${sCfg.bg} ${sCfg.color}`}>
                                   {sCfg.label}
                                 </span>
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono uppercase ${cfg.bg} ${cfg.color}`}>
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono uppercase ${cfg.bg} ${cfg.color}`}>
                                   {cfg.label}
                                 </span>
                                 {ob.due_date && (

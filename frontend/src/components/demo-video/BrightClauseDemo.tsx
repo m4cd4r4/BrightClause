@@ -20,7 +20,7 @@ const SLIDE_T = 20;
 
 export const BrightClauseDemo: React.FC = () => {
   return (
-    <AbsoluteFill style={{ backgroundColor: "#06060a" }}>
+    <AbsoluteFill style={{ backgroundColor: "#0d0b08" }}>
       <TransitionSeries>
         {/* Intro */}
         <TransitionSeries.Sequence durationInFrames={INTRO} premountFor={30}>

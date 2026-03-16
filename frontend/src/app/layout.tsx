@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://brightclause.com' },
   robots: { index: true, follow: true },
   verification: { google: 'hjZkahLqQJUWRBpHS6iz4i4zyuy4MEC5WqFCRmbgFek' },
-  other: { 'theme-color': '#0a0a1a' },
+  other: { 'theme-color': '#0d0b08' },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

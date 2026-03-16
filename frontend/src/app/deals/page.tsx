@@ -152,7 +152,7 @@ export default function DealsPage() {
                 ].map(({ label, icon: Icon }) => (
                   <div key={label} className="p-2.5 rounded-lg border border-ink-800/30">
                     <Icon className="w-4 h-4 text-ink-500 mx-auto mb-1" />
-                    <p className="text-[10px] font-mono text-ink-500 uppercase">{label}</p>
+                    <p className="text-[11px] font-mono text-ink-500 uppercase">{label}</p>
                   </div>
                 ))}
               </div>
@@ -198,12 +198,12 @@ export default function DealsPage() {
                   {deal.documents.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1">
                       {deal.documents.slice(0, 3).map((doc) => (
-                        <span key={doc.id} className="text-[10px] text-ink-400 bg-ink-800/50 px-2 py-0.5 rounded truncate max-w-[120px]">
+                        <span key={doc.id} className="text-[11px] text-ink-400 bg-ink-800/50 px-2 py-0.5 rounded truncate max-w-[120px]">
                           {doc.filename}
                         </span>
                       ))}
                       {deal.document_count > 3 && (
-                        <span className="text-[10px] text-ink-500 px-1">+{deal.document_count - 3} more</span>
+                        <span className="text-[11px] text-ink-500 px-1">+{deal.document_count - 3} more</span>
                       )}
                     </div>
                   )}

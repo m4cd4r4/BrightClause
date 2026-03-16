@@ -1,9 +1,9 @@
 import { CSSProperties } from "react";
 
 export const colors = {
-  bg: "#06060a",
-  bgCard: "#0d0d14",
-  bgCardHover: "#12121c",
+  bg: "#0d0b08",
+  bgCard: "#14120e",
+  bgCardHover: "#1c1a15",
   border: "#1a1a2e",
   borderLight: "#252540",
   accent: "#c9a227",

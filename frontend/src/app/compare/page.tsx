@@ -196,7 +196,7 @@ function ComparePageContent() {
               )}
               <span className="text-sm text-ink-200 font-medium max-w-[200px] truncate">{cd.doc.filename}</span>
               {cd.summary && (
-                <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded
+                <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded
                   ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk]?.color : 'text-ink-500'}
                   ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk]?.bg + '/15' : 'bg-ink-800/30'}`}>
                   {cd.summary.overall_risk}
@@ -251,7 +251,7 @@ function ComparePageContent() {
                             <FileText className="w-4 h-4 text-ink-500 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-ink-200 truncate">{doc.filename}</p>
-                              <p className="text-[10px] text-ink-500 font-mono">
+                              <p className="text-[11px] text-ink-500 font-mono">
                                 {doc.page_count ? `${doc.page_count} pages` : 'Unknown pages'} &middot; {doc.chunk_count} chunks
                               </p>
                             </div>
@@ -333,17 +333,17 @@ function ComparePageContent() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-ink-800/30">
-                      <th className="sticky left-0 bg-ink-950 z-10 px-6 py-3 text-left text-[10px] font-mono uppercase tracking-widest text-ink-500 min-w-[160px]">
+                      <th className="sticky left-0 bg-ink-950 z-10 px-6 py-3 text-left text-[11px] font-mono uppercase tracking-widest text-ink-500 min-w-[160px]">
                         Clause Type
                       </th>
                       {compareDocs.map(cd => (
                         <th key={cd.doc.id} className="px-4 py-3 text-center min-w-[180px]">
                           <div className="flex flex-col items-center gap-1">
-                            <span className="text-[10px] font-mono text-ink-400 truncate max-w-[160px]">
+                            <span className="text-[11px] font-mono text-ink-400 truncate max-w-[160px]">
                               {cd.doc.filename}
                             </span>
                             {cd.summary && (
-                              <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded
+                              <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded
                                 ${riskConfig[cd.summary.overall_risk]?.color}
                                 ${riskConfig[cd.summary.overall_risk]?.bg}/15`}>
                                 {cd.summary.overall_risk}
@@ -384,12 +384,12 @@ function ComparePageContent() {
                                       cellData.topRisk === 'medium' ? 'bg-amber-500/40' :
                                       'bg-emerald-500/30'
                                     }`} />
-                                    <span className="text-[10px] font-mono font-bold uppercase">{cellData.topRisk}</span>
+                                    <span className="text-[11px] font-mono font-bold uppercase">{cellData.topRisk}</span>
                                   </div>
-                                  <span className="text-[10px] text-ink-500 font-mono">{cellData.breakdown.total} clause(s)</span>
+                                  <span className="text-[11px] text-ink-500 font-mono">{cellData.breakdown.total} clause(s)</span>
                                 </button>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-[10px] text-ink-600 font-mono">
+                                <span className="inline-flex items-center gap-1 text-[11px] text-ink-600 font-mono">
                                   <span className="w-2 h-2 rounded-sm bg-ink-800/50" />
                                   Not found
                                 </span>
@@ -412,7 +412,7 @@ function ComparePageContent() {
                                     {cellData.clauses.slice(0, 3).map((clause) => (
                                       <div key={clause.id} className="p-2.5 bg-ink-800/30 rounded-lg">
                                         {clause.risk_level && (
-                                          <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded mb-1.5 inline-block
+                                          <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded mb-1.5 inline-block
                                             ${riskConfig[clause.risk_level as RiskLevel]?.color}
                                             ${riskConfig[clause.risk_level as RiskLevel]?.bg}/15`}>
                                             {clause.risk_level}
@@ -426,7 +426,7 @@ function ComparePageContent() {
                                   </div>
                                   <Link
                                     href={`/documents/${cd.doc.id}`}
-                                    className="flex items-center justify-center gap-1.5 mt-3 text-[10px] text-accent hover:text-accent-light transition-colors"
+                                    className="flex items-center justify-center gap-1.5 mt-3 text-[11px] text-accent hover:text-accent-light transition-colors"
                                   >
                                     <Eye className="w-3 h-3" />
                                     View Full Document
@@ -483,7 +483,7 @@ function ComparePageContent() {
                           <div className="flex items-center gap-2 mb-3">
                             <AlertTriangle className="w-4 h-4 text-amber-400" />
                             <span className="text-sm font-medium text-ink-200">{doc.filename}</span>
-                            <span className="text-[10px] text-ink-500 font-mono">
+                            <span className="text-[11px] text-ink-500 font-mono">
                               missing {missing.length} clause type{missing.length !== 1 ? 's' : ''}
                             </span>
                           </div>
@@ -491,7 +491,7 @@ function ComparePageContent() {
                             {missing.map(type => (
                               <span
                                 key={type}
-                                className="text-[10px] font-mono px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-md text-amber-400"
+                                className="text-[11px] font-mono px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-md text-amber-400"
                               >
                                 {formatClauseType(type)}
                               </span>

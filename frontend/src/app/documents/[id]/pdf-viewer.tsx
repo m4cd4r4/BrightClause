@@ -61,7 +61,7 @@ export function PdfViewer({ documentId, clauses, activeClauseId, onClauseClick }
           ) : (
             sortedPages.map((page) => (
               <div key={page}>
-                <div className="px-4 py-2 bg-ink-900/30 text-[10px] font-mono uppercase tracking-wide text-ink-500 sticky top-0">
+                <div className="px-4 py-2 bg-ink-900/30 text-[11px] font-mono uppercase tracking-wide text-ink-500 sticky top-0">
                   {page === 0 ? 'Unknown Page' : `Page ${page}`}
                 </div>
                 {clausesByPage[page].map((clause) => {

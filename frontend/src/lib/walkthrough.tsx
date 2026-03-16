@@ -206,9 +206,9 @@ export function WalkthroughOverlay({
           <div className="px-5">
             <div className="h-1 bg-ink-800 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-accent rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${((step + 1) / totalSteps) * 100}%` }}
+                className="h-full w-full bg-accent rounded-full origin-left"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: (step + 1) / totalSteps }}
                 transition={{ duration: 0.3 }}
               />
             </div>

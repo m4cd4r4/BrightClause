@@ -58,7 +58,7 @@ function ByokForm({ onSubmit, initialKey, onCancel }: {
         }`}
       />
       {showValidationHint && (
-        <p className="text-[10px] text-red-400 mb-3">Key must start with &quot;sk-ant-&quot;</p>
+        <p className="text-[11px] text-red-400 mb-3">Key must start with &quot;sk-ant-&quot;</p>
       )}
       {!showValidationHint && <div className="mb-3" />}
       <div className="flex gap-2">
@@ -69,7 +69,7 @@ function ByokForm({ onSubmit, initialKey, onCancel }: {
           Cancel
         </button>
       </div>
-      <p className="text-[10px] text-ink-600 mt-3 text-center">
+      <p className="text-[11px] text-ink-600 mt-3 text-center">
         Get your key at <span className="text-ink-400">console.anthropic.com</span>
       </p>
     </form>
@@ -942,7 +942,7 @@ export default function DocumentDetailPage() {
                           const risk = riskConfig[clause.risk_level as RiskLevel] || riskConfig.low
                           return (
                             <div key={i} className="flex items-start gap-3 p-3 bg-ink-900/30 rounded-lg">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ${risk.color} ${risk.bg}/10 flex-shrink-0 mt-0.5`}>
+                              <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium uppercase ${risk.color} ${risk.bg}/10 flex-shrink-0 mt-0.5`}>
                                 {clause.risk_level}
                               </span>
                               <div>

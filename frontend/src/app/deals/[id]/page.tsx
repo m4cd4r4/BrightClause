@@ -249,7 +249,7 @@ export default function DealDetailPage() {
             </div>
             <div className="flex items-center gap-4 mt-2">
               {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
-                <span key={level} className={`text-[10px] font-mono ${riskColors[level].split(' ')[0]}`}>
+                <span key={level} className={`text-[11px] font-mono ${riskColors[level].split(' ')[0]}`}>
                   {level}: {deal.risk_summary[level] || 0}
                 </span>
               ))}

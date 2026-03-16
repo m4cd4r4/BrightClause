@@ -146,7 +146,7 @@ export function ChatPanel({ documentId }: { documentId: string }) {
                           <span
                             key={j}
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                       bg-ink-800/50 text-[10px] text-ink-500 font-mono"
+                                       bg-ink-800/50 text-[11px] text-ink-500 font-mono"
                             title={src.content}
                           >
                             <FileText className="w-3 h-3" />

@@ -60,7 +60,7 @@ export function Timeline({ documentId }: { documentId: string }) {
         {Object.entries(typeConfig)
           .filter(([type]) => events.some(e => e.type === type))
           .map(([type, config]) => (
-            <span key={type} className="flex items-center gap-1.5 text-[10px] text-ink-400">
+            <span key={type} className="flex items-center gap-1.5 text-[11px] text-ink-400">
               <span className={`w-2 h-2 rounded-full ${config.bg}`} />
               {config.label}
             </span>
@@ -102,7 +102,7 @@ export function Timeline({ documentId }: { documentId: string }) {
                         <AlertTriangle className="w-3 h-3 text-amber-400" />
                       )}
                       {event.page_number != null && (
-                        <span className="text-[10px] text-ink-600 font-mono">p.{event.page_number}</span>
+                        <span className="text-[11px] text-ink-600 font-mono">p.{event.page_number}</span>
                       )}
                     </div>
                     <p className="text-sm text-ink-200 mt-0.5 font-medium truncate">

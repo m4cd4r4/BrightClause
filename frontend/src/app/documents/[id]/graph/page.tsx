@@ -885,7 +885,7 @@ export default function GraphPage() {
                                 </div>
                                 <ChevronRight className="w-3.5 h-3.5 text-ink-600 group-hover:text-accent flex-shrink-0" />
                               </div>
-                              <div className="mt-1 flex items-center gap-1.5 text-[10px] text-ink-500">
+                              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-ink-500">
                                 <span className="uppercase">{otherNode.type}</span>
                                 {edge.label && edge.label !== 'relates_to' && (
                                   <>
@@ -933,11 +933,11 @@ export default function GraphPage() {
                     <div className="grid grid-cols-2 gap-2">
                       <div className="p-2.5 bg-ink-900/30 rounded-lg text-center">
                         <p className="text-lg font-bold font-mono text-ink-200">{connectedCount}</p>
-                        <p className="text-[10px] text-ink-500 uppercase">Connections</p>
+                        <p className="text-[11px] text-ink-500 uppercase">Connections</p>
                       </div>
                       <div className="p-2.5 bg-ink-900/30 rounded-lg text-center">
                         <p className="text-lg font-bold font-mono text-ink-200">{sameTypeCount}</p>
-                        <p className="text-[10px] text-ink-500 uppercase">Same Type</p>
+                        <p className="text-[11px] text-ink-500 uppercase">Same Type</p>
                       </div>
                     </div>
                   )
@@ -1076,7 +1076,7 @@ export default function GraphPage() {
                                   <ChevronRight className="w-3.5 h-3.5 text-ink-600 flex-shrink-0" />
                                 </div>
                                 {edge.label && edge.label !== 'relates_to' && (
-                                  <span className="text-[10px] text-accent/70 mt-0.5 block">{edge.label.replace(/_/g, ' ')}</span>
+                                  <span className="text-[11px] text-accent/70 mt-0.5 block">{edge.label.replace(/_/g, ' ')}</span>
                                 )}
                               </button>
                             )
@@ -1102,11 +1102,11 @@ export default function GraphPage() {
                       <div className="grid grid-cols-2 gap-2">
                         <div className="p-2 bg-ink-800/30 rounded-lg text-center">
                           <p className="text-lg font-bold font-mono text-ink-200">{connectedCount}</p>
-                          <p className="text-[10px] text-ink-500 uppercase">Connections</p>
+                          <p className="text-[11px] text-ink-500 uppercase">Connections</p>
                         </div>
                         <div className="p-2 bg-ink-800/30 rounded-lg text-center">
                           <p className="text-lg font-bold font-mono text-ink-200">{sameTypeCount}</p>
-                          <p className="text-[10px] text-ink-500 uppercase">Same Type</p>
+                          <p className="text-[11px] text-ink-500 uppercase">Same Type</p>
                         </div>
                       </div>
                     )
