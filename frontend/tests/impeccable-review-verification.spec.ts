@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test'
  * Tests the 8 checks from the impeccable review fixes against the live site.
  */
 
-const LIVE_URL = 'https://brightclause.com'
+const LIVE_URL = process.env.BASE_URL || 'https://brightclause.com'
 
 // --- Helper: parse rgb/rgba string to {r, g, b} ---
 function parseRGB(color: string): { r: number; g: number; b: number } | null {
