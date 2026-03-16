@@ -128,7 +128,7 @@ export function HeroVisual() {
                   className="flex items-center justify-between py-2 px-3 bg-ink-800/30 rounded-lg"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-[11px] text-ink-500 font-mono shrink-0">{c.section}</span>
+                    <span className="text-[11px] text-ink-300 font-mono shrink-0">{c.section}</span>
                     <span className="text-xs text-ink-100 truncate">{c.type}</span>
                   </div>
                   <span className={`text-[11px] font-mono font-bold uppercase px-1.5 py-0.5 rounded shrink-0 ml-2 ${clauseColors[c.risk]}`}>
