@@ -1,12 +1,13 @@
 """Deal management endpoints for grouping related documents."""
 
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
 from app.core.database import get_db
+from app.core.rate_limit import limiter
 from app.core.config import get_settings
 from app.models.document import Deal, Document, deal_documents
 from app.services.storage import upload_document as minio_upload
@@ -183,7 +184,9 @@ async def remove_document_from_deal(
 
 
 @router.post("/{deal_id}/upload")
+@limiter.limit("3/minute")
 async def batch_upload_to_deal(
+    request: Request,
     deal_id: UUID,
     files: list[UploadFile] = File(...),
     db: AsyncSession = Depends(get_db),
@@ -209,8 +212,17 @@ async def batch_upload_to_deal(
             errors.append(f"{file.filename}: File too large")
             continue
 
+        safe_filename = (
+            file.filename.replace("/", "_")
+            .replace("\\", "_")
+            .replace("..", "_")
+            .replace("\x00", "")
+        )
+        if len(safe_filename) > 255:
+            safe_filename = safe_filename[:251] + ".pdf"
+
         doc = Document(
-            filename=file.filename,
+            filename=safe_filename,
             file_path="",
             file_size=len(content),
             file_type="application/pdf",

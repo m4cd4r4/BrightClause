@@ -83,8 +83,15 @@ async def upload_document(
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
-    # Sanitize filename — strip path separators to prevent path traversal
-    safe_filename = file.filename.replace("/", "_").replace("\\", "_").replace("..", "_")
+    # Sanitize filename — strip path separators, null bytes, and cap length
+    safe_filename = (
+        file.filename.replace("/", "_")
+        .replace("\\", "_")
+        .replace("..", "_")
+        .replace("\x00", "")
+    )
+    if len(safe_filename) > 255:
+        safe_filename = safe_filename[:251] + ".pdf"
 
     # Read file content
     content = await file.read()

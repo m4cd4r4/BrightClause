@@ -8,7 +8,6 @@ import {
 import { colors, fonts, centered, springs, STAGGER } from "../styles";
 import { AnimatedBackground } from "../components/AnimatedBackground";
 import { LogoImage } from "../components/LogoImage";
-import { GlowOrb } from "../components/GlowOrb";
 import { FadeInSlide } from "../components/FadeInSlide";
 import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
@@ -82,8 +81,6 @@ export const IntroScene: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
           shadow={false}
         />
       </div>
-
-      <GlowOrb pulse y="42%" maxOpacity={0.2} />
 
       <div
         style={{

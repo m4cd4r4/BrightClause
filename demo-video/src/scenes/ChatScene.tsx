@@ -7,7 +7,6 @@ import {
 } from "remotion";
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
-import { GlowOrb } from "../components/GlowOrb";
 import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const userQuestion = "What are the termination rights in this contract?";
@@ -87,8 +86,6 @@ export const ChatScene: React.FC<ChatSceneProps> = ({ mobile }) => {
           y={40}
         />
       )}
-      <GlowOrb color={colors.blue} size={mobile ? 300 : 350} x="50%" y="50%" maxOpacity={0.12} delay={5} />
-
       <SceneBadge title="Contract Q&A" subtitle="RAG-Powered Chat — Ask Anything" mobile={mobile} />
 
       <div

@@ -15,6 +15,7 @@ import {
 
 // Configuration
 const API_URL = process.env.BRIGHTCLAUSE_API_URL || 'http://45.77.233.102:8003';
+const API_KEY = process.env.BRIGHTCLAUSE_API_KEY || '';
 
 // Helper for API calls
 async function apiCall(endpoint, options = {}) {
@@ -23,6 +24,7 @@ async function apiCall(endpoint, options = {}) {
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
         ...options.headers,
       },
       ...options,

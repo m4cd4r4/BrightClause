@@ -9,7 +9,6 @@ import {
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
 import { AnimatedCounter } from "../components/AnimatedCounter";
-import { GlowOrb } from "../components/GlowOrb";
 import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const riskData = [
@@ -40,13 +39,12 @@ export const RiskDashboardScene: React.FC<RiskDashboardSceneProps> = ({ mobile }
 
   const panelScale = spring({ frame: frame - 5, fps, config: springs.panel });
 
-  const getBarWidth = (i: number, pct: number) => {
-    const s = spring({
+  const getBarScale = (i: number) => {
+    return spring({
       frame: frame - 25 - i * STAGGER.normal,
       fps,
       config: springs.bouncy,
     });
-    return s * pct;
   };
 
   const getClauseProgress = (i: number) =>
@@ -102,8 +100,6 @@ export const RiskDashboardScene: React.FC<RiskDashboardSceneProps> = ({ mobile }
           y={20}
         />
       )}
-      <GlowOrb color={colors.accent} size={300} x="30%" y="45%" maxOpacity={0.1} delay={15} />
-
       <SceneBadge title="Risk Dashboard" subtitle="Portfolio-Wide Risk Analysis" mobile={mobile} />
 
       <div
@@ -227,9 +223,11 @@ export const RiskDashboardScene: React.FC<RiskDashboardSceneProps> = ({ mobile }
                   <div
                     style={{
                       height: "100%",
-                      width: `${getBarWidth(i, risk.pct)}%`,
+                      width: `${risk.pct}%`,
                       backgroundColor: risk.color,
                       borderRadius: 4,
+                      transformOrigin: "left",
+                      transform: `scaleX(${getBarScale(i)})`,
                     }}
                   />
                 </div>

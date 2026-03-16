@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://45.77.233.102:8002'
 const BACKEND_API_KEY = process.env.BACKEND_API_KEY || ''
+const PROXY_SECRET = process.env.PROXY_SECRET || ''
 
 async function proxy(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
+  // Verify client is authorized to use the proxy
+  if (PROXY_SECRET) {
+    const clientToken = request.headers.get('x-proxy-token')
+    if (clientToken !== PROXY_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+  }
+
   const { path } = await params
   const target = new URL(`/${path.join('/')}`, BACKEND_URL)
 

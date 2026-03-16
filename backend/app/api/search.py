@@ -318,16 +318,16 @@ async def _semantic_search(
             d.filename as document_name,
             c.content,
             c.page_number,
-            1 - (c.embedding <=> '{embedding_str}'::vector) as similarity
+            1 - (c.embedding <=> :embedding_vec::vector) as similarity
         FROM chunks c
         JOIN documents d ON c.document_id = d.id
         WHERE c.embedding IS NOT NULL
         {doc_filter}
-        ORDER BY c.embedding <=> '{embedding_str}'::vector
+        ORDER BY c.embedding <=> :embedding_vec::vector
         LIMIT :limit
     """)
 
-    params = {"limit": limit}
+    params = {"limit": limit, "embedding_vec": embedding_str}
     if document_id:
         params["document_id"] = document_id
 

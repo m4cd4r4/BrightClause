@@ -7,7 +7,6 @@ import {
 } from "remotion";
 import { colors, fonts, springs, STAGGER } from "../styles";
 import { SceneBadge } from "../components/SceneBadge";
-import { GlowOrb } from "../components/GlowOrb";
 import { ScreenshotReveal } from "../components/ScreenshotReveal";
 
 const obligations = [
@@ -88,7 +87,7 @@ export const ObligationsScene: React.FC<ObligationsSceneProps> = ({ mobile }) =>
           borderRadius={16}
           y={30}
         />
-        <GlowOrb color={colors.purple} size={300} x="70%" y="75%" maxOpacity={0.1} delay={60} />
+
 
         <div
           style={{
@@ -226,8 +225,6 @@ export const ObligationsScene: React.FC<ObligationsSceneProps> = ({ mobile }) =>
         borderRadius={16}
         y={30}
       />
-      <GlowOrb color={colors.purple} size={300} x="70%" y="75%" maxOpacity={0.1} delay={60} />
-
       <SceneBadge title="Obligations & Timeline" subtitle="Deadline Tracking — Never Miss a Date" />
 
       <div
