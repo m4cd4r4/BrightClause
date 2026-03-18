@@ -220,8 +220,8 @@ export default function LandingPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-ink-50">
-              Read Every Clause.{' '}
-              <span className="block mt-1">Miss Nothing.</span>
+              Upload a Contract.{' '}
+              <span className="block mt-1">Know the Risks.</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-ink-400 leading-relaxed mb-10 max-w-2xl mx-auto">
