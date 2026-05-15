@@ -1,0 +1,138 @@
+/* =========================================================================
+   BrightClause v2 Component Primitives
+   All selectors scoped under .bc-root.
+   ========================================================================= */
+
+.bc-root .bcb {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 500 13px/1 var(--bc-font-sans);
+  letter-spacing: 0.005em;
+  padding: 8px 12px;
+  white-space: nowrap;
+  border-radius: var(--bc-r-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--bc-ink-1);
+  cursor: pointer;
+  transition: background var(--bc-dur-fast) var(--bc-ease),
+              border-color var(--bc-dur-fast) var(--bc-ease),
+              color var(--bc-dur-fast) var(--bc-ease);
+}
+.bc-root .bcb:focus-visible { outline: none; box-shadow: var(--bc-shadow-focus); }
+
+.bc-root .bcb-primary { background: var(--bc-mark); color: #fff; border-color: var(--bc-mark); }
+.bc-root .bcb-primary:hover  { background: var(--bc-mark-deep); border-color: var(--bc-mark-deep); }
+.bc-root .bcb-primary:active { background: #0a226e; border-color: #0a226e; }
+
+.bc-root .bcb-secondary { background: var(--bc-paper-2); color: var(--bc-ink-1); border-color: var(--bc-rule); }
+.bc-root .bcb-secondary:hover  { border-color: var(--bc-rule-strong); background: #fafbfc; }
+.bc-root .bcb-secondary:active { background: var(--bc-paper-sunk); }
+
+.bc-root .bcb-ghost { color: var(--bc-ink-2); }
+.bc-root .bcb-ghost:hover { background: var(--bc-paper-sunk); color: var(--bc-ink-1); }
+
+.bc-root .bcb-sm { padding: 5px 9px; font-size: 12px; }
+.bc-root .bcb-lg { padding: 10px 16px; font-size: 14px; }
+
+/* Inputs */
+.bc-root .bci {
+  font: var(--bc-t-body-sm);
+  padding: 8px 10px;
+  border: 1px solid var(--bc-rule);
+  border-radius: var(--bc-r-sm);
+  background: var(--bc-paper-2);
+  color: var(--bc-ink-1);
+  outline: none;
+  transition: border-color var(--bc-dur-fast) var(--bc-ease);
+  width: 100%;
+  box-sizing: border-box;
+}
+.bc-root .bci::placeholder { color: var(--bc-ink-4); }
+.bc-root .bci:hover { border-color: var(--bc-rule-strong); }
+.bc-root .bci:focus-visible { border-color: var(--bc-mark); box-shadow: 0 0 0 3px rgba(23,66,196,0.15); }
+
+/* Risk badges */
+.bc-root .bc-risk {
+  display: inline-flex; align-items: center; gap: 5px;
+  font: 600 10px/1 var(--bc-font-mono);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 4px 7px 4px 5px;
+  border-radius: var(--bc-r-xs);
+  border: 1px solid;
+}
+.bc-root .bc-risk-critical { background: var(--bc-risk-critical-bg); color: var(--bc-risk-critical-ink); border-color: var(--bc-risk-critical); }
+.bc-root .bc-risk-high     { background: var(--bc-risk-high-bg);     color: var(--bc-risk-high-ink);     border-color: var(--bc-risk-high);     }
+.bc-root .bc-risk-medium   { background: var(--bc-risk-medium-bg);   color: var(--bc-risk-medium-ink);   border-color: var(--bc-risk-medium);   }
+.bc-root .bc-risk-low      { background: var(--bc-risk-low-bg);      color: var(--bc-risk-low-ink);      border-color: var(--bc-risk-low);      }
+.bc-root .bc-risk svg { width: 12px; height: 12px; }
+
+/* Status pills */
+.bc-root .bc-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 500 11px/1 var(--bc-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: var(--bc-r-xs);
+  border: 1px solid var(--bc-rule);
+  background: var(--bc-paper-2);
+  color: var(--bc-ink-2);
+}
+.bc-root .bc-status::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--bc-ink-4);
+}
+.bc-root .bc-status-verified { background: var(--bc-verified-bg); border-color: var(--bc-verified); color: var(--bc-verified-ink); }
+.bc-root .bc-status-verified::before { background: var(--bc-verified); }
+
+/* Tables */
+.bc-root .bc-table { width: 100%; border-collapse: collapse; font: var(--bc-t-body-sm); }
+.bc-root .bc-table th {
+  text-align: left;
+  font: var(--bc-t-label);
+  text-transform: uppercase;
+  color: var(--bc-ink-3);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--bc-rule-strong);
+  letter-spacing: 0.08em;
+  background: var(--bc-paper);
+}
+.bc-root .bc-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--bc-rule);
+  color: var(--bc-ink-1);
+  vertical-align: middle;
+}
+.bc-root .bc-table tr:hover td { background: #fafbfc; }
+
+/* Brand wordmark - rendered as text + a flush-baseline cobalt rule */
+.bc-root .bc-wordmark {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 600 18px/1 var(--bc-font-sans);
+  letter-spacing: -0.018em;
+  color: var(--bc-mark);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.bc-root .bc-wordmark::before {
+  content: ""; display: inline-block;
+  width: 4px; height: 13px; background: var(--bc-mark);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* Confidence indicator */
+.bc-root .bc-confidence {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: var(--bc-t-mono-sm);
+  color: var(--bc-ink-3);
+}
+.bc-root .bc-confidence-bar { display: inline-flex; gap: 2px; }
+.bc-root .bc-confidence-bar i {
+  display: inline-block; width: 8px; height: 12px; background: var(--bc-rule-strong);
+  border-radius: 1px;
+}
+.bc-root .bc-confidence-bar i.on-high { background: var(--bc-confidence-high); }
+
+/* Helpers */
+.bc-root .row { display: flex; align-items: center; gap: 8px; }

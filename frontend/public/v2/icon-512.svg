@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <title>BrightClause</title>
+  <rect width="512" height="512" rx="48" fill="#f4f5f7"/>
+  <rect x="96" y="96" width="48" height="320" rx="6" fill="#1742c4"/>
+  <text x="190" y="368" font-family="'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif" font-weight="600" font-size="320" letter-spacing="-10" fill="#1742c4">B</text>
+</svg>

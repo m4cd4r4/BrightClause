@@ -1,0 +1,124 @@
+/* =========================================================================
+   BrightClause v2 Design Tokens - "Instrument" direction
+   Scoped to .bc-root so it does not bleed into the dashboard routes.
+   Fonts injected via next/font/google in layout.tsx, exposed as
+   --font-plex-sans / --font-plex-mono / --font-plex-serif.
+   ========================================================================= */
+
+.bc-root {
+  /* Surface */
+  --bc-paper:        #f4f5f7;
+  --bc-paper-2:      #ffffff;
+  --bc-paper-sunk:   #eceef1;
+  --bc-rule:         #d8dce2;
+  --bc-rule-strong:  #b8bec8;
+  --bc-tick:         #e6e8ec;
+
+  /* Ink */
+  --bc-ink-1:        #0d1016;
+  --bc-ink-2:        #353a44;
+  --bc-ink-3:        #5b626d;
+  --bc-ink-4:        #8a909a;
+  --bc-ink-5:        #b4b8bf;
+
+  /* Brand accent */
+  --bc-mark:         #1742c4;
+  --bc-mark-deep:    #0e2c8a;
+  --bc-mark-tint:    #e3e9fb;
+  --bc-mark-ink:     #0a1d63;
+
+  /* Risk tiers */
+  --bc-risk-critical:        #c0291f;
+  --bc-risk-critical-bg:     #fbe6e3;
+  --bc-risk-critical-ink:    #6e1611;
+  --bc-risk-high:            #c66416;
+  --bc-risk-high-bg:         #fbeadb;
+  --bc-risk-high-ink:        #6a3408;
+  --bc-risk-medium:          #b08712;
+  --bc-risk-medium-bg:       #f8eecf;
+  --bc-risk-medium-ink:      #574108;
+  --bc-risk-low:             #4a5563;
+  --bc-risk-low-bg:          #e8eaee;
+  --bc-risk-low-ink:         #232932;
+
+  /* Confidence */
+  --bc-confidence-high:      #2a6f4f;
+  --bc-confidence-mid:       var(--bc-ink-3);
+  --bc-confidence-low:       #7a4b9e;
+  --bc-confidence-low-bg:    #ede4f5;
+
+  /* Verified */
+  --bc-verified:        #2a6f4f;
+  --bc-verified-bg:     #e0ede7;
+  --bc-verified-ink:    #143123;
+
+  /* Type families (resolved from next/font CSS variables) */
+  --bc-font-sans:  var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --bc-font-mono:  var(--font-plex-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  --bc-font-serif: var(--font-plex-serif), ui-serif, Georgia, serif;
+
+  /* Type scale */
+  --bc-t-display:    600 44px/1.08 var(--bc-font-sans);
+  --bc-t-h1:         600 30px/1.15 var(--bc-font-sans);
+  --bc-t-h2:         600 22px/1.20 var(--bc-font-sans);
+  --bc-t-h3:         600 17px/1.25 var(--bc-font-sans);
+  --bc-t-h4:         600 14px/1.30 var(--bc-font-sans);
+  --bc-t-body:       400 15px/1.55 var(--bc-font-sans);
+  --bc-t-body-sm:    400 13px/1.50 var(--bc-font-sans);
+  --bc-t-caption:    500 11px/1.30 var(--bc-font-sans);
+  --bc-t-prose:      400 16px/1.65 var(--bc-font-serif);
+  --bc-t-mono:       500 13px/1.40 var(--bc-font-mono);
+  --bc-t-mono-sm:    500 11px/1.35 var(--bc-font-mono);
+  --bc-t-label:      500 11px/1.25 var(--bc-font-mono);
+
+  /* Space */
+  --bc-s-1:  4px;  --bc-s-2:  8px;  --bc-s-3: 12px; --bc-s-4: 16px;
+  --bc-s-5: 20px;  --bc-s-6: 24px;  --bc-s-8: 32px; --bc-s-10: 40px;
+  --bc-s-12: 48px; --bc-s-16: 64px; --bc-s-20: 80px;
+
+  /* Radius */
+  --bc-r-xs:  2px; --bc-r-sm:  3px; --bc-r-md:  4px;
+  --bc-r-lg:  6px; --bc-r-pill: 2px;
+
+  /* Elevation */
+  --bc-shadow-1: 0 1px 0 rgba(13,16,22,0.04);
+  --bc-shadow-2: 0 1px 2px rgba(13,16,22,0.06), 0 0 0 1px rgba(13,16,22,0.04);
+  --bc-shadow-3: 0 8px 24px -8px rgba(13,16,22,0.18), 0 0 0 1px rgba(13,16,22,0.06);
+  --bc-shadow-focus: 0 0 0 2px var(--bc-paper-2), 0 0 0 4px var(--bc-mark);
+
+  /* Motion */
+  --bc-ease:       cubic-bezier(0.22, 0.61, 0.36, 1);
+  --bc-dur-fast:   80ms;
+  --bc-dur-base:   140ms;
+  --bc-dur-slow:   240ms;
+}
+
+.bc-root {
+  background: var(--bc-paper);
+  color: var(--bc-ink-1);
+  font: var(--bc-t-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.bc-root .bc-body  { font: var(--bc-t-body); color: var(--bc-ink-1); }
+.bc-root .bc-h1    { font: var(--bc-t-h1); color: var(--bc-ink-1); letter-spacing: -0.01em; margin: 0; }
+.bc-root .bc-h2    { font: var(--bc-t-h2); color: var(--bc-ink-1); letter-spacing: -0.005em; margin: 0; }
+.bc-root .bc-h3    { font: var(--bc-t-h3); color: var(--bc-ink-1); margin: 0; }
+.bc-root .bc-h4    { font: var(--bc-t-h4); color: var(--bc-ink-1); margin: 0; }
+.bc-root .bc-display { font: var(--bc-t-display); color: var(--bc-ink-1); letter-spacing: -0.018em; }
+.bc-root .bc-prose   { font: var(--bc-t-prose); color: var(--bc-ink-1); }
+.bc-root .bc-caption { font: var(--bc-t-caption); color: var(--bc-ink-3); letter-spacing: 0.02em; }
+.bc-root .bc-mono    { font: var(--bc-t-mono); color: var(--bc-ink-2); }
+.bc-root .bc-label   { font: var(--bc-t-label); color: var(--bc-ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.bc-root .bc-cite {
+  font: var(--bc-t-mono-sm);
+  color: var(--bc-mark-ink);
+  background: var(--bc-mark-tint);
+  border: 1px solid var(--bc-mark);
+  border-radius: var(--bc-r-xs);
+  padding: 1px 5px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.bc-root .bc-cite:hover { background: var(--bc-mark); color: #fff; cursor: pointer; }
