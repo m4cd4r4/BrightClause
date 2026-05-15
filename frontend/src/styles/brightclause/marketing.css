@@ -144,10 +144,60 @@
 /* Sections */
 .bc-root .m-section { border-bottom: 1px solid var(--bc-rule); }
 .bc-root .m-section--alt { background: var(--bc-paper-2); }
+.bc-root .m-section--dark { background: #0d1016; color: #d8dce2; border-bottom-color: #1d222c; }
 .bc-root .m-section__inner { max-width: 1280px; margin: 0 auto; padding: 88px 32px; }
 .bc-root .m-section__head { max-width: 720px; margin-bottom: 48px; }
 .bc-root .m-section__head .bc-label { display: block; margin-bottom: 12px; }
 .bc-root .m-section__lede { font: 400 17px/1.55 var(--bc-font-sans); color: var(--bc-ink-2); margin-top: 18px; }
+.bc-root .m-label-on-dark { color: #8a909a !important; }
+.bc-root .m-h1-on-dark { color: #f4f5f7 !important; }
+.bc-root .m-lede-on-dark { color: #b4b8bf !important; }
+
+/* App screen grid - shown on dark ground inside marketing */
+.bc-root .m-screens {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+.bc-root .m-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-decoration: none;
+  background: #14171f;
+  border: 1px solid #1d222c;
+  border-radius: var(--bc-r-md);
+  overflow: hidden;
+  transition: border-color var(--bc-dur-base) var(--bc-ease), transform var(--bc-dur-base) var(--bc-ease);
+}
+.bc-root .m-screen:hover { border-color: var(--bc-mark); transform: translateY(-2px); }
+.bc-root .m-screen__shot {
+  aspect-ratio: 16 / 9;
+  background: #0d1016;
+  border-bottom: 1px solid #1d222c;
+  overflow: hidden;
+  position: relative;
+}
+.bc-root .m-screen__shot img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.bc-root .m-screen__meta { padding: 0 22px 22px; display: flex; flex-direction: column; gap: 6px; }
+.bc-root .m-screen__meta .bc-label { color: var(--bc-mark); margin-bottom: 0; }
+.bc-root .m-screen__meta p { font: var(--bc-t-body-sm); color: #b4b8bf; margin: 0; }
+.bc-root .m-screens__note {
+  margin: 40px 0 0;
+  font: var(--bc-t-body-sm);
+  color: #8a909a;
+  text-align: center;
+}
+.bc-root .m-screens__note .bc-mono { color: #5b626d; }
+
+@media (max-width: 1000px) {
+  .bc-root .m-screens { grid-template-columns: 1fr; }
+}
 
 /* Annotated specimen */
 .bc-root .m-spec {

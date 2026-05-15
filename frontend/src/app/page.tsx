@@ -36,8 +36,8 @@ export default function LandingV2() {
             <a href="#pricing">Pricing</a>
           </nav>
           <div className="row" style={{ gap: 6 }}>
-            <button className="bcb bcb-ghost">Sign in</button>
-            <button className="bcb bcb-primary">Try with one PDF</button>
+            <a className="bcb bcb-ghost" href="/dashboard">Sign in</a>
+            <a className="bcb bcb-primary" href="/dashboard">Try with one PDF</a>
           </div>
         </div>
       </header>
@@ -85,8 +85,8 @@ export default function LandingV2() {
             </p>
 
             <div className="row" style={{ gap: 8, marginTop: 24 }}>
-              <button className="bcb bcb-primary bcb-lg">Upload a PDF</button>
-              <button className="bcb bcb-secondary bcb-lg">Open the sample analysis</button>
+              <a className="bcb bcb-primary bcb-lg" href="/dashboard">Upload a PDF</a>
+              <a className="bcb bcb-secondary bcb-lg" href="#app-preview">Open the sample analysis</a>
             </div>
 
             <div className="m-trust">
@@ -139,9 +139,9 @@ export default function LandingV2() {
                   </p>
                   <div className="m-find__foot">
                     <span className="bc-mono">from §11.2, sentence 2</span>
-                    <button className="bcb bcb-ghost bcb-sm">
+                    <a className="bcb bcb-ghost bcb-sm" href="/dashboard">
                       Open in viewer <ArrowUpRight size={11} />
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -150,84 +150,63 @@ export default function LandingV2() {
         </div>
       </section>
 
-      <section className="m-section" id="what">
+      <section className="m-section m-section--dark" id="app-preview">
         <div className="m-section__inner">
           <div className="m-section__head">
-            <span className="bc-label">01 · WHAT IT DOES</span>
-            <h2 className="bc-h1">Four operations, on a real clause.</h2>
-            <p className="m-section__lede">
-              The clause below is § 11.2 from the sample MSA. The four numbered marks show what
-              BrightClause does to it.
+            <span className="bc-label m-label-on-dark">01 · INSIDE THE PRODUCT</span>
+            <h2 className="bc-h1 m-h1-on-dark">Four surfaces, all reading from the same PDFs.</h2>
+            <p className="m-section__lede m-lede-on-dark">
+              Every screen below is a live route in the product. Click any to open it. If the API
+              is not running you will land on the route shell, which is enough to see the shape.
             </p>
           </div>
 
-          <div className="m-spec">
-            <div className="m-spec__clause">
-              <div className="m-spec__chrome">
-                <span className="bc-mono">§ 11.2 INDEMNIFICATION</span>
-                <span className="bc-mono">p.18 of 38</span>
+          <div className="m-screens">
+            <a className="m-screen" href="/dashboard">
+              <div className="m-screen__shot">
+                <img src="/assets/screenshot-dashboard.png" alt="Portfolio dashboard - documents, risk distribution, recent activity" loading="lazy" />
               </div>
-              <div className="m-spec__body">
-                <p className="bc-prose">
-                  Customer shall indemnify Provider against any{' '}
-                  <span className="m-spec__mark">1</span> and all losses, damages, claims, costs
-                  and expenses, including <span className="m-spec__mark">2</span> indirect and
-                  consequential damages, arising from any <span className="m-spec__mark">3</span>{' '}
-                  breach of confidentiality, without limitation as to amount{' '}
-                  <span className="m-spec__mark">4</span>.
-                </p>
+              <div className="m-screen__meta">
+                <span className="bc-label">PORTFOLIO</span>
+                <p>Every contract you have uploaded, ranked by critical findings. Open one to drop into the document analyser.</p>
               </div>
-            </div>
+            </a>
 
-            <ol className="m-spec__callouts">
-              <li className="m-spec__callout">
-                <div className="m-spec__num">01</div>
-                <div>
-                  <span className="bc-label">EXTRACTS CLAUSES</span>
-                  <p>
-                    Identified as an indemnification clause. Tagged for the source page, section
-                    number, and 15 other clause types it appears alongside.
-                  </p>
-                </div>
-              </li>
-              <li className="m-spec__callout">
-                <div className="m-spec__num">02</div>
-                <div>
-                  <span className="bc-label">SCORES RISK</span>
-                  <p>
-                    Marked{' '}
-                    <span className="bc-risk bc-risk-high" style={{ verticalAlign: 1 }}>
-                      <AlertTriangle size={11} />
-                      HIGH
-                    </span>{' '}
-                    because the indemnity covers indirect and consequential damages, with no cap,
-                    for a confidentiality breach.
-                  </p>
-                </div>
-              </li>
-              <li className="m-spec__callout">
-                <div className="m-spec__num">03</div>
-                <div>
-                  <span className="bc-label">ANSWERS QUESTIONS</span>
-                  <p>
-                    If you ask &quot;am I liable for indirect damages?&quot;, BrightClause cites
-                    this clause and § 14.3 to answer &quot;yes, for confidentiality breach
-                    only&quot;.
-                  </p>
-                </div>
-              </li>
-              <li className="m-spec__callout">
-                <div className="m-spec__num">04</div>
-                <div>
-                  <span className="bc-label">TRACKS OBLIGATIONS</span>
-                  <p>
-                    No dated obligation in this clause, so nothing is added to the timeline.
-                    Survival period is recorded from § 9.4 instead.
-                  </p>
-                </div>
-              </li>
-            </ol>
+            <a className="m-screen" href="/documents/sample">
+              <div className="m-screen__shot">
+                <img src="/assets/screenshot-search.png" alt="Document analysis - source PDF, extracted clauses, Q and A chat" loading="lazy" />
+              </div>
+              <div className="m-screen__meta">
+                <span className="bc-label">DOCUMENT ANALYSIS</span>
+                <p>PDF viewer left, extracted clauses with risk tier and citations centre, Q&amp;A chat right. The work surface.</p>
+              </div>
+            </a>
+
+            <a className="m-screen" href="/obligations">
+              <div className="m-screen__shot">
+                <img src="/assets/screenshot-obligations.png" alt="Obligations tracker - deadlines, commitments, status filters" loading="lazy" />
+              </div>
+              <div className="m-screen__meta">
+                <span className="bc-label">OBLIGATIONS</span>
+                <p>Every dated commitment across every contract. Filter by type and status. Nothing slips because nobody re-read the contract.</p>
+              </div>
+            </a>
+
+            <a className="m-screen" href="/compare">
+              <div className="m-screen__shot">
+                <img src="/assets/screenshot-compare.png" alt="Document comparison matrix - side-by-side clause and risk comparison" loading="lazy" />
+              </div>
+              <div className="m-screen__meta">
+                <span className="bc-label">COMPARE</span>
+                <p>Two or three contracts side by side, clause by clause. Find the worst termination clause in a vendor RFP in seconds.</p>
+              </div>
+            </a>
           </div>
+
+          <p className="m-screens__note">
+            <span className="bc-mono">Note: app surfaces shown here use the previous design language.</span>{' '}
+            The visual system on this page rolls into them in the next iteration.
+          </p>
         </div>
       </section>
 
