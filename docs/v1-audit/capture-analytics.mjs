@@ -1,0 +1,13 @@
+import { chromium } from 'playwright'
+const browser = await chromium.launch()
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+await ctx.addInitScript(() => { try { localStorage.setItem('bc_walkthrough_seen','true') } catch {} })
+const page = await ctx.newPage()
+await page.goto('https://brightclause.com/analytics', { waitUntil: 'domcontentloaded', timeout: 30000 })
+await page.waitForTimeout(15000)
+await page.screenshot({ path: 'i:/Scratch/ContractClarity/docs/v1-audit/screenshots/analytics.png', fullPage: true })
+await page.goto('https://brightclause.com/documents/9772a3f5-67b6-45f3-a714-ca05eb8afa12/graph', { waitUntil: 'domcontentloaded', timeout: 30000 })
+await page.waitForTimeout(15000)
+await page.screenshot({ path: 'i:/Scratch/ContractClarity/docs/v1-audit/screenshots/knowledge-graph.png', fullPage: true })
+console.log('done')
+await browser.close()
