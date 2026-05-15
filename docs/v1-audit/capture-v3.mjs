@@ -1,0 +1,11 @@
+import { chromium } from 'playwright'
+const browser = await chromium.launch()
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, serviceWorkers: 'block' })
+const page = await ctx.newPage()
+page.on('pageerror', (e) => console.log('PAGEERR', e.message))
+const r = await page.goto('http://localhost:3000/analytics-v2', { waitUntil: 'domcontentloaded', timeout: 60000 })
+console.log('initial', r?.status())
+await page.waitForTimeout(15000)
+await page.screenshot({ path: 'i:/Scratch/ContractClarity/docs/v1-audit/screenshots/analytics-v3.png', fullPage: true })
+console.log('done')
+await browser.close()
