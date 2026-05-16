@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Maximize2, Minimize2 } from 'lucide-react'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 const SCREENS = [
   {
@@ -45,6 +46,8 @@ export function ScreenshotShowcase() {
   const [paused, setPaused] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
+  const cinemaRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(cinemaRef, isExpanded)
 
   const next = useCallback(() => {
     setActive(i => (i + 1) % SCREENS.length)
@@ -247,8 +250,13 @@ export function ScreenshotShowcase() {
             {/* Cinema content — pointer-events-none on wrapper so backdrop click works in padding */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
               <div
+                ref={cinemaRef}
+                tabIndex={-1}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Screenshot cinema view"
                 className="flex flex-col gap-3 w-full pointer-events-auto"
-                style={{ maxWidth: 'calc((88vh - 80px) * 16 / 9)', maxHeight: '90vh' }}
+                style={{ maxWidth: 'calc((88vh - 80px) * 16 / 9)', maxHeight: '90vh', outline: 'none' }}
                 onClick={e => e.stopPropagation()}
               >
                 {tabNav}
