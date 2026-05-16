@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import { type DragEventHandler, ReactNode, useEffect, useState } from 'react'
 import {
   LayoutGrid, BarChart3, Search, ClipboardCheck, Briefcase, GitBranch, Settings, Command,
 } from 'lucide-react'
@@ -18,7 +18,12 @@ const INSIGHTS = [
   { href: '/search', label: 'Search', icon: Search },
 ] as const
 
-export function V3Shell({ children }: { children: ReactNode }) {
+export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
+  children: ReactNode
+  onDragOver?: DragEventHandler
+  onDragLeave?: DragEventHandler
+  onDrop?: DragEventHandler
+}) {
   const path = usePathname() || ''
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -36,7 +41,7 @@ export function V3Shell({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <div className="v3" style={{ minHeight: '100vh', display: 'flex' }}>
+    <div className="v3" style={{ minHeight: '100vh', display: 'flex' }} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
       <aside className="v3-side">
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--v3-border)' }}>
           <div style={{

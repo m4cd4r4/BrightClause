@@ -1,27 +1,20 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
-  FileText, Search, Upload, AlertTriangle, CheckCircle,
-  Clock, ChevronRight, X, Loader2,
-  FileWarning, Shield, Network, BarChart3,
-  Eye, PlayCircle, Pencil, Check
+  Eye, PlayCircle, Pencil, Check,
+  Upload, Shield, Network, BarChart3,
+  FileWarning, Loader2, CheckCircle, Clock, X,
+  AlertTriangle,
 } from 'lucide-react'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { useToast } from '@/lib/toast'
 import { useWalkthrough, WalkthroughOverlay, WalkthroughButton } from '@/lib/walkthrough'
-import { Navigation } from '@/lib/navigation'
 import { type RiskLevel } from '@/lib/risk'
-
-const riskColors: Record<RiskLevel, string> = {
-  critical: 'text-red-400 bg-red-500/10 border-red-500/20',
-  high: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-  medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-}
-
+import { V3Shell } from '@/components/v3/shell'
+import { KpiCard, RiskPill, PageHeader, Section } from '@/components/v3/primitives'
 
 function formatRelativeTime(iso: string): string {
   const now = Date.now()
@@ -329,28 +322,163 @@ function DashboardContent() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="w-4 h-4 text-emerald-500" />
+        return <CheckCircle size={14} color="var(--v3-risk-low)" />
       case 'processing':
-        return <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+        return <Loader2 size={14} color="var(--v3-risk-medium)" style={{ animation: 'spin 1s linear infinite' }} />
       case 'queued':
-        return <Clock className="w-4 h-4 text-blue-400 animate-pulse" />
+        return <Clock size={14} color="#60a5fa" />
       case 'failed':
-        return <FileWarning className="w-4 h-4 text-red-500" />
+        return <FileWarning size={14} color="var(--v3-risk-critical)" />
       default:
-        return <Clock className="w-4 h-4 text-ink-500" />
+        return <Clock size={14} color="var(--v3-text-muted)" />
     }
   }
 
+  // KPI spark data derived from stats
+  const contractSpark = useMemo(() => {
+    const n = stats?.documents_indexed ?? 0
+    return [Math.max(0, n - 3), Math.max(0, n - 2), Math.max(0, n - 1), n, n, n, n]
+  }, [stats])
+  const clauseSpark = useMemo(() => {
+    const n = stats?.clauses_extracted ?? 0
+    return [0, Math.round(n * 0.3), Math.round(n * 0.55), Math.round(n * 0.7), Math.round(n * 0.85), Math.round(n * 0.95), n]
+  }, [stats])
+  const readySpark = useMemo(() => {
+    const n = documents.filter(d => d.status === 'completed').length
+    return [0, 0, Math.max(0, n - 2), Math.max(0, n - 1), n, n, n]
+  }, [documents])
+
   return (
-    <div
-      className="min-h-screen bg-ink-950"
+    <V3Shell
       onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
       onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOver(false) }}
       onDrop={handleDrop}
     >
-      <Navigation>
-        {/* Search */}
-        <div className="relative" data-tour="search">
+      <h1 className="sr-only">Contract Dashboard</h1>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf"
+        multiple
+        onChange={handleMultiUpload}
+        style={{ display: 'none' }}
+      />
+
+      {/* Page header with upload action */}
+      <PageHeader
+        crumb="Workspace"
+        title="Portfolio"
+        subtitle={loading ? 'Loading…' : `${documents.length} contract${documents.length !== 1 ? 's' : ''} · click a row to see risk`}
+        actions={
+          <>
+            <WalkthroughButton onClick={walkthrough.restart} />
+            <button
+              type="button"
+              data-tour="upload"
+              aria-label="Upload PDF"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="v3-btn v3-btn-primary"
+              style={{ gap: 6 }}
+            >
+              {uploading ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={14} />}
+              Upload PDF
+            </button>
+          </>
+        }
+      />
+
+      {/* Drag & Drop Overlay */}
+      {dragOver && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 60,
+            background: 'rgba(10,10,12,0.8)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={{
+            padding: '48px 64px', border: '2px dashed var(--v3-accent)',
+            borderRadius: 'var(--v3-radius-lg)', background: 'rgba(212,168,45,0.05)',
+            textAlign: 'center',
+          }}>
+            <Upload size={40} color="var(--v3-accent)" style={{ margin: '0 auto 16px' }} />
+            <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--v3-text-primary)' }}>Drop PDF files here</p>
+            <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', marginTop: 8 }}>Supports multiple files up to 50MB each</p>
+          </div>
+        </div>
+      )}
+
+      {/* KPI strip */}
+      <div
+        data-tour="stats"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}
+      >
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="v3-card" style={{ height: 104, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ height: 11, width: 80, borderRadius: 4, background: 'var(--v3-border)' }} />
+              <div style={{ height: 32, width: 60, borderRadius: 4, background: 'var(--v3-border)', marginTop: 8 }} />
+            </div>
+          ))
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => router.push('/search')}
+              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', display: 'block' }}
+            >
+              <KpiCard
+                label="Contracts"
+                value={stats?.documents_indexed ?? 0}
+                spark={contractSpark}
+                intent="default"
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const docWithClauses = documents.find(d => d.status === 'completed')
+                if (docWithClauses) router.push(`/documents/${docWithClauses.id}`)
+                else router.push('/search')
+              }}
+              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', display: 'block' }}
+            >
+              <KpiCard
+                label="Clauses found"
+                value={stats?.clauses_extracted ?? 0}
+                spark={clauseSpark}
+                intent="default"
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const completed = documents.find(d => d.status === 'completed')
+                if (completed) loadAnalysis(completed.id)
+              }}
+              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', display: 'block' }}
+            >
+              <KpiCard
+                label="Ready to review"
+                value={documents.filter(d => d.status === 'completed').length}
+                spark={readySpark}
+                intent="low"
+              />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Inline search bar */}
+      <div
+        data-tour="search"
+        style={{ display: 'flex', gap: 8, marginBottom: 24 }}
+      >
+        <div style={{ position: 'relative', flex: 1, maxWidth: 480 }}>
           <label htmlFor="search-input" className="sr-only">Search contracts</label>
           <input
             id="search-input"
@@ -358,619 +486,448 @@ function DashboardContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Search..."
-            className="w-28 sm:w-40 lg:w-64 pl-8 sm:pl-10 pr-4 py-2 bg-ink-900/60 border border-ink-700/50 rounded-lg
-                     text-sm text-ink-100 placeholder:text-ink-500
-                     focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/10
-                     transition-all duration-200"
+            placeholder="Search clauses, entities…"
+            style={{
+              width: '100%', height: 32, paddingLeft: 12, paddingRight: searching ? 36 : 12,
+              background: 'var(--v3-card)', border: '1px solid var(--v3-border)',
+              borderRadius: 'var(--v3-radius-md)', color: 'var(--v3-text-primary)',
+              fontSize: 13, outline: 'none', boxSizing: 'border-box',
+            }}
           />
-          <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
           {searching && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent animate-spin" />
+            <Loader2
+              size={14}
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--v3-accent)', animation: 'spin 1s linear infinite' }}
+            />
           )}
         </div>
-
-        <WalkthroughButton onClick={walkthrough.restart} />
-
         <button
           type="button"
-          data-tour="upload"
-          aria-label="Upload PDF"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="flex items-center gap-2 px-4 py-2 bg-accent text-ink-950 font-semibold rounded-lg
-                   hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
-                   transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          onClick={handleSearch}
+          disabled={searching || !searchQuery.trim()}
+          className="v3-btn"
         >
-          {uploading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Upload className="w-4 h-4" />
-          )}
-          <span className="hidden sm:inline">Upload</span>
+          Search
         </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf"
-          multiple
-          onChange={handleMultiUpload}
-          className="hidden"
-        />
-      </Navigation>
+      </div>
 
-      {/* Drag & Drop Overlay */}
-      <AnimatePresence>
-        {dragOver && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-ink-950/80 backdrop-blur-sm flex items-center justify-center pointer-events-none"
-          >
-            <div className="p-12 border-2 border-dashed border-accent/50 rounded-2xl bg-accent/5 text-center">
-              <Upload className="w-12 h-12 text-accent mx-auto mb-4" />
-              <p className="text-xl font-display font-semibold text-ink-100">Drop PDF files here</p>
-              <p className="text-sm text-ink-500 mt-2">Supports multiple files up to 50MB each</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
-        <h1 className="sr-only">Contract Dashboard</h1>
-        {/* Portfolio Stats Strip */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="grid grid-cols-3 divide-x divide-ink-800/40 border-b border-ink-800/40 mb-8"
-          data-tour="stats"
-        >
-          {loading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-2">
-                <div className="skeleton h-6 sm:h-9 w-8 sm:w-12 rounded" />
-                <div className="skeleton h-3 sm:h-4 w-16 sm:w-28 rounded" />
-              </div>
-            ))
-          ) : (
-            <>
-              <PortfolioStat
-                value={stats?.documents_indexed ?? 0}
-                label="Contracts"
-                onClick={() => router.push('/search')}
-              />
-              <PortfolioStat
-                value={stats?.clauses_extracted ?? 0}
-                label="Clauses found"
-                onClick={() => {
-                  const docWithClauses = documents.find(d => d.status === 'completed')
-                  if (docWithClauses) router.push(`/documents/${docWithClauses.id}`)
-                  else router.push('/search')
-                }}
-              />
-              <PortfolioStat
-                value={documents.filter(d => d.status === 'completed').length}
-                label="Ready to review"
-                onClick={() => {
-                  const completed = documents.find(d => d.status === 'completed')
-                  if (completed) loadAnalysis(completed.id)
-                }}
-              />
-            </>
-          )}
-        </motion.div>
-
-        {/* Search Results */}
-        <div aria-live="polite">
-        <AnimatePresence>
-          {searchResults.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-8"
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <Section
+          title="Search Results"
+          hint={`${searchResults.length} matches`}
+          actions={
+            <button
+              type="button"
+              onClick={() => setSearchResults([])}
+              className="v3-btn v3-btn-ghost"
+              aria-label="Clear search results"
+              style={{ padding: '0 8px' }}
             >
-              <div className="card p-6 border-accent/20">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h2 className="font-display text-xl font-semibold text-ink-50">Search Results</h2>
-                    <p className="text-xs text-ink-500 mt-0.5">{searchResults.length} matches found</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSearchResults([])}
-                    className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
-                    aria-label="Clear search results"
-                  >
-                    <X className="w-4 h-4 text-ink-400" />
-                  </button>
+              <X size={14} />
+            </button>
+          }
+        >
+          <div aria-live="polite">
+            {searchResults.map((result, i) => (
+              <div
+                key={result.chunk_id}
+                style={{
+                  padding: '12px 16px',
+                  borderBottom: i < searchResults.length - 1 ? '1px solid var(--v3-border)' : 0,
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--v3-accent)' }}>{result.document_name}</span>
+                  <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                    {(result.combined_score * 100).toFixed(0)}% relevance
+                  </span>
                 </div>
-                <div className="space-y-3">
-                  {searchResults.map((result, i) => (
-                    <motion.div
-                      key={result.chunk_id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="p-4 bg-ink-900/40 border border-ink-800/50 rounded-lg hover:border-accent/30 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-semibold text-accent">{result.document_name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-ink-500">Relevance</span>
-                          <span className="text-xs text-ink-300 bg-ink-800/50 px-2 py-0.5 rounded">
-                            {(result.combined_score * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-ink-300 leading-relaxed line-clamp-2">{result.content}</p>
-                    </motion.div>
+                <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', lineHeight: 1.5, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {result.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Main grid: document list + risk panel */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24 }}>
+        {/* Document list */}
+        <div data-tour="documents">
+          <Section
+            title="Contracts"
+            hint={documents.length > 0 ? `${documents.length} total` : undefined}
+            actions={
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="v3-btn"
+                style={{ fontSize: 12, height: 28, padding: '0 10px' }}
+              >
+                <Upload size={12} />
+                Upload
+              </button>
+            }
+          >
+            <div
+              style={{ maxHeight: 'calc(100vh - 380px)', overflowY: 'auto' }}
+            >
+              {loading ? (
+                <div>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} style={{ padding: '0 16px', height: 40, display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--v3-border)' }}>
+                      <div style={{ width: 14, height: 14, borderRadius: 999, background: 'var(--v3-border)', flexShrink: 0 }} />
+                      <div style={{ flex: 1, height: 11, borderRadius: 4, background: 'var(--v3-border)', maxWidth: `${55 + i * 7}%` }} />
+                      <div style={{ width: 40, height: 11, borderRadius: 4, background: 'var(--v3-border)' }} />
+                    </div>
                   ))}
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        </div>
-
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Document List - Enhanced */}
-          <div className="lg:col-span-2" data-tour="documents">
-            <div className="card overflow-hidden">
-              {documents.length > 0 && (
-                <div className="px-4 sm:px-6 py-3 border-b border-ink-800/30">
-                  <p className="text-xs text-ink-500">
-                    {documents.length} {documents.length === 1 ? 'contract' : 'contracts'} · click to see risk
+              ) : documents.length === 0 ? (
+                <div style={{ padding: '56px 32px', textAlign: 'center' }}>
+                  <div style={{
+                    width: 80, height: 80, borderRadius: 16, border: '2px dashed var(--v3-border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 20px', position: 'relative',
+                  }}>
+                    <Upload size={28} color="var(--v3-text-muted)" />
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--v3-text-primary)', marginBottom: 8 }}>Add your first contract</p>
+                  <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', lineHeight: 1.6, marginBottom: 20 }}>
+                    Drop any PDF here or use the Upload button. We read every clause, flag risky provisions, and surface what needs your attention — in minutes.
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="v3-btn v3-btn-primary"
+                  >
+                    <Upload size={14} />
+                    Choose PDF
+                  </button>
                 </div>
-              )}
-              <div className="divide-y divide-ink-800/30 max-h-[60vh] sm:max-h-[calc(100vh-300px)] overflow-y-auto">
-                {loading ? (
-                  <div className="divide-y divide-ink-800/30">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="px-6 py-5 flex items-start gap-4" style={{ animationDelay: `${i * 0.08}s` }}>
-                        <div className="skeleton w-4 h-4 rounded-full mt-0.5 shrink-0" />
-                        <div className="flex-1 space-y-2.5">
-                          <div className="skeleton h-4 rounded" style={{ width: `${65 + Math.random() * 30}%` }} />
-                          <div className="flex items-center gap-3">
-                            <div className="skeleton h-3 w-16 rounded" />
-                            <div className="skeleton h-3 w-20 rounded" />
-                            <div className="skeleton h-3 w-12 rounded" />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : documents.length === 0 ? (
-                  <div className="p-10 sm:p-16">
-                    <div className="max-w-sm mx-auto text-center">
-                      {/* Decorative upload zone */}
-                      <div
-                        className="relative mx-auto w-24 h-24 rounded-2xl border-2 border-dashed border-ink-700/60 bg-ink-900/30
-                                   flex items-center justify-center mb-6 group-hover:border-accent/40 transition-colors"
+              ) : (
+                <table className="v3-table" style={{ tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: 28 }} />
+                    <col />
+                    <col style={{ width: 72 }} />
+                    <col style={{ width: 80 }} />
+                    <col style={{ width: 80 }} />
+                    <col style={{ width: 72 }} />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th style={{ paddingLeft: 16 }}></th>
+                      <th>Filename</th>
+                      <th style={{ textAlign: 'right' }}>Pages</th>
+                      <th style={{ textAlign: 'right' }}>Sections</th>
+                      <th>Risk</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {documents.map((doc) => (
+                      <tr
+                        key={doc.id}
+                        role="button"
+                        tabIndex={0}
+                        onMouseEnter={() => setHoveredDoc(doc.id)}
+                        onMouseLeave={() => setHoveredDoc(null)}
+                        onClick={() => loadAnalysis(doc.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            loadAnalysis(doc.id)
+                          }
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          background: selectedDoc === doc.id ? 'rgba(212,168,45,0.06)' : undefined,
+                          outline: selectedDoc === doc.id ? '1px solid rgba(212,168,45,0.25)' : undefined,
+                          outlineOffset: -1,
+                        }}
                       >
-                        <Upload className="w-8 h-8 text-ink-600" />
-                        <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center">
-                          <FileText className="w-3.5 h-3.5 text-accent" />
-                        </div>
-                      </div>
-
-                      <h3 className="text-ink-200 font-semibold text-base">Add your first contract</h3>
-                      <p className="mt-2 text-ink-500 text-sm leading-relaxed">
-                        Drop any PDF here. We read every clause, flag risky provisions, and surface what needs your attention - in minutes.
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="mt-6 btn-primary inline-flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        Choose PDF
-                      </button>
-
-                      {/* Value outcome steps */}
-                      <div className="mt-8 pt-6 border-t border-ink-800/40">
-                        <p className="text-[11px] text-ink-500 mb-3">What you get</p>
-                        <div className="flex items-center justify-center gap-3 text-[11px] text-ink-400">
-                          <span className="flex items-center gap-1.5">
-                            <FileText className="w-3 h-3 text-amber-500/70" />
-                            Every clause read
-                          </span>
-                          <ChevronRight className="w-3 h-3 text-ink-700" />
-                          <span className="flex items-center gap-1.5">
-                            <Shield className="w-3 h-3 text-orange-500/70" />
-                            Risk flagged
-                          </span>
-                          <ChevronRight className="w-3 h-3 text-ink-700" />
-                          <span className="flex items-center gap-1.5">
-                            <Search className="w-3 h-3 text-emerald-500/70" />
-                            Nothing missed
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  documents.map((doc, i) => (
-                    <motion.div
-                      key={doc.id}
-                      role="button"
-                      tabIndex={0}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.02 }}
-                      onMouseEnter={() => setHoveredDoc(doc.id)}
-                      onMouseLeave={() => setHoveredDoc(null)}
-                      onClick={() => loadAnalysis(doc.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          loadAnalysis(doc.id)
-                        }
-                      }}
-                      className={`px-6 py-5 cursor-pointer transition-all duration-200 relative group
-                                focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
-                                ${selectedDoc === doc.id
-                                  ? 'bg-accent/5 ring-1 ring-inset ring-accent/25'
-                                  : 'hover:bg-ink-900/30'
-                                }`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <div className="mt-0.5">
-                            {getStatusIcon(doc.status)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            {renamingDoc === doc.id ? (
-                              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                <input
-                                  ref={renameInputRef}
-                                  value={renameValue}
-                                  onChange={(e) => setRenameValue(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') submitRename()
-                                    if (e.key === 'Escape') setRenamingDoc(null)
-                                  }}
-                                  onBlur={submitRename}
-                                  className="flex-1 px-2 py-1 bg-ink-900 border border-accent/40 rounded text-[15px] text-ink-100
-                                           focus:outline-none focus:ring-1 focus:ring-accent/30"
-                                />
-                                <button
-                                  type="button"
-                                  onMouseDown={(e) => { e.preventDefault(); submitRename() }}
-                                  className="p-1 text-accent hover:bg-accent/10 rounded transition-colors"
-                                  aria-label="Save name"
-                                >
-                                  <Check className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 group/name">
-                                <h3 className="font-medium text-ink-100 text-[15px] leading-snug truncate">
-                                  {doc.filename}
-                                </h3>
-                                {analysisMap.has(doc.id) && (() => {
-                                  const a = analysisMap.get(doc.id)!
-                                  const risk = a.overall_risk as RiskLevel
-                                  const badge = {
-                                    critical: 'bg-red-500/15 text-red-400',
-                                    high: 'bg-orange-500/15 text-orange-400',
-                                    medium: 'bg-amber-500/15 text-amber-400',
-                                    low: 'bg-emerald-500/15 text-emerald-400',
-                                  }[risk]
-                                  return (
-                                    <motion.span
-                                      className={`shrink-0 text-[11px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${badge}`}
-                                      initial={{ opacity: 0, scale: 0.7 }}
-                                      animate={{ opacity: 1, scale: 1 }}
-                                      transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                                    >
-                                      {risk}
-                                    </motion.span>
-                                  )
-                                })()}
+                        <td style={{ paddingLeft: 16, paddingRight: 4 }}>
+                          {getStatusIcon(doc.status)}
+                        </td>
+                        <td style={{ maxWidth: 0 }}>
+                          {renamingDoc === doc.id ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={(e) => e.stopPropagation()}>
+                              <input
+                                ref={renameInputRef}
+                                value={renameValue}
+                                onChange={(e) => setRenameValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') submitRename()
+                                  if (e.key === 'Escape') setRenamingDoc(null)
+                                }}
+                                onBlur={submitRename}
+                                style={{
+                                  flex: 1, height: 26, padding: '0 8px',
+                                  background: 'var(--v3-panel)', border: '1px solid var(--v3-accent)',
+                                  borderRadius: 'var(--v3-radius-sm)', color: 'var(--v3-text-primary)',
+                                  fontSize: 13, outline: 'none',
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onMouseDown={(e) => { e.preventDefault(); submitRename() }}
+                                style={{ padding: 4, color: 'var(--v3-accent)', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 4 }}
+                                aria-label="Save name"
+                              >
+                                <Check size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                              <span className="v3-mono" style={{ fontSize: 12, color: 'var(--v3-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                                {doc.filename}
+                              </span>
+                              {analysisMap.has(doc.id) && (() => {
+                                const a = analysisMap.get(doc.id)!
+                                const risk = a.overall_risk as RiskLevel
+                                return <RiskPill level={risk} />
+                              })()}
+                              {(hoveredDoc === doc.id || selectedDoc === doc.id) && (
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     startRename(doc.id, doc.filename)
                                   }}
-                                  className="p-1 text-ink-600 hover:text-accent opacity-0 group-hover/name:opacity-100 transition-all rounded"
+                                  style={{ padding: 4, color: 'var(--v3-text-muted)', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 4, flexShrink: 0 }}
                                   aria-label="Rename document"
                                   title="Rename"
                                 >
-                                  <Pencil className="w-3.5 h-3.5" />
+                                  <Pencil size={12} />
                                 </button>
-                              </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <span className="v3-mono" style={{ fontSize: 12, color: 'var(--v3-text-muted)' }}>
+                            {doc.status === 'completed' ? (doc.page_count ?? '—') : (
+                              doc.status === 'queued' ? <span style={{ color: '#60a5fa' }}>queued</span>
+                              : doc.status === 'processing' ? <span style={{ color: 'var(--v3-risk-medium)' }}>…</span>
+                              : doc.status === 'failed' ? <span style={{ color: 'var(--v3-risk-critical)' }}>fail</span>
+                              : '—'
                             )}
-                            <div className="flex items-center gap-4 mt-2">
-                              <span className={`text-xs ${
-                                doc.status === 'completed' ? 'text-ink-500'
-                                : doc.status === 'queued' ? 'text-blue-400'
-                                : doc.status === 'processing' ? 'text-amber-400'
-                                : 'text-ink-500'
-                              }`}>
-                                {doc.status === 'completed'
-                                  ? doc.page_count ? `${doc.page_count} pages` : 'Unknown pages'
-                                  : doc.status === 'queued' ? 'Queued · ~30s'
-                                  : doc.status === 'processing' ? 'Processing...'
-                                  : doc.status === 'failed' ? 'Failed'
-                                  : doc.status
-                                }
-                              </span>
-                              {doc.chunk_count > 0 && (
-                                <>
-                                  <span className="text-ink-700">·</span>
-                                  <span className="text-xs text-ink-500">
-                                    {doc.chunk_count} sections
-                                  </span>
-                                </>
-                              )}
-                              {doc.status === 'completed' && (
-                                <>
-                                  <span className="text-ink-700">·</span>
-                                  <span className="text-xs text-emerald-500">
-                                    Ready
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className={`flex items-center gap-2 transition-opacity duration-200 ${
-                          hoveredDoc === doc.id || selectedDoc === doc.id ? 'opacity-100' : 'opacity-40'
-                        }`}>
-                          <a
-                            href={`/documents/${doc.id}`}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              e.preventDefault()
-                              navigateToDocument(doc.id)
-                            }}
-                            className="p-3 sm:p-2 min-w-[44px] sm:min-w-0 min-h-[44px] sm:min-h-0 flex items-center justify-center bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors"
-                            aria-label="View document details"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </a>
-                          <ChevronRight className="w-5 h-5 text-ink-600 group-hover:text-accent transition-colors" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Risk Analysis Panel */}
-          <div className="lg:col-span-1" data-tour="analysis" aria-live="polite">
-            <AnimatePresence mode="wait">
-              {(selectedDoc && selectedAnalysis) || (!selectedDoc && portfolioRisk) ? (
-                <motion.div
-                  key={selectedDoc ?? 'portfolio'}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
-                  className="card overflow-hidden"
-                >
-                  {/* Header */}
-                  <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                    <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-xs text-ink-500 mt-1">
-                      {selectedAnalysis ? 'Document analysis' : `Portfolio · ${portfolioRisk?.docCount} contracts`}
-                    </p>
-                  </div>
-
-                  {(() => {
-                    const risk = selectedAnalysis ?? portfolioRisk!
-                    const validRiskLevels: RiskLevel[] = ['critical', 'high', 'medium', 'low']
-                    const rawRisk = selectedAnalysis ? selectedAnalysis.overall_risk : portfolioRisk!.overall
-                    const overallRisk: RiskLevel = validRiskLevels.includes(rawRisk as RiskLevel) ? rawRisk as RiskLevel : 'low'
-                    const clauses = selectedAnalysis ? selectedAnalysis.clauses_extracted : portfolioRisk!.totalClauses
-                    const riskCounts = selectedAnalysis
-                      ? { critical: selectedAnalysis.risk_summary.critical || 0, high: selectedAnalysis.risk_summary.high || 0, medium: selectedAnalysis.risk_summary.medium || 0, low: selectedAnalysis.risk_summary.low || 0 }
-                      : { critical: portfolioRisk!.critical, high: portfolioRisk!.high, medium: portfolioRisk!.medium, low: portfolioRisk!.low }
-                    const highlights = selectedAnalysis ? selectedAnalysis.high_risk_highlights : portfolioRisk!.highlights
-                    return (
-                      <div className="p-6 space-y-6">
-                        {/* Overall Risk */}
-                        <motion.div
-                          className="flex items-center gap-4 py-3"
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-                        >
-                          <div className={`w-3.5 h-3.5 rounded-full shrink-0 ${
-                            overallRisk === 'critical' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' :
-                            overallRisk === 'high' ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]' :
-                            overallRisk === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
-                          }`} />
-                          <div>
-                            <div className={`text-3xl font-bold uppercase tracking-tight ${
-                              overallRisk === 'critical' ? 'text-red-400' :
-                              overallRisk === 'high' ? 'text-orange-400' :
-                              overallRisk === 'medium' ? 'text-amber-400' : 'text-emerald-400'
-                            }`}>
-                              {overallRisk}
-                            </div>
-                            <div className="text-xs text-ink-400 mt-0.5">{clauses} clauses analyzed</div>
-                          </div>
-                        </motion.div>
-
-                        {/* Risk Distribution - data row + stacked bar */}
-                        <div>
-                          <p className="text-xs text-ink-500 mb-3">Risk breakdown</p>
-                          <div className="flex mb-3">
-                            {([
-                              { level: 'critical' as RiskLevel, color: 'text-red-400' },
-                              { level: 'high' as RiskLevel, color: 'text-orange-400' },
-                              { level: 'medium' as RiskLevel, color: 'text-amber-400' },
-                              { level: 'low' as RiskLevel, color: 'text-emerald-400' },
-                            ]).map(({ level, color }, idx) => (
-                              <motion.div
-                                key={level}
-                                className="flex-1 text-center"
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.06, duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-                              >
-                                <div className={`text-2xl font-bold tabular-nums ${color}`}>{riskCounts[level]}</div>
-                                <div className="text-[11px] text-ink-600 mt-0.5 capitalize">{level}</div>
-                              </motion.div>
-                            ))}
-                          </div>
-                          {clauses > 0 && (
-                            <div className="flex h-1 rounded-full overflow-hidden">
-                              {([
-                                { count: riskCounts.critical, color: 'bg-red-500' },
-                                { count: riskCounts.high, color: 'bg-orange-400' },
-                                { count: riskCounts.medium, color: 'bg-amber-400' },
-                                { count: riskCounts.low, color: 'bg-emerald-500' },
-                              ] as { count: number; color: string }[]).filter(s => s.count > 0).map((s, i) => (
-                                <motion.div
-                                  key={s.color}
-                                  className={s.color}
-                                  style={{ flex: s.count, originX: 0 }}
-                                  initial={{ scaleX: 0 }}
-                                  animate={{ scaleX: 1 }}
-                                  transition={{ delay: i * 0.07, duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
-                                />
-                              ))}
-                            </div>
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <span className="v3-mono" style={{ fontSize: 12, color: 'var(--v3-text-muted)' }}>
+                            {doc.chunk_count > 0 ? doc.chunk_count : '—'}
+                          </span>
+                        </td>
+                        <td>
+                          {doc.status === 'completed' && (
+                            <span style={{ fontSize: 12, color: 'var(--v3-risk-low)' }}>Ready</span>
                           )}
-                        </div>
-
-                        {/* High Risk Highlights */}
-                        {highlights.length > 0 && (
-                          <div>
-                            <h3 className="text-xs text-ink-500 mb-3">Attention required</h3>
-                            <div className="space-y-3">
-                              {highlights.slice(0, 3).map((highlight, i) => (
-                                <motion.div
-                                  key={i}
-                                  initial={{ opacity: 0, x: -5 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: i * 0.05 }}
-                                  className={`p-4 rounded-lg border text-sm ${
-                                    highlight.risk_level === 'critical'
-                                      ? 'border-red-500/30 bg-red-500/5'
-                                      : 'border-orange-500/30 bg-orange-500/5'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <AlertTriangle className={`w-4 h-4 ${
-                                      highlight.risk_level === 'critical' ? 'text-red-400' : 'text-orange-400'
-                                    }`} />
-                                    <span className="font-semibold text-ink-100 text-xs uppercase tracking-wide">
-                                      {(highlight.clause_type ?? '').replace(/_/g, ' ')}
-                                    </span>
-                                  </div>
-                                  <p className="text-ink-400 text-xs leading-relaxed line-clamp-3">
-                                    {highlight.summary}
-                                  </p>
-                                </motion.div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="pt-4 border-t border-ink-800/50 space-y-3">
-                          {selectedDoc && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => navigateToDocument(selectedDoc)}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
-                                         font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
-                                         transition-all duration-200"
-                              >
-                                <Eye className="w-4 h-4" />
-                                View Full Analysis
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => router.push(`/documents/${selectedDoc}/graph`)}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-ink-800 text-ink-200
-                                         font-medium rounded-xl hover:bg-ink-700 transition-colors"
-                              >
-                                <Network className="w-4 h-4" />
-                                Knowledge Graph
-                              </button>
-                            </>
-                          )}
-                          {!selectedDoc && (
-                            <button
-                              type="button"
-                              onClick={() => router.push('/analytics')}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
-                                       font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
-                                       transition-all duration-200"
+                        </td>
+                        <td style={{ paddingRight: 12 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: hoveredDoc === doc.id || selectedDoc === doc.id ? 1 : 0.3, transition: 'opacity 150ms' }}>
+                            <a
+                              href={`/documents/${doc.id}`}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                                navigateToDocument(doc.id)
+                              }}
+                              style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: 28, height: 28, borderRadius: 'var(--v3-radius-sm)',
+                                background: 'rgba(212,168,45,0.12)', color: 'var(--v3-accent)',
+                                border: 'none', cursor: 'pointer', textDecoration: 'none',
+                              }}
+                              aria-label="View document details"
+                              title="View Details"
                             >
-                              <BarChart3 className="w-4 h-4" />
-                              Portfolio Analytics
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })()}
-                </motion.div>
-              ) : selectedDoc ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="card overflow-hidden"
-                >
-                  <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                    <h2 className="font-display text-xl font-semibold text-ink-50">Risk Assessment</h2>
-                    <p className="text-xs text-ink-400 mt-1">Not yet analyzed</p>
-                  </div>
-                  <div className="p-6 flex flex-col items-center text-center gap-5">
-                    <div className="mt-2 p-4 rounded-full bg-ink-800/60 border border-ink-700/50">
-                      <Shield className="w-9 h-9 text-ink-500" />
-                    </div>
-                    <div>
-                      <p className="text-ink-200 font-medium mb-1">Analyze this contract</p>
-                      <p className="text-sm text-ink-400 leading-relaxed">
-                        We&apos;ll read every clause, identify the risky ones, and flag anything that needs your attention.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => triggerAnalysis(selectedDoc)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-accent text-ink-950
-                               font-semibold rounded-xl hover:bg-accent-light hover:shadow-lg hover:shadow-accent/20
-                               transition-all duration-200"
-                    >
-                      <PlayCircle className="w-4 h-4" />
-                      Run Analysis
-                    </button>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[200px]"
-                >
-                  <Shield className="w-8 h-8 text-ink-700" />
-                  <p className="text-sm text-ink-500">Select a contract to see its risk breakdown</p>
-                </motion.div>
+                              <Eye size={13} />
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
-            </AnimatePresence>
-          </div>
+            </div>
+          </Section>
         </div>
 
-      </main>
+        {/* Risk Analysis Panel */}
+        <div data-tour="analysis" aria-live="polite">
+          {(selectedDoc && selectedAnalysis) || (!selectedDoc && portfolioRisk) ? (
+            <div className="v3-card" style={{ overflow: 'hidden' }}>
+              {/* Header */}
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}>
+                <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Risk Assessment</h2>
+                <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 4 }}>
+                  {selectedAnalysis ? 'Document analysis' : `Portfolio · ${portfolioRisk?.docCount} contracts`}
+                </p>
+              </div>
+
+              {(() => {
+                const risk = selectedAnalysis ?? portfolioRisk!
+                const validRiskLevels: RiskLevel[] = ['critical', 'high', 'medium', 'low']
+                const rawRisk = selectedAnalysis ? selectedAnalysis.overall_risk : portfolioRisk!.overall
+                const overallRisk: RiskLevel = validRiskLevels.includes(rawRisk as RiskLevel) ? rawRisk as RiskLevel : 'low'
+                const clauses = selectedAnalysis ? selectedAnalysis.clauses_extracted : portfolioRisk!.totalClauses
+                const riskCounts = selectedAnalysis
+                  ? { critical: selectedAnalysis.risk_summary.critical || 0, high: selectedAnalysis.risk_summary.high || 0, medium: selectedAnalysis.risk_summary.medium || 0, low: selectedAnalysis.risk_summary.low || 0 }
+                  : { critical: portfolioRisk!.critical, high: portfolioRisk!.high, medium: portfolioRisk!.medium, low: portfolioRisk!.low }
+                const highlights = selectedAnalysis ? selectedAnalysis.high_risk_highlights : portfolioRisk!.highlights
+                return (
+                  <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    {/* Overall Risk */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <RiskPill level={overallRisk} size="md" />
+                      <div>
+                        <div className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>{clauses} clauses analyzed</div>
+                      </div>
+                    </div>
+
+                    {/* Risk Distribution */}
+                    <div>
+                      <div className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Risk breakdown</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 }}>
+                        {([
+                          { level: 'critical' as RiskLevel, color: 'var(--v3-risk-critical)' },
+                          { level: 'high' as RiskLevel, color: 'var(--v3-risk-high)' },
+                          { level: 'medium' as RiskLevel, color: 'var(--v3-risk-medium)' },
+                          { level: 'low' as RiskLevel, color: 'var(--v3-risk-low)' },
+                        ]).map(({ level, color }) => (
+                          <div key={level} style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: 22, fontWeight: 600, color, lineHeight: 1 }}>{riskCounts[level]}</div>
+                            <div className="v3-mono" style={{ fontSize: 10, color: 'var(--v3-text-muted)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{level}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {clauses > 0 && (
+                        <div style={{ display: 'flex', height: 4, borderRadius: 999, overflow: 'hidden' }}>
+                          {([
+                            { count: riskCounts.critical, color: 'var(--v3-risk-critical)' },
+                            { count: riskCounts.high, color: 'var(--v3-risk-high)' },
+                            { count: riskCounts.medium, color: 'var(--v3-risk-medium)' },
+                            { count: riskCounts.low, color: 'var(--v3-risk-low)' },
+                          ] as { count: number; color: string }[]).filter(s => s.count > 0).map((s, i) => (
+                            <div
+                              key={s.color}
+                              style={{ flex: s.count, background: s.color }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* High Risk Highlights */}
+                    {highlights.length > 0 && (
+                      <div>
+                        <div className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Attention required</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {highlights.slice(0, 3).map((highlight, i) => (
+                            <div
+                              key={i}
+                              style={{
+                                padding: 12, borderRadius: 'var(--v3-radius-sm)',
+                                border: `1px solid ${highlight.risk_level === 'critical' ? 'rgba(239,68,68,0.3)' : 'rgba(249,115,22,0.3)'}`,
+                                background: highlight.risk_level === 'critical' ? 'rgba(239,68,68,0.06)' : 'rgba(249,115,22,0.06)',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                <AlertTriangle size={13} color={highlight.risk_level === 'critical' ? 'var(--v3-risk-critical)' : 'var(--v3-risk-high)'} />
+                                <span className="v3-mono" style={{ fontSize: 10, fontWeight: 500, color: 'var(--v3-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                  {(highlight.clause_type ?? '').replace(/_/g, ' ')}
+                                </span>
+                              </div>
+                              <p style={{ fontSize: 12, color: 'var(--v3-text-muted)', lineHeight: 1.5, margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                {highlight.summary}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div style={{ paddingTop: 12, borderTop: '1px solid var(--v3-border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {selectedDoc && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => navigateToDocument(selectedDoc)}
+                            className="v3-btn v3-btn-primary"
+                            style={{ width: '100%', justifyContent: 'center', height: 36 }}
+                          >
+                            <Eye size={14} />
+                            View Full Analysis
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/documents/${selectedDoc}/graph`)}
+                            className="v3-btn"
+                            style={{ width: '100%', justifyContent: 'center', height: 36 }}
+                          >
+                            <Network size={14} />
+                            Knowledge Graph
+                          </button>
+                        </>
+                      )}
+                      {!selectedDoc && (
+                        <button
+                          type="button"
+                          onClick={() => router.push('/analytics')}
+                          className="v3-btn v3-btn-primary"
+                          style={{ width: '100%', justifyContent: 'center', height: 36 }}
+                        >
+                          <BarChart3 size={14} />
+                          Portfolio Analytics
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          ) : selectedDoc ? (
+            <div className="v3-card" style={{ overflow: 'hidden' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}>
+                <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Risk Assessment</h2>
+                <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 4 }}>Not yet analyzed</p>
+              </div>
+              <div style={{ padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16 }}>
+                <div style={{ padding: 16, borderRadius: 999, background: 'var(--v3-panel)', border: '1px solid var(--v3-border)' }}>
+                  <Shield size={32} color="var(--v3-text-muted)" />
+                </div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--v3-text-primary)', marginBottom: 6 }}>Analyze this contract</p>
+                  <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                    We'll read every clause, identify the risky ones, and flag anything that needs your attention.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => triggerAnalysis(selectedDoc)}
+                  className="v3-btn v3-btn-primary"
+                  style={{ width: '100%', justifyContent: 'center', height: 36 }}
+                >
+                  <PlayCircle size={14} />
+                  Run Analysis
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="v3-card" style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 12, minHeight: 200 }}>
+              <Shield size={28} color="var(--v3-text-disabled)" />
+              <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', margin: 0 }}>Select a contract to see its risk breakdown</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <WalkthroughOverlay
         active={walkthrough.active}
@@ -981,39 +938,6 @@ function DashboardContent() {
         prev={walkthrough.prev}
         dismiss={walkthrough.dismiss}
       />
-    </div>
-  )
-}
-
-function PortfolioStat({
-  value,
-  label,
-  onClick,
-}: {
-  value: number
-  label: string
-  onClick?: () => void
-}) {
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5 text-left cursor-pointer hover:bg-ink-900/40 group transition-colors"
-      >
-        <span className="text-xl sm:text-3xl lg:text-4xl font-bold tabular-nums tracking-tight text-ink-50 group-hover:text-accent transition-colors block">
-          {value.toLocaleString()}
-        </span>
-        <p className="text-[11px] sm:text-sm text-ink-500 mt-0.5 sm:mt-1 leading-tight">{label}</p>
-      </button>
-    )
-  }
-  return (
-    <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-5">
-      <span className="text-xl sm:text-3xl lg:text-4xl font-bold tabular-nums tracking-tight text-ink-50 block">
-        {value.toLocaleString()}
-      </span>
-      <p className="text-[11px] sm:text-sm text-ink-500 mt-0.5 sm:mt-1 leading-tight">{label}</p>
-    </div>
+    </V3Shell>
   )
 }
