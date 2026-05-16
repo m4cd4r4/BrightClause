@@ -100,6 +100,14 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
           >
             <Menu size={18} />
           </button>
+          <Link
+            href="/"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="BrightClause home"
+            className="v3-top-logo"
+          >
+            <Image src="/logo-minimal.png" alt="BrightClause" width={24} height={24} style={{ objectFit: 'contain' }} />
+          </Link>
           <button className="v3-search-trigger" onClick={() => setPaletteOpen(true)}>
             <Search size={14} />
             <span>Search documents, clauses, entities…</span>

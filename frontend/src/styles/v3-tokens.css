@@ -236,6 +236,8 @@ html.light .v3 {
    Hamburger lives in the existing topbar; hidden on desktop. */
 .v3-side-toggle { display: none; }
 .v3-scrim { display: none; }
+/* Topbar brand: only shown on mobile (desktop has it in the sidebar). */
+.v3-top-logo { display: none; }
 
 @media (max-width: 1023px) {
   .v3-side {
@@ -278,6 +280,18 @@ html.light .v3 {
   .v3-main {
     padding: 20px 16px;
     overflow-x: auto;
+  }
+  /* Keep the topbar (hamburger + home logo + search) reachable while
+     scrolling on phones. Below the drawer/scrim/palette z-indexes. */
+  .v3-top {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .v3-top-logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
 }
 
