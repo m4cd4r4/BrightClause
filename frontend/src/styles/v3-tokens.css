@@ -332,3 +332,12 @@ html.light .v3 {
   }
   .v3-pageheader-actions { flex-wrap: wrap; }
 }
+
+/* Analytics risk heatmap: the clause-type x document matrix is unusable
+   on a phone, so below 768px the same data renders as a single-open
+   per-document accordion instead. Desktop keeps the matrix unchanged. */
+.v3-hm-accordion { display: none; }
+@media (max-width: 768px) {
+  .v3-hm-matrix { display: none; }
+  .v3-hm-accordion { display: block; }
+}
