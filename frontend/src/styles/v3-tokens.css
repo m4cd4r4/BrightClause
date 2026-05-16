@@ -341,3 +341,24 @@ html.light .v3 {
   .v3-hm-matrix { display: none; }
   .v3-hm-accordion { display: block; }
 }
+
+/* Dark frame: a product-preview mock should stay on a dark surface in
+   both themes (it depicts the dark product UI - same intent the v1
+   landing had with .theme-dark-frame). Re-pins the surface/text tokens
+   to their dark values so html.light .v3 does not invert the mock and
+   its small entity hues keep adequate contrast. */
+.v3-darkframe {
+  --v3-canvas: #0a0a0c;
+  --v3-panel: #111114;
+  --v3-card: #16161a;
+  --v3-card-hover: #1c1c22;
+  --v3-popover: #1d1d22;
+  --v3-border: #27272a;
+  --v3-border-hover: #3f3f46;
+  --v3-text-primary: #fafafa;
+  --v3-text-secondary: #a1a1aa;
+  --v3-text-muted: #71717a;
+  --v3-text-disabled: #52525b;
+  background: var(--v3-card);
+  color: var(--v3-text-primary);
+}
