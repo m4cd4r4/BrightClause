@@ -109,7 +109,7 @@ flowchart TD
 
     Upload(["📄  Upload PDF"]):::upload --> OCR
 
-    subgraph OCR["4-Tier OCR Pipeline — fastest method wins"]
+    subgraph OCR["4-Tier OCR Pipeline - confidence-threshold fallback"]
         T0["Tier 0  PyMuPDF\nnative PDF text"]:::ocr
         T1["Tier 1  Tesseract\nclean scans"]:::ocr
         T2["Tier 2  PaddleOCR\ncomplex layouts"]:::ocr
@@ -120,7 +120,7 @@ flowchart TD
     OCR --> Chunk["✂  Chunking\n6 000 chars · 600 overlap\nSemantic boundary preservation"]:::embed
     Chunk --> Embed["🔢  Vector Embeddings\nnomic-embed-text · 768 dims · IVFFlat"]:::embed
 
-    Embed --> Clauses["📋  Clause Extraction\n16+ types via LLM"]:::clause
+    Embed --> Clauses["📋  Clause Extraction\n16 types via LLM"]:::clause
     Embed --> Entities["🔗  Entity Extraction\nparties · dates · amounts · locations"]:::entity
 
     Clauses --> Risk["⚠  Risk Assessment\nCritical · High · Medium · Low"]:::risk
