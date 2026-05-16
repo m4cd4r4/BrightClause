@@ -249,8 +249,8 @@ export default function AnalyticsPage() {
             <ResponsiveContainer>
               <BarChart data={distribution} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
                 <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1d1d22', border: '1px solid #27272a', borderRadius: 8, fontSize: 12, color: '#fafafa' }} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11, fill: 'var(--v3-text-muted)' }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: 'var(--v3-card-hover)' }} contentStyle={{ background: 'var(--v3-popover)', border: '1px solid var(--v3-border)', borderRadius: 8, fontSize: 12, color: 'var(--v3-text-primary)' }} />
                 <Bar dataKey="count" radius={[4, 4, 4, 4]} fill="#d4a82d" />
               </BarChart>
             </ResponsiveContainer>

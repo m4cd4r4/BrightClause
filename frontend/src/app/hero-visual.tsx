@@ -68,7 +68,7 @@ export function HeroVisual() {
       style={{ position: 'relative' }}
     >
       <div
-        className="v3-card"
+        className="v3-card v3-darkframe"
         style={{ overflow: 'hidden', borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)' }}
       >
         {/* Browser chrome */}
