@@ -318,7 +318,7 @@ export default function DocumentDetailPage() {
   if (loading) {
     return (
       <V3Shell>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
+        <div className="v3-grid-resp" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
           <div className="v3-card" style={{ height: 112, gridColumn: 'span 2' }} />
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="v3-card" style={{ height: 112 }} />
@@ -406,7 +406,7 @@ export default function DocumentDetailPage() {
           analysis ? `${analysis.clauses_extracted} clauses` : null,
         ].filter(Boolean).join(' · ') || undefined}
         actions={
-          <div ref={exportMenuRef} style={{ display: 'flex', gap: 8, position: 'relative' }}>
+          <div ref={exportMenuRef} style={{ display: 'flex', gap: 8, position: 'relative', flexWrap: 'wrap' }}>
             <Link href={`/documents/${documentId}/graph`} className="v3-btn">
               <Network size={14} />
               <span>Graph</span>
@@ -507,6 +507,7 @@ export default function DocumentDetailPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              className="v3-grid-resp"
               style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}
             >
               {/* Overall Risk */}
@@ -599,7 +600,7 @@ export default function DocumentDetailPage() {
                 </div>
               </Section>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24 }}>
+              <div className="v3-split-resp" style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24 }}>
                 {/* Clause Type Sidebar */}
                 <div>
                   <div className="v3-card" style={{ position: 'sticky', top: 24, padding: 0, overflow: 'hidden' }}>

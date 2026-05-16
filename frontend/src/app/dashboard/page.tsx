@@ -415,6 +415,7 @@ function DashboardContent() {
       {/* KPI strip */}
       <div
         data-tour="stats"
+        className="v3-grid-resp"
         style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}
       >
         {loading ? (
@@ -554,7 +555,7 @@ function DashboardContent() {
       )}
 
       {/* Main grid: document list + risk panel */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24 }}>
+      <div className="v3-split-resp" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24 }}>
         {/* Document list */}
         <div data-tour="documents">
           <Section
@@ -574,7 +575,7 @@ function DashboardContent() {
             }
           >
             <div
-              style={{ maxHeight: 'calc(100vh - 380px)', overflowY: 'auto' }}
+              style={{ maxHeight: 'calc(100vh - 380px)', overflowY: 'auto', overflowX: 'auto' }}
             >
               {loading ? (
                 <div>
@@ -609,7 +610,7 @@ function DashboardContent() {
                   </button>
                 </div>
               ) : (
-                <table className="v3-table" style={{ tableLayout: 'fixed' }}>
+                <table className="v3-table v3-table-min" style={{ tableLayout: 'fixed' }}>
                   <colgroup>
                     <col style={{ width: 28 }} />
                     <col />

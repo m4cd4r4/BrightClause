@@ -101,7 +101,7 @@ export function PageHeader({
   actions?: ReactNode
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, paddingTop: 8 }}>
+    <div className="v3-pageheader" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, paddingTop: 8 }}>
       <div>
         {crumb && (
           <div className="v3-mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--v3-text-muted)', marginBottom: 6 }}>
@@ -111,7 +111,7 @@ export function PageHeader({
         <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--v3-text-primary)', margin: 0 }}>{title}</h1>
         {subtitle && <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--v3-text-secondary)' }}>{subtitle}</p>}
       </div>
-      {actions && <div style={{ display: 'flex', gap: 8 }}>{actions}</div>}
+      {actions && <div className="v3-pageheader-actions" style={{ display: 'flex', gap: 8 }}>{actions}</div>}
     </div>
   )
 }
