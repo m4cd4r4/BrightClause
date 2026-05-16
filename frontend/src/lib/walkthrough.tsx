@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react'
+import { X, ChevronRight, ChevronLeft, Compass } from 'lucide-react'
 
 interface WalkthroughStep {
   target: string
@@ -178,7 +178,7 @@ export function WalkthroughOverlay({
           {/* Header */}
           <div className="px-5 py-4 border-b border-ink-800/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-accent" />
+              <Compass className="w-4 h-4 text-accent" />
               <span className="text-xs text-ink-400">
                 {step + 1} of {totalSteps}
               </span>
@@ -257,7 +257,7 @@ export function WalkthroughButton({ onClick }: { onClick: () => void }) {
                bg-ink-900/50 border border-ink-800/50 rounded-lg hover:border-accent/30 transition-all"
       title="Restart guided tour"
     >
-      <Sparkles className="w-4 h-4" />
+      <Compass className="w-4 h-4" />
       <span className="hidden sm:inline">Tour</span>
     </button>
   )
