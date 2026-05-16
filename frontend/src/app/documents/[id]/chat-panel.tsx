@@ -70,19 +70,22 @@ export function ChatPanel({ documentId }: { documentId: string }) {
   }
 
   return (
-    <>
+    <div className="v3">
       {/* Toggle button */}
       <button
         onClick={() => setOpen(prev => !prev)}
-        className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full
-                     shadow-lg transition-all ${
-                       open
-                         ? 'bg-ink-800 text-ink-400 hover:bg-ink-700'
-                         : 'bg-accent text-ink-950 hover:bg-accent-light'
-                     }`}
+        style={{
+          position: 'fixed', bottom: 24, right: 24, zIndex: 40,
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '12px 16px', borderRadius: 999,
+          boxShadow: 'var(--v3-shadow-md)', border: 'none', cursor: 'pointer',
+          fontSize: 13, fontWeight: 600,
+          background: open ? 'var(--v3-card)' : 'var(--v3-accent)',
+          color: open ? 'var(--v3-text-secondary)' : 'var(--v3-accent-fg)',
+        }}
       >
-        {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
-        <span className="text-sm font-medium">{open ? 'Close' : 'Ask AI'}</span>
+        {open ? <X size={18} /> : <MessageCircle size={18} />}
+        <span>{open ? 'Close' : 'Ask AI'}</span>
       </button>
 
       {/* Chat panel */}
@@ -93,31 +96,39 @@ export function ChatPanel({ documentId }: { documentId: string }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] z-30
-                       bg-ink-950 border-l border-ink-800/50 flex flex-col shadow-2xl"
+            style={{
+              position: 'fixed', top: 0, right: 0, bottom: 0, width: 420, maxWidth: '100vw',
+              zIndex: 30, background: 'var(--v3-popover)',
+              borderLeft: '1px solid var(--v3-border)',
+              display: 'flex', flexDirection: 'column', boxShadow: 'var(--v3-shadow-md)',
+            }}
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-ink-800/50">
-              <div className="p-2 bg-accent/10 rounded-lg">
-                <Sparkles className="w-4 h-4 text-accent" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: '1px solid var(--v3-border)' }}>
+              <div style={{ padding: 8, background: 'rgba(212,168,45,0.12)', borderRadius: 'var(--v3-radius-sm)' }}>
+                <Sparkles size={16} color="var(--v3-accent)" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-ink-200">Contract Q&A</h3>
-                <p className="text-[11px] text-ink-500">Ask anything about this document</p>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Contract Q&amp;A</h3>
+                <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', margin: 0 }}>Ask anything about this document</p>
               </div>
             </div>
 
             {/* Messages area */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
               {messages.length === 0 && (
-                <div className="space-y-3 pt-4">
-                  <p className="text-xs text-ink-500 text-center mb-4">Try asking:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
+                  <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textAlign: 'center', marginBottom: 8 }}>Try asking:</p>
                   {STARTERS.map(q => (
                     <button
                       key={q}
                       onClick={() => sendMessage(q)}
-                      className="w-full text-left px-3 py-2.5 rounded-lg bg-ink-900/50 border border-ink-800/30
-                                 text-xs text-ink-400 hover:text-ink-200 hover:border-ink-700 transition-colors"
+                      style={{
+                        width: '100%', textAlign: 'left', padding: '10px 12px',
+                        borderRadius: 'var(--v3-radius-md)', background: 'var(--v3-card)',
+                        border: '1px solid var(--v3-border)', cursor: 'pointer',
+                        fontSize: 12, color: 'var(--v3-text-secondary)',
+                      }}
                     >
                       {q}
                     </button>
@@ -128,28 +139,33 @@ export function ChatPanel({ documentId }: { documentId: string }) {
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === 'user'
-                        ? 'bg-accent/15 text-ink-200 rounded-br-md'
-                        : 'bg-ink-900/60 text-ink-300 border border-ink-800/30 rounded-bl-md'
-                    }`}
+                    style={{
+                      maxWidth: '85%', borderRadius: 'var(--v3-radius-lg)', padding: '10px 14px', fontSize: 13,
+                      background: msg.role === 'user' ? 'rgba(212,168,45,0.15)' : 'var(--v3-card)',
+                      color: msg.role === 'user' ? 'var(--v3-text-primary)' : 'var(--v3-text-secondary)',
+                      border: msg.role === 'user' ? 'none' : '1px solid var(--v3-border)',
+                    }}
                   >
-                    <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{msg.content}</div>
 
                     {/* Source citations */}
                     {msg.sources && msg.sources.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-ink-800/30 flex flex-wrap gap-1.5">
+                      <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--v3-border)', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {msg.sources.map((src, j) => (
                           <span
                             key={j}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                       bg-ink-800/50 text-[11px] text-ink-500 font-mono"
+                            className="v3-mono"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              padding: '2px 8px', borderRadius: 999,
+                              background: 'var(--v3-panel)', fontSize: 11, color: 'var(--v3-text-muted)',
+                            }}
                             title={src.content}
                           >
-                            <FileText className="w-3 h-3" />
+                            <FileText size={12} />
                             {src.page_number != null ? `p.${src.page_number}` : `chunk ${j + 1}`}
                           </span>
                         ))}
@@ -161,12 +177,12 @@ export function ChatPanel({ documentId }: { documentId: string }) {
 
               {/* Typing indicator */}
               {loading && (
-                <div className="flex justify-start">
-                  <div className="bg-ink-900/60 border border-ink-800/30 rounded-2xl rounded-bl-md px-4 py-3">
-                    <div className="flex gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-ink-600 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 rounded-full bg-ink-600 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 rounded-full bg-ink-600 animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  <div style={{ background: 'var(--v3-card)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-lg)', padding: '12px 16px' }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <span className="animate-bounce" style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--v3-text-muted)', animationDelay: '0ms' }} />
+                      <span className="animate-bounce" style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--v3-text-muted)', animationDelay: '150ms' }} />
+                      <span className="animate-bounce" style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--v3-text-muted)', animationDelay: '300ms' }} />
                     </div>
                   </div>
                 </div>
@@ -176,13 +192,13 @@ export function ChatPanel({ documentId }: { documentId: string }) {
             </div>
 
             {/* Input area */}
-            <div className="px-4 py-3 border-t border-ink-800/50">
+            <div style={{ padding: 16, borderTop: '1px solid var(--v3-border)' }}>
               <form
                 onSubmit={e => {
                   e.preventDefault()
                   sendMessage(input)
                 }}
-                className="flex gap-2"
+                style={{ display: 'flex', gap: 8 }}
               >
                 <input
                   ref={inputRef}
@@ -191,22 +207,23 @@ export function ChatPanel({ documentId }: { documentId: string }) {
                   onChange={e => setInput(e.target.value)}
                   placeholder="Ask about this contract..."
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 bg-ink-900/50 border border-ink-800/50 rounded-xl
-                             text-sm text-ink-200 placeholder-ink-600
-                             focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20
-                             disabled:opacity-50"
+                  style={{
+                    flex: 1, height: 38, padding: '0 14px',
+                    background: 'var(--v3-card)', border: '1px solid var(--v3-border)',
+                    borderRadius: 'var(--v3-radius-md)', color: 'var(--v3-text-primary)',
+                    fontSize: 13, outline: 'none',
+                  }}
                 />
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
-                  className="px-3 py-2.5 bg-accent text-ink-950 rounded-xl
-                             hover:bg-accent-light transition-colors
-                             disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="v3-btn v3-btn-primary"
+                  style={{ height: 38, padding: '0 12px', opacity: loading || !input.trim() ? 0.4 : 1 }}
                 >
                   {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
                   ) : (
-                    <Send className="w-4 h-4" />
+                    <Send size={16} />
                   )}
                 </button>
               </form>
@@ -214,6 +231,6 @@ export function ChatPanel({ documentId }: { documentId: string }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }

@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, AlertTriangle, ChevronDown, Loader2 } from 'lucide-react'
 import { api, TimelineEvent } from '@/lib/api'
 
-const typeConfig: Record<string, { color: string; bg: string; label: string }> = {
-  effective: { color: 'text-emerald-400', bg: 'bg-emerald-400', label: 'Effective' },
-  expiration: { color: 'text-red-400', bg: 'bg-red-400', label: 'Expiration' },
-  renewal: { color: 'text-amber-400', bg: 'bg-amber-400', label: 'Renewal' },
-  payment: { color: 'text-blue-400', bg: 'bg-blue-400', label: 'Payment' },
-  notice: { color: 'text-purple-400', bg: 'bg-purple-400', label: 'Notice' },
-  execution: { color: 'text-cyan-400', bg: 'bg-cyan-400', label: 'Execution' },
-  other: { color: 'text-ink-400', bg: 'bg-ink-400', label: 'Other' },
+const typeConfig: Record<string, { color: string; label: string }> = {
+  effective: { color: 'var(--v3-risk-low)', label: 'Effective' },
+  expiration: { color: 'var(--v3-risk-critical)', label: 'Expiration' },
+  renewal: { color: 'var(--v3-risk-medium)', label: 'Renewal' },
+  payment: { color: '#60a5fa', label: 'Payment' },
+  notice: { color: '#a78bfa', label: 'Notice' },
+  execution: { color: '#22d3ee', label: 'Execution' },
+  other: { color: 'var(--v3-text-secondary)', label: 'Other' },
 }
 
 export function Timeline({ documentId }: { documentId: string }) {
@@ -29,49 +29,46 @@ export function Timeline({ documentId }: { documentId: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-5 h-5 text-ink-500 animate-spin" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 0' }}>
+        <Loader2 size={18} color="var(--v3-text-muted)" style={{ animation: 'spin 1s linear infinite' }} />
       </div>
     )
   }
 
   if (events.length === 0) {
     return (
-      <div className="text-center py-8">
-        <Calendar className="w-8 h-8 text-ink-700 mx-auto" />
-        <p className="text-ink-500 text-sm mt-3">No timeline events found.</p>
-        <p className="text-ink-600 text-xs mt-1">Run entity extraction to detect dates.</p>
+      <div style={{ textAlign: 'center', padding: '24px 0' }}>
+        <Calendar size={28} color="var(--v3-text-disabled)" style={{ margin: '0 auto' }} />
+        <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', marginTop: 10 }}>No timeline events found.</p>
+        <p style={{ fontSize: 11, color: 'var(--v3-text-disabled)', marginTop: 2 }}>Run entity extraction to detect dates.</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-4 h-4 text-accent" />
-        <h3 className="font-display text-sm font-semibold text-ink-200">
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <Clock size={14} color="var(--v3-accent)" />
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>
           Contract Timeline
         </h3>
-        <span className="text-xs text-ink-500 font-mono">{events.length} events</span>
+        <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>{events.length} events</span>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginLeft: 'auto' }}>
+          {Object.entries(typeConfig)
+            .filter(([type]) => events.some(e => e.type === type))
+            .map(([type, config]) => (
+              <span key={type} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                <span style={{ width: 7, height: 7, borderRadius: 999, background: config.color }} />
+                {config.label}
+              </span>
+            ))}
+        </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {Object.entries(typeConfig)
-          .filter(([type]) => events.some(e => e.type === type))
-          .map(([type, config]) => (
-            <span key={type} className="flex items-center gap-1.5 text-[11px] text-ink-400">
-              <span className={`w-2 h-2 rounded-full ${config.bg}`} />
-              {config.label}
-            </span>
-          ))}
-      </div>
-
-      {/* Timeline */}
-      <div className="relative pl-6">
-        {/* Vertical line */}
-        <div className="absolute left-[9px] top-2 bottom-2 w-px bg-ink-800" />
-
+      {/* Horizontal strip */}
+      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6 }}>
         {events.map((event, i) => {
           const config = typeConfig[event.type] || typeConfig.other
           const isExpanded = expandedEvent === event.id
@@ -82,40 +79,43 @@ export function Timeline({ documentId }: { documentId: string }) {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="relative mb-3"
+              style={{ flexShrink: 0, width: isExpanded ? 320 : 220 }}
             >
-              {/* Dot */}
-              <div className={`absolute left-[-18px] top-2.5 w-3 h-3 rounded-full border-2 border-ink-950 ${config.bg}`} />
-
-              {/* Event card */}
               <button
                 onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
-                className="w-full text-left p-3 rounded-lg bg-ink-900/30 hover:bg-ink-900/50 transition-colors border border-ink-800/30"
+                style={{
+                  width: '100%', textAlign: 'left', padding: 12,
+                  borderRadius: 'var(--v3-radius-md)', background: 'var(--v3-panel)',
+                  border: '1px solid var(--v3-border)', cursor: 'pointer', color: 'inherit',
+                  borderTop: `2px solid ${config.color}`,
+                }}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-medium ${config.color}`}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: config.color }}>
                         {config.label}
                       </span>
                       {event.importance === 'high' && (
-                        <AlertTriangle className="w-3 h-3 text-amber-400" />
+                        <AlertTriangle size={12} color="var(--v3-risk-medium)" />
                       )}
                       {event.page_number != null && (
-                        <span className="text-[11px] text-ink-600 font-mono">p.{event.page_number}</span>
+                        <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-disabled)' }}>p.{event.page_number}</span>
                       )}
                     </div>
-                    <p className="text-sm text-ink-200 mt-0.5 font-medium truncate">
+                    <p style={{ fontSize: 13, color: 'var(--v3-text-primary)', marginTop: 4, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {event.label}
                     </p>
-                    <p className="text-xs text-ink-500 mt-0.5 font-mono">
+                    <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 4 }}>
                       {event.date}
                     </p>
                   </div>
                   {event.context && (
-                    <ChevronDown className={`w-3.5 h-3.5 text-ink-600 flex-shrink-0 transition-transform ${
-                      isExpanded ? 'rotate-180' : ''
-                    }`} />
+                    <ChevronDown
+                      size={14}
+                      color="var(--v3-text-muted)"
+                      style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : undefined, transition: 'transform 150ms' }}
+                    />
                   )}
                 </div>
 
@@ -125,8 +125,9 @@ export function Timeline({ documentId }: { documentId: string }) {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
+                      style={{ overflow: 'hidden' }}
                     >
-                      <p className="text-xs text-ink-400 mt-2 pt-2 border-t border-ink-800/30 leading-relaxed">
+                      <p style={{ fontSize: 11, color: 'var(--v3-text-secondary)', marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--v3-border)', lineHeight: 1.6 }}>
                         {event.context}
                       </p>
                     </motion.div>

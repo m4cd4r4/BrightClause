@@ -11,16 +11,17 @@ import {
 } from 'lucide-react'
 import { api, Document, GraphData, Entity } from '@/lib/api'
 import { useToast } from '@/lib/toast'
-import { Navigation } from '@/lib/navigation'
+import { V3Shell } from '@/components/v3/shell'
+import { PageHeader } from '@/components/v3/primitives'
 
-const entityTypeConfig: Record<string, { icon: typeof Building2; color: string; bg: string }> = {
-  party: { icon: Building2, color: 'text-blue-400', bg: 'bg-blue-500' },
-  person: { icon: User, color: 'text-purple-400', bg: 'bg-purple-500' },
-  date: { icon: Calendar, color: 'text-emerald-400', bg: 'bg-emerald-500' },
-  amount: { icon: DollarSign, color: 'text-amber-400', bg: 'bg-amber-500' },
-  location: { icon: MapPin, color: 'text-red-400', bg: 'bg-red-500' },
-  term: { icon: Clock, color: 'text-cyan-400', bg: 'bg-cyan-500' },
-  percentage: { icon: Percent, color: 'text-pink-400', bg: 'bg-pink-500' },
+const entityTypeConfig: Record<string, { icon: typeof Building2; dot: string }> = {
+  party: { icon: Building2, dot: '#3b82f6' },
+  person: { icon: User, dot: '#a855f7' },
+  date: { icon: Calendar, dot: '#10b981' },
+  amount: { icon: DollarSign, dot: '#f59e0b' },
+  location: { icon: MapPin, dot: '#ef4444' },
+  term: { icon: Clock, dot: '#06b6d4' },
+  percentage: { icon: Percent, dot: '#ec4899' },
 }
 
 interface Node {
@@ -721,402 +722,424 @@ export default function GraphPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto" />
-          <p className="mt-4 text-ink-400">Loading knowledge graph...</p>
+      <V3Shell>
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Loader2 size={40} color="var(--v3-accent)" style={{ animation: 'spin 1s linear infinite', margin: '0 auto' }} />
+            <p style={{ marginTop: 16, color: 'var(--v3-text-muted)' }}>Loading knowledge graph...</p>
+          </div>
         </div>
-      </div>
+      </V3Shell>
     )
   }
 
   return (
-    <div ref={containerRef} className={`min-h-screen flex flex-col bg-ink-950 ${isFullscreen ? 'fullscreen-container' : ''}`}
-         style={isFullscreen ? { width: '100vw', height: '100vh' } : undefined}>
-      <Navigation>
-        {graphData && (
-          <div className="hidden sm:flex items-center gap-3 text-sm text-ink-400">
-            <span className="font-mono text-[11px]">{graphData.stats.total_entities} entities</span>
-            <span className="text-ink-600">|</span>
-            <span className="font-mono text-[11px]">{graphData.stats.total_relationships} rels</span>
+    <V3Shell>
+      <div
+        ref={containerRef}
+        style={isFullscreen
+          ? { width: '100vw', height: '100vh', background: 'var(--v3-canvas)', display: 'flex', flexDirection: 'column' }
+          : { background: 'var(--v3-canvas)', display: 'flex', flexDirection: 'column' }}
+      >
+        <PageHeader
+          crumb="Workspace · Document"
+          title="Knowledge Graph"
+          subtitle={graphData
+            ? `${graphData.stats.total_entities} entities · ${graphData.stats.total_relationships} relationships`
+            : contractDoc ? contractDoc.filename : undefined}
+          actions={
+            <>
+              <button
+                onClick={() => setZoom((z) => Math.min(3, z * 1.2))}
+                className="v3-btn v3-btn-ghost"
+                style={{ padding: '0 10px' }}
+                title="Zoom In"
+              >
+                <ZoomIn size={16} />
+              </button>
+              <button
+                onClick={() => setZoom((z) => Math.max(0.3, z * 0.8))}
+                className="v3-btn v3-btn-ghost"
+                style={{ padding: '0 10px' }}
+                title="Zoom Out"
+              >
+                <ZoomOut size={16} />
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                className="v3-btn v3-btn-ghost"
+                style={{ padding: '0 10px' }}
+                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+              >
+                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+              <button onClick={resetView} className="v3-btn v3-btn-ghost" style={{ padding: '0 10px' }} title="Reset View">
+                <RefreshCw size={16} />
+              </button>
+              <Link href={`/documents/${documentId}`} className="v3-btn">
+                <FileText size={14} />
+                <span>Clauses</span>
+              </Link>
+            </>
+          }
+        />
+
+        {/* Mobile Entity Type Filter - horizontal scroll chips */}
+        {graphData && graphData.nodes.length > 0 && (
+          <div className="md:hidden" style={{ borderBottom: '1px solid var(--v3-border)', padding: '8px 12px', overflowX: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 'max-content' }}>
+              {Object.entries(entityTypeConfig).map(([type, config]) => {
+                const count = graphData.stats.entity_types[type] || 0
+                if (count === 0) return null
+                const active = selectedTypes.has(type) || selectedTypes.size === 0
+                return (
+                  <button
+                    key={type}
+                    onClick={() => toggleType(type)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+                      borderRadius: 999, fontSize: 12, whiteSpace: 'nowrap', cursor: 'pointer',
+                      border: '1px solid var(--v3-border)',
+                      background: active ? 'var(--v3-card)' : 'transparent',
+                      color: active ? 'var(--v3-text-primary)' : 'var(--v3-text-muted)',
+                    }}
+                  >
+                    <span style={{ width: 8, height: 8, borderRadius: 999, background: config.dot }} />
+                    <span style={{ textTransform: 'capitalize' }}>{type}</span>
+                    <span className="v3-mono" style={{ color: 'var(--v3-text-muted)' }}>{count}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
-        <button
-          onClick={() => setZoom((z) => Math.min(3, z * 1.2))}
-          className="p-2 hover:bg-ink-800 rounded-lg transition-colors" title="Zoom In"
-        >
-          <ZoomIn className="w-4 h-4 text-ink-400" />
-        </button>
-        <button
-          onClick={() => setZoom((z) => Math.max(0.3, z * 0.8))}
-          className="p-2 hover:bg-ink-800 rounded-lg transition-colors" title="Zoom Out"
-        >
-          <ZoomOut className="w-4 h-4 text-ink-400" />
-        </button>
-        <button
-          onClick={toggleFullscreen}
-          className="p-2 hover:bg-ink-800 rounded-lg transition-colors"
-          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-        >
-          {isFullscreen ? <Minimize2 className="w-4 h-4 text-ink-400" /> : <Maximize2 className="w-4 h-4 text-ink-400" />}
-        </button>
-        <button onClick={resetView} className="p-2 hover:bg-ink-800 rounded-lg transition-colors" title="Reset View">
-          <RefreshCw className="w-4 h-4 text-ink-400" />
-        </button>
-        <Link
-          href={`/documents/${documentId}`}
-          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg hover:bg-ink-700 transition-colors text-sm"
-        >
-          <FileText className="w-4 h-4" />
-          <span className="hidden sm:inline">Clauses</span>
-        </Link>
-      </Navigation>
 
-      {/* Mobile Entity Type Filter - horizontal scroll chips */}
-      {graphData && graphData.nodes.length > 0 && (
-        <div className="md:hidden border-b border-ink-800/50 px-3 py-2 overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
-            {Object.entries(entityTypeConfig).map(([type, config]) => {
-              const count = graphData.stats.entity_types[type] || 0
-              if (count === 0) return null
-              const active = selectedTypes.has(type) || selectedTypes.size === 0
-              return (
-                <button
-                  key={type}
-                  onClick={() => toggleType(type)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors
-                    ${active ? 'bg-ink-800 text-ink-200' : 'bg-ink-900/50 text-ink-500'}`}
-                >
-                  <div className={`w-2 h-2 rounded-full ${config.bg}`} />
-                  <span className="capitalize">{type}</span>
-                  <span className="font-mono text-ink-500">{count}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
+        <div style={{ display: 'flex', flex: 1, minHeight: 0, gap: 16 }}>
+          {/* Entity Type Filter */}
+          <aside className="hidden md:block" style={{ width: 256, flexShrink: 0 }}>
+            <div className="v3-card" style={{ padding: 16 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--v3-text-secondary)', marginBottom: 12 }}>Entity Types</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {Object.entries(entityTypeConfig).map(([type, config]) => {
+                  const count = graphData?.stats.entity_types[type] || 0
+                  if (count === 0) return null
 
-      <div className="flex-1 flex">
-        {/* Entity Type Filter */}
-        <aside className="hidden md:block w-64 border-r border-ink-800/50 p-4">
-          <h3 className="text-sm font-medium text-ink-400 mb-4">Entity Types</h3>
-          <div className="space-y-2">
-            {Object.entries(entityTypeConfig).map(([type, config]) => {
-              const Icon = config.icon
-              const count = graphData?.stats.entity_types[type] || 0
-              if (count === 0) return null
-
-              return (
-                <button
-                  key={type}
-                  onClick={() => toggleType(type)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors
-                            ${selectedTypes.has(type) || selectedTypes.size === 0
-                              ? 'bg-ink-800/50'
-                              : 'opacity-40 hover:opacity-70'}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${config.bg}`} />
-                    <span className="text-sm capitalize">{type}</span>
-                  </div>
-                  <span className="text-xs font-mono text-ink-500">{count}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Selected Node Details - Enhanced */}
-          <AnimatePresence>
-            {selectedNode && graphData && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="mt-6 pt-6 border-t border-ink-800/50 space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto"
-              >
-                <h3 className="text-sm font-medium text-ink-400">Selected Entity</h3>
-
-                {/* Entity Info */}
-                <div className="card p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`w-3 h-3 rounded-full ${entityTypeConfig[selectedNode.type]?.bg || 'bg-gray-500'}`} />
-                    <span className="text-xs uppercase tracking-wider text-ink-500">{selectedNode.type}</span>
-                  </div>
-                  <p className="font-semibold text-ink-100 text-lg">{selectedNode.label}</p>
-                  {selectedNode.value && selectedNode.value !== selectedNode.label && (
-                    <p className="text-sm text-ink-400 mt-2 italic">{selectedNode.value}</p>
-                  )}
-                </div>
-
-                {/* Connected Relationships */}
-                {(() => {
-                  const connectedEdges = graphData.edges.filter(
-                    e => e.source === selectedNode.id || e.target === selectedNode.id
-                  )
-                  if (connectedEdges.length === 0) return null
-
+                  const active = selectedTypes.has(type) || selectedTypes.size === 0
                   return (
-                    <div>
-                      <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <Link2 className="w-3 h-3" />
-                        Relationships ({connectedEdges.length})
-                      </h4>
-                      <div className="space-y-2">
-                        {connectedEdges.slice(0, 8).map((edge) => {
-                          const isSource = edge.source === selectedNode.id
-                          const otherId = isSource ? edge.target : edge.source
-                          const otherNode = graphData.nodes.find(n => n.id === otherId)
-                          if (!otherNode) return null
-
-                          return (
-                            <button
-                              key={edge.id}
-                              onClick={() => {
-                                const targetNode = nodesRef.current.find(n => n.id === otherId)
-                                if (targetNode) setSelectedNode(targetNode)
-                              }}
-                              className="w-full text-left p-2.5 bg-ink-900/50 hover:bg-ink-800/70 rounded-lg transition-colors group"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${entityTypeConfig[otherNode.type]?.bg || 'bg-gray-500'}`} />
-                                  <span className="text-sm text-ink-200 truncate">{otherNode.label}</span>
-                                </div>
-                                <ChevronRight className="w-3.5 h-3.5 text-ink-600 group-hover:text-accent flex-shrink-0" />
-                              </div>
-                              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-ink-500">
-                                <span className="uppercase">{otherNode.type}</span>
-                                {edge.label && edge.label !== 'relates_to' && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="text-accent/70">{edge.label.replace(/_/g, ' ')}</span>
-                                  </>
-                                )}
-                              </div>
-                            </button>
-                          )
-                        })}
-                        {connectedEdges.length > 8 && (
-                          <p className="text-xs text-ink-500 text-center py-1">
-                            +{connectedEdges.length - 8} more connections
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })()}
-
-                {/* Entity Value/Context */}
-                {selectedNode.value && selectedNode.value.length > 30 && (
-                  <div>
-                    <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <Quote className="w-3 h-3" />
-                      Context
-                    </h4>
-                    <div className="p-3 bg-ink-900/30 rounded-lg border border-ink-800/50">
-                      <p className="text-xs text-ink-400 leading-relaxed">
-                        {selectedNode.value}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Stats for this entity */}
-                {(() => {
-                  const connectedCount = graphData.edges.filter(
-                    e => e.source === selectedNode.id || e.target === selectedNode.id
-                  ).length
-                  const sameTypeCount = graphData.nodes.filter(n => n.type === selectedNode.type).length
-
-                  return (
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2.5 bg-ink-900/30 rounded-lg text-center">
-                        <p className="text-lg font-bold font-mono text-ink-200">{connectedCount}</p>
-                        <p className="text-[11px] text-ink-500 uppercase">Connections</p>
-                      </div>
-                      <div className="p-2.5 bg-ink-900/30 rounded-lg text-center">
-                        <p className="text-lg font-bold font-mono text-ink-200">{sameTypeCount}</p>
-                        <p className="text-[11px] text-ink-500 uppercase">Same Type</p>
-                      </div>
-                    </div>
-                  )
-                })()}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </aside>
-
-        {/* Canvas Area */}
-        <div className="flex-1 relative bg-ink-950">
-          {graphData && graphData.nodes.length > 0 ? (
-            <canvas
-              ref={canvasRef}
-              role="img"
-              aria-label={`Knowledge graph visualization showing ${graphData?.stats.total_entities || 0} entities and ${graphData?.stats.total_relationships || 0} relationships`}
-              className="w-full h-full cursor-grab active:cursor-grabbing"
-              style={{ touchAction: 'none' }}
-              onMouseDown={handleCanvasMouseDown}
-              onMouseMove={handleCanvasMouseMove}
-              onMouseUp={handleCanvasMouseUp}
-              onMouseLeave={handleCanvasMouseLeave}
-              onWheel={handleWheel}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Network className="w-12 h-12 text-ink-600 mx-auto" />
-                <h3 className="font-display text-lg font-semibold mt-4">No Entities Extracted</h3>
-                <p className="text-ink-500 mt-2 max-w-md text-sm leading-relaxed">
-                  Extract parties, dates, monetary amounts, and other key entities from
-                  {contractDoc ? ` "${contractDoc.filename}"` : ' this document'} to build
-                  an interactive relationship graph.
-                </p>
-                <button
-                  onClick={triggerExtraction}
-                  disabled={extracting}
-                  className="mt-6 btn-primary"
-                >
-                  {extracting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Analyzing{extractionElapsed > 0 ? ` · ${extractionElapsed}s` : '...'}
-                    </>
-                  ) : (
-                    <>
-                      <Network className="w-4 h-4 mr-2" />
-                      Build Knowledge Graph
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Zoom indicator */}
-          <div className="absolute bottom-4 right-4 px-3 py-1 bg-ink-900/80 rounded-lg text-xs text-ink-400">
-            {Math.round(zoom * 100)}%
-          </div>
-
-          {/* Mobile bottom sheet for selected node */}
-          <AnimatePresence>
-            {selectedNode && mobileSheetOpen && graphData && (
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="md:hidden absolute bottom-0 inset-x-0 bg-ink-900 border-t border-ink-700/50 rounded-t-2xl max-h-[60vh] overflow-y-auto z-10"
-              >
-                {/* Drag handle */}
-                <div className="flex justify-center pt-2 pb-1">
-                  <div className="w-10 h-1 rounded-full bg-ink-600" />
-                </div>
-
-                <div className="px-4 pb-4 space-y-3">
-                  {/* Header with close button */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${entityTypeConfig[selectedNode.type]?.bg || 'bg-gray-500'}`} />
-                      <span className="text-xs uppercase tracking-wider text-ink-500">{selectedNode.type}</span>
-                    </div>
                     <button
-                      onClick={() => {
-                        setMobileSheetOpen(false)
-                        setSelectedNode(null)
+                      key={type}
+                      onClick={() => toggleType(type)}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '8px 12px', borderRadius: 'var(--v3-radius-sm)', cursor: 'pointer',
+                        border: 'none', background: active ? 'var(--v3-card-hover)' : 'transparent',
+                        opacity: active ? 1 : 0.45, color: 'inherit',
                       }}
-                      className="p-1 hover:bg-ink-800 rounded-lg"
                     >
-                      <X className="w-4 h-4 text-ink-400" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: 999, background: config.dot }} />
+                        <span style={{ fontSize: 13, textTransform: 'capitalize' }}>{type}</span>
+                      </div>
+                      <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>{count}</span>
                     </button>
+                  )
+                })}
+              </div>
+
+              {/* Selected Node Details - Enhanced */}
+              <AnimatePresence>
+                {selectedNode && graphData && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--v3-border)', display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}
+                  >
+                    <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--v3-text-secondary)', margin: 0 }}>Selected Entity</h3>
+
+                    {/* Entity Info */}
+                    <div className="v3-card" style={{ padding: 16 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: 999, background: entityTypeConfig[selectedNode.type]?.dot || '#6b7280' }} />
+                        <span className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)' }}>{selectedNode.type}</span>
+                      </div>
+                      <p style={{ fontWeight: 600, color: 'var(--v3-text-primary)', fontSize: 18, margin: 0 }}>{selectedNode.label}</p>
+                      {selectedNode.value && selectedNode.value !== selectedNode.label && (
+                        <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', marginTop: 8, fontStyle: 'italic' }}>{selectedNode.value}</p>
+                      )}
+                    </div>
+
+                    {/* Connected Relationships */}
+                    {(() => {
+                      const connectedEdges = graphData.edges.filter(
+                        e => e.source === selectedNode.id || e.target === selectedNode.id
+                      )
+                      if (connectedEdges.length === 0) return null
+
+                      return (
+                        <div>
+                          <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Link2 size={12} />
+                            Relationships ({connectedEdges.length})
+                          </h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {connectedEdges.slice(0, 8).map((edge) => {
+                              const isSource = edge.source === selectedNode.id
+                              const otherId = isSource ? edge.target : edge.source
+                              const otherNode = graphData.nodes.find(n => n.id === otherId)
+                              if (!otherNode) return null
+
+                              return (
+                                <button
+                                  key={edge.id}
+                                  onClick={() => {
+                                    const targetNode = nodesRef.current.find(n => n.id === otherId)
+                                    if (targetNode) setSelectedNode(targetNode)
+                                  }}
+                                  style={{ width: '100%', textAlign: 'left', padding: 10, background: 'var(--v3-panel)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-sm)', cursor: 'pointer', color: 'inherit' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                                      <div style={{ width: 8, height: 8, borderRadius: 999, flexShrink: 0, background: entityTypeConfig[otherNode.type]?.dot || '#6b7280' }} />
+                                      <span style={{ fontSize: 13, color: 'var(--v3-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherNode.label}</span>
+                                    </div>
+                                    <ChevronRight size={14} color="var(--v3-text-muted)" style={{ flexShrink: 0 }} />
+                                  </div>
+                                  <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                                    <span style={{ textTransform: 'uppercase' }}>{otherNode.type}</span>
+                                    {edge.label && edge.label !== 'relates_to' && (
+                                      <>
+                                        <span>•</span>
+                                        <span style={{ color: 'var(--v3-accent)' }}>{edge.label.replace(/_/g, ' ')}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </button>
+                              )
+                            })}
+                            {connectedEdges.length > 8 && (
+                              <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textAlign: 'center', padding: '4px 0' }}>
+                                +{connectedEdges.length - 8} more connections
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })()}
+
+                    {/* Entity Value/Context */}
+                    {selectedNode.value && selectedNode.value.length > 30 && (
+                      <div>
+                        <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Quote size={12} />
+                          Context
+                        </h4>
+                        <div style={{ padding: 12, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-sm)', border: '1px solid var(--v3-border)' }}>
+                          <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', lineHeight: 1.6, margin: 0 }}>
+                            {selectedNode.value}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Stats for this entity */}
+                    {(() => {
+                      const connectedCount = graphData.edges.filter(
+                        e => e.source === selectedNode.id || e.target === selectedNode.id
+                      ).length
+                      const sameTypeCount = graphData.nodes.filter(n => n.type === selectedNode.type).length
+
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                          <div style={{ padding: 10, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-sm)', textAlign: 'center' }}>
+                            <p className="v3-mono" style={{ fontSize: 18, fontWeight: 600, color: 'var(--v3-text-secondary)', margin: 0 }}>{connectedCount}</p>
+                            <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase' }}>Connections</p>
+                          </div>
+                          <div style={{ padding: 10, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-sm)', textAlign: 'center' }}>
+                            <p className="v3-mono" style={{ fontSize: 18, fontWeight: 600, color: 'var(--v3-text-secondary)', margin: 0 }}>{sameTypeCount}</p>
+                            <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase' }}>Same Type</p>
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </aside>
+
+          {/* Canvas Area */}
+          <div className="v3-card" style={{ flex: 1, position: 'relative', overflow: 'hidden', padding: 0, minHeight: isFullscreen ? undefined : 'calc(100vh - 180px)' }}>
+            {graphData && graphData.nodes.length > 0 ? (
+              <canvas
+                ref={canvasRef}
+                role="img"
+                aria-label={`Knowledge graph visualization showing ${graphData?.stats.total_entities || 0} entities and ${graphData?.stats.total_relationships || 0} relationships`}
+                style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none', display: 'block' }}
+                onMouseDown={handleCanvasMouseDown}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseUp={handleCanvasMouseUp}
+                onMouseLeave={handleCanvasMouseLeave}
+                onWheel={handleWheel}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              />
+            ) : (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <Network size={48} color="var(--v3-text-disabled)" style={{ margin: '0 auto' }} />
+                  <h3 style={{ fontSize: 18, fontWeight: 600, marginTop: 16, color: 'var(--v3-text-primary)' }}>No Entities Extracted</h3>
+                  <p style={{ color: 'var(--v3-text-muted)', marginTop: 8, maxWidth: 420, fontSize: 13, lineHeight: 1.6 }}>
+                    Extract parties, dates, monetary amounts, and other key entities from
+                    {contractDoc ? ` "${contractDoc.filename}"` : ' this document'} to build
+                    an interactive relationship graph.
+                  </p>
+                  <button
+                    onClick={triggerExtraction}
+                    disabled={extracting}
+                    className="v3-btn v3-btn-primary"
+                    style={{ marginTop: 24, display: 'inline-flex' }}
+                  >
+                    {extracting ? (
+                      <>
+                        <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        Analyzing{extractionElapsed > 0 ? ` · ${extractionElapsed}s` : '...'}
+                      </>
+                    ) : (
+                      <>
+                        <Network size={14} />
+                        Build Knowledge Graph
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Zoom indicator */}
+            <div className="v3-mono" style={{ position: 'absolute', bottom: 16, right: 16, padding: '4px 12px', background: 'rgba(17,17,20,0.8)', borderRadius: 'var(--v3-radius-sm)', fontSize: 11, color: 'var(--v3-text-muted)', border: '1px solid var(--v3-border)' }}>
+              {Math.round(zoom * 100)}%
+            </div>
+
+            {/* Mobile bottom sheet for selected node */}
+            <AnimatePresence>
+              {selectedNode && mobileSheetOpen && graphData && (
+                <motion.div
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="md:hidden"
+                  style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--v3-popover)', borderTop: '1px solid var(--v3-border)', borderTopLeftRadius: 'var(--v3-radius-lg)', borderTopRightRadius: 'var(--v3-radius-lg)', maxHeight: '60vh', overflowY: 'auto', zIndex: 10 }}
+                >
+                  {/* Drag handle */}
+                  <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 4 }}>
+                    <div style={{ width: 40, height: 4, borderRadius: 999, background: 'var(--v3-border-hover)' }} />
                   </div>
 
-                  <p className="font-semibold text-ink-100 text-lg">{selectedNode.label}</p>
-                  {selectedNode.value && selectedNode.value !== selectedNode.label && (
-                    <p className="text-sm text-ink-400 italic">{selectedNode.value}</p>
-                  )}
+                  <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {/* Header with close button */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: 999, background: entityTypeConfig[selectedNode.type]?.dot || '#6b7280' }} />
+                        <span className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)' }}>{selectedNode.type}</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setMobileSheetOpen(false)
+                          setSelectedNode(null)
+                        }}
+                        style={{ padding: 4, background: 'transparent', border: 'none', color: 'var(--v3-text-muted)', cursor: 'pointer' }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
 
-                  {/* Connected relationships */}
-                  {(() => {
-                    const connectedEdges = graphData.edges.filter(
-                      e => e.source === selectedNode.id || e.target === selectedNode.id
-                    )
-                    if (connectedEdges.length === 0) return null
+                    <p style={{ fontWeight: 600, color: 'var(--v3-text-primary)', fontSize: 18, margin: 0 }}>{selectedNode.label}</p>
+                    {selectedNode.value && selectedNode.value !== selectedNode.label && (
+                      <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', fontStyle: 'italic', margin: 0 }}>{selectedNode.value}</p>
+                    )}
 
-                    return (
-                      <div>
-                        <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <Link2 className="w-3 h-3" />
-                          Relationships ({connectedEdges.length})
-                        </h4>
-                        <div className="space-y-1.5">
-                          {connectedEdges.slice(0, 6).map((edge) => {
-                            const isSource = edge.source === selectedNode.id
-                            const otherId = isSource ? edge.target : edge.source
-                            const otherNode = graphData.nodes.find(n => n.id === otherId)
-                            if (!otherNode) return null
+                    {/* Connected relationships */}
+                    {(() => {
+                      const connectedEdges = graphData.edges.filter(
+                        e => e.source === selectedNode.id || e.target === selectedNode.id
+                      )
+                      if (connectedEdges.length === 0) return null
 
-                            return (
-                              <button
-                                key={edge.id}
-                                onClick={() => {
-                                  const targetNode = nodesRef.current.find(n => n.id === otherId)
-                                  if (targetNode) setSelectedNode(targetNode)
-                                }}
-                                className="w-full text-left p-2 bg-ink-800/50 hover:bg-ink-800 rounded-lg transition-colors"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${entityTypeConfig[otherNode.type]?.bg || 'bg-gray-500'}`} />
-                                    <span className="text-sm text-ink-200 truncate">{otherNode.label}</span>
+                      return (
+                        <div>
+                          <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Link2 size={12} />
+                            Relationships ({connectedEdges.length})
+                          </h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {connectedEdges.slice(0, 6).map((edge) => {
+                              const isSource = edge.source === selectedNode.id
+                              const otherId = isSource ? edge.target : edge.source
+                              const otherNode = graphData.nodes.find(n => n.id === otherId)
+                              if (!otherNode) return null
+
+                              return (
+                                <button
+                                  key={edge.id}
+                                  onClick={() => {
+                                    const targetNode = nodesRef.current.find(n => n.id === otherId)
+                                    if (targetNode) setSelectedNode(targetNode)
+                                  }}
+                                  style={{ width: '100%', textAlign: 'left', padding: 8, background: 'var(--v3-card)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-sm)', cursor: 'pointer', color: 'inherit' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                                      <div style={{ width: 8, height: 8, borderRadius: 999, flexShrink: 0, background: entityTypeConfig[otherNode.type]?.dot || '#6b7280' }} />
+                                      <span style={{ fontSize: 13, color: 'var(--v3-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherNode.label}</span>
+                                    </div>
+                                    <ChevronRight size={14} color="var(--v3-text-muted)" style={{ flexShrink: 0 }} />
                                   </div>
-                                  <ChevronRight className="w-3.5 h-3.5 text-ink-600 flex-shrink-0" />
-                                </div>
-                                {edge.label && edge.label !== 'relates_to' && (
-                                  <span className="text-[11px] text-accent/70 mt-0.5 block">{edge.label.replace(/_/g, ' ')}</span>
-                                )}
-                              </button>
-                            )
-                          })}
-                          {connectedEdges.length > 6 && (
-                            <p className="text-xs text-ink-500 text-center py-1">
-                              +{connectedEdges.length - 6} more
-                            </p>
-                          )}
+                                  {edge.label && edge.label !== 'relates_to' && (
+                                    <span style={{ fontSize: 11, color: 'var(--v3-accent)', marginTop: 2, display: 'block' }}>{edge.label.replace(/_/g, ' ')}</span>
+                                  )}
+                                </button>
+                              )
+                            })}
+                            {connectedEdges.length > 6 && (
+                              <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textAlign: 'center', padding: '4px 0' }}>
+                                +{connectedEdges.length - 6} more
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })()}
+                      )
+                    })()}
 
-                  {/* Quick stats */}
-                  {(() => {
-                    const connectedCount = graphData.edges.filter(
-                      e => e.source === selectedNode.id || e.target === selectedNode.id
-                    ).length
-                    const sameTypeCount = graphData.nodes.filter(n => n.type === selectedNode.type).length
+                    {/* Quick stats */}
+                    {(() => {
+                      const connectedCount = graphData.edges.filter(
+                        e => e.source === selectedNode.id || e.target === selectedNode.id
+                      ).length
+                      const sameTypeCount = graphData.nodes.filter(n => n.type === selectedNode.type).length
 
-                    return (
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="p-2 bg-ink-800/30 rounded-lg text-center">
-                          <p className="text-lg font-bold font-mono text-ink-200">{connectedCount}</p>
-                          <p className="text-[11px] text-ink-500 uppercase">Connections</p>
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                          <div style={{ padding: 8, background: 'var(--v3-card)', borderRadius: 'var(--v3-radius-sm)', textAlign: 'center' }}>
+                            <p className="v3-mono" style={{ fontSize: 18, fontWeight: 600, color: 'var(--v3-text-secondary)', margin: 0 }}>{connectedCount}</p>
+                            <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase' }}>Connections</p>
+                          </div>
+                          <div style={{ padding: 8, background: 'var(--v3-card)', borderRadius: 'var(--v3-radius-sm)', textAlign: 'center' }}>
+                            <p className="v3-mono" style={{ fontSize: 18, fontWeight: 600, color: 'var(--v3-text-secondary)', margin: 0 }}>{sameTypeCount}</p>
+                            <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase' }}>Same Type</p>
+                          </div>
                         </div>
-                        <div className="p-2 bg-ink-800/30 rounded-lg text-center">
-                          <p className="text-lg font-bold font-mono text-ink-200">{sameTypeCount}</p>
-                          <p className="text-[11px] text-ink-500 uppercase">Same Type</p>
-                        </div>
-                      </div>
-                    )
-                  })()}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                      )
+                    })()}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
-    </div>
+    </V3Shell>
   )
 }
