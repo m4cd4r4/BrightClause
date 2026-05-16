@@ -134,7 +134,7 @@ export default function DealsPage() {
 
       {/* Deals Grid */}
       {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
+        <div className="v3-grid-resp" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="v3-card" style={{ padding: 24 }}>
               <div style={{ height: 24, width: 160, background: 'var(--v3-card-hover)', borderRadius: 4, marginBottom: 12 }} />
@@ -153,7 +153,7 @@ export default function DealsPage() {
               Each deal gives you aggregate risk scores, obligation tracking, and clause comparison
               across all its documents.
             </p>
-            <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, textAlign: 'center' }} aria-hidden="true">
+            <div className="v3-grid-resp" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, textAlign: 'center' }} aria-hidden="true">
               {[
                 { label: 'Aggregate risk', icon: AlertTriangle },
                 { label: 'Track obligations', icon: ClipboardCheck },
@@ -176,7 +176,7 @@ export default function DealsPage() {
           </div>
         </motion.div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
+        <div className="v3-grid-resp" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
           {deals.map((deal, i) => (
             <motion.div
               key={deal.id}

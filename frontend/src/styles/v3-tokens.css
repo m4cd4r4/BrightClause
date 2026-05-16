@@ -284,3 +284,37 @@ html.light .v3 {
 @media (prefers-reduced-motion: reduce) {
   .v3-side { transition: none; }
 }
+
+/* Per-page mobile reflow utilities. Additive: desktop keeps the inline
+   grid-template-columns (these classes set columns only inside media
+   queries, with !important to beat the inline desktop value). */
+
+/* KPI / card strips: desktop N-up (inline) -> 2-up -> 1-up on phones. */
+@media (max-width: 768px) {
+  .v3-grid-resp { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 480px) {
+  .v3-grid-resp { grid-template-columns: 1fr !important; }
+}
+
+/* Page splits (content + fixed-width aside): stack below 900px. */
+@media (max-width: 900px) {
+  .v3-split-resp { grid-template-columns: 1fr !important; }
+}
+
+/* Dense fixed-layout tables: keep a usable width and scroll within the
+   page content region (the wrapper sets overflow-x:auto) on phones. */
+@media (max-width: 768px) {
+  .v3-table-min { min-width: 600px; }
+}
+
+/* PageHeader: stack title above actions and let the action buttons
+   wrap when the row would overflow on a phone. Desktop unchanged. */
+@media (max-width: 768px) {
+  .v3-pageheader {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+  .v3-pageheader-actions { flex-wrap: wrap; }
+}
