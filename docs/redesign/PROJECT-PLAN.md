@@ -67,6 +67,8 @@ Every batch is one PR, branched fresh off `master`, merged via the git-integrati
 
 Batches are independent enough to parallelise across worktrees if desired, but the recommended order is 1 → 2 → 3 → 4 because each batch hardens the primitives the next one reuses, and Batch 4 must be last (it removes the v1 fallbacks).
 
+**Post-reskin follow-on - v3 landing reskin (2026-05-16, branch `feat/v3-landing-reskin`):** The marketing landing at `/` was deliberately excluded from Batches 1-4 and remained the v1 marketing page. This separate follow-on brings it onto the v3 design system (v3 tokens, Geist, two-tier elevation, dark default + the shipped `html.light .v3` light variant, one signature motion moment) and wires the real `logo-minimal.png` into the `V3Shell` sidebar in place of the `§` placeholder. It does not re-open Batches 1-4: the core v3 app reskin remains complete and unchanged. Scope was rendering-only (no route, API, data, feature, primitive signature, or `--v3-*` token-value change); the single sanctioned shared edit is the shell logo swap. Rationale: `docs/redesign/landing-reskin-rationale.md`.
+
 ### Per-surface contract (applies to every surface in every batch)
 
 For each route: wrap the page in `<V3Shell>`, swap the rendering JSX to v3 primitives, keep the **exact** data fetching, hooks, state, handlers, and feature logic. No API change. No behaviour change. If a feature exists in v1 it exists identically in v3. Verify the reskinned page against its v1 audit entry in `docs/v1-audit/AUDIT.md` and its v1 screenshot.

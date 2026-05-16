@@ -10,7 +10,7 @@ const SCREENS = [
     id: 'dashboard',
     label: 'Dashboard',
     src: '/assets/screenshot-dashboard.png',
-    desc: 'Your entire contract portfolio at a glance — documents indexed, clauses extracted, and recent activity in one view.',
+    desc: 'Your entire contract portfolio at a glance - documents indexed, clauses extracted, and recent activity in one view.',
   },
   {
     id: 'analytics',
@@ -88,17 +88,20 @@ export function ScreenshotShowcase() {
         <button
           key={screen.id}
           onClick={() => { setActive(i); setProgress(0) }}
-          className={`relative px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 overflow-hidden
-            ${active === i
-              ? 'bg-accent/15 text-accent border border-accent/40'
-              : 'text-ink-500 hover:text-ink-300 border border-transparent hover:border-ink-700/50'
-            }`}
+          className="relative px-4 py-1.5 text-sm font-medium transition-all duration-200 overflow-hidden"
+          style={{
+            borderRadius: 'var(--v3-radius-md)',
+            border: '1px solid',
+            borderColor: active === i ? 'rgba(212, 168, 45, 0.4)' : 'transparent',
+            background: active === i ? 'rgba(212, 168, 45, 0.15)' : 'transparent',
+            color: active === i ? 'var(--v3-accent)' : 'var(--v3-text-muted)',
+          }}
         >
           {screen.label}
           {active === i && (
             <span
-              className="absolute inset-0 bg-accent/10 origin-left rounded-lg pointer-events-none"
-              style={{ transform: `scaleX(${progress / 100})` }}
+              className="absolute inset-0 origin-left pointer-events-none"
+              style={{ transform: `scaleX(${progress / 100})`, background: 'rgba(212, 168, 45, 0.1)', borderRadius: 'var(--v3-radius-md)' }}
             />
           )}
         </button>
@@ -108,26 +111,33 @@ export function ScreenshotShowcase() {
 
   const showcaseCard = (
     <div
-      className="rounded-2xl overflow-hidden border border-ink-700/40 shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_40px_rgba(201,162,39,0.04)] theme-dark-frame"
-      style={{ backgroundColor: '#0d0b08' }}
+      className="overflow-hidden v3-card"
+      style={{ borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)' }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Chrome bar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-ink-800/50 bg-ink-900/70">
+      <div
+        className="flex items-center gap-2 px-4 py-2.5"
+        style={{ borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}
+      >
         <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--v3-border-hover)' }} />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--v3-border-hover)' }} />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--v3-border-hover)' }} />
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[11px] text-ink-500 font-mono">
+          <div
+            className="px-4 py-1 text-[11px] v3-mono"
+            style={{ background: 'var(--v3-card)', borderRadius: 'var(--v3-radius-sm)', color: 'var(--v3-text-muted)' }}
+          >
             brightclause.com/{SCREENS[active].id === 'dashboard' ? '' : SCREENS[active].id}
           </div>
         </div>
         <button
           onClick={() => setIsExpanded(v => !v)}
-          className="p-1.5 text-ink-500 hover:text-accent transition-colors rounded"
+          className="p-1.5 transition-colors rounded"
+          style={{ color: 'var(--v3-text-muted)' }}
           aria-label={isExpanded ? 'Collapse' : 'Expand to cinema mode'}
           title={isExpanded ? 'Collapse (Esc)' : 'Cinema mode'}
         >
@@ -166,7 +176,10 @@ export function ScreenshotShowcase() {
       </div>
 
       {/* Caption bar */}
-      <div className="px-5 py-3 border-t border-ink-800/40 bg-ink-900/60">
+      <div
+        className="px-5 py-3"
+        style={{ borderTop: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}
+      >
         <AnimatePresence mode="wait">
           <motion.p
             key={active}
@@ -174,9 +187,10 @@ export function ScreenshotShowcase() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="text-xs text-ink-400 leading-relaxed"
+            className="text-xs leading-relaxed"
+            style={{ color: 'var(--v3-text-secondary)' }}
           >
-            <span className="text-accent font-semibold mr-2">{SCREENS[active].label}.</span>
+            <span style={{ color: 'var(--v3-accent)', fontWeight: 600, marginRight: 8 }}>{SCREENS[active].label}.</span>
             {SCREENS[active].desc}
           </motion.p>
         </AnimatePresence>
@@ -185,16 +199,19 @@ export function ScreenshotShowcase() {
   )
 
   return (
-    <section className="py-24 border-t border-ink-800/50">
+    <section style={{ padding: '96px 0', borderTop: '1px solid var(--v3-border)' }}>
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center"
+          style={{ marginBottom: 48 }}
         >
-          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">See It In Action</h2>
-          <p className="text-ink-400 max-w-xl mx-auto">
+          <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
+            See It In Action
+          </h2>
+          <p style={{ color: 'var(--v3-text-secondary)', maxWidth: 576, margin: '0 auto' }}>
             Real contract data. No mocks. Click any tab to explore.
           </p>
         </motion.div>
@@ -223,7 +240,8 @@ export function ScreenshotShowcase() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/85 backdrop-blur-sm cursor-pointer"
+              className="fixed inset-0 z-40 cursor-pointer"
+              style={{ background: 'rgba(0,0,0,0.85)' }}
               onClick={() => setIsExpanded(false)}
             />
             {/* Cinema content — pointer-events-none on wrapper so backdrop click works in padding */}

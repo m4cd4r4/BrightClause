@@ -457,3 +457,31 @@ html.light .bg-ink-800\/50 {
   background: rgba(0, 0, 0, 0.04);
 }
 
+/* ── v3 landing-only utilities (additive, consume --v3-* tokens) ──── */
+
+.v3-pill-landing {
+  padding: 8px 16px;
+  border-radius: var(--v3-radius-md);
+  font-size: 14px;
+  color: var(--v3-text-secondary);
+  background: var(--v3-card);
+  border: 1px solid var(--v3-border);
+  cursor: default;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.v3-pill-landing:hover {
+  color: var(--v3-accent);
+  border-color: var(--v3-border-hover);
+}
+
+.v3-foot-link {
+  color: var(--v3-text-muted);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.v3-foot-link:hover {
+  color: var(--v3-text-secondary);
+}
+

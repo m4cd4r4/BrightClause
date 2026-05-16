@@ -1,15 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
-import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
-  CheckCircle, ChevronRight, ExternalLink,
   MessageCircle, Lightbulb, ClipboardCheck, Calendar,
-  Briefcase, Sun, Activity, Play, Server
+  Briefcase, Sun, Activity, Play,
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
 
@@ -55,7 +54,7 @@ const features: { Icon: React.ElementType; title: string; description: string }[
   {
     Icon: Calendar,
     title: 'Timeline Extraction',
-    description: 'Automatically extracts key dates — effective, expiration, renewal, payment — and displays them on an interactive timeline.',
+    description: 'Automatically extracts key dates - effective, expiration, renewal, payment - and displays them on an interactive timeline.',
   },
   {
     Icon: Briefcase,
@@ -114,7 +113,7 @@ const trustSignals = [
   {
     Icon: Zap,
     title: 'Seconds, Not Hours',
-    description: 'Upload a contract and get clause extraction, risk scores, and actionable insights in seconds — not days of manual review.',
+    description: 'Upload a contract and get clause extraction, risk scores, and actionable insights in seconds - not days of manual review.',
     statTarget: 2,
     statPrefix: '< ',
     statSuffix: 's',
@@ -151,110 +150,156 @@ function TrustCard({ signal, index }: { signal: typeof trustSignals[number]; ind
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true })
   const count = useCountUp(signal.statTarget, isInView)
+  const reduce = useReducedMotion()
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
+      initial={reduce ? false : { opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1 }}
-      className="p-6 bg-ink-900/30 border border-ink-800/40 rounded-xl group hover:border-accent/30 transition-all"
+      transition={{ delay: reduce ? 0 : index * 0.1 }}
+      className="v3-card v3-card-hover"
+      style={{ padding: 24 }}
     >
-      <div className="flex items-start gap-4 mb-3">
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 12 }}>
         <div
-          className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors"
+          style={{
+            width: 44, height: 44, borderRadius: 'var(--v3-radius-md)', flexShrink: 0,
+            background: 'rgba(212, 168, 45, 0.1)', color: 'var(--v3-accent)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
         >
-          <signal.Icon className="w-5 h-5" />
+          <signal.Icon style={{ width: 20, height: 20 }} />
         </div>
-        <div className="min-w-0">
-          <h3 className="font-display text-base font-semibold text-ink-100">{signal.title}</h3>
-          <span className="text-xs font-mono text-accent/80 bg-accent/8 px-1.5 py-0.5 rounded mt-1 inline-block">
+        <div style={{ minWidth: 0 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>{signal.title}</h3>
+          <span
+            className="v3-mono"
+            style={{
+              display: 'inline-block', marginTop: 6, fontSize: 12, color: 'var(--v3-accent)',
+              background: 'rgba(212, 168, 45, 0.1)', padding: '2px 6px', borderRadius: 'var(--v3-radius-sm)',
+            }}
+          >
             {signal.statPrefix ?? ''}{signal.statDisplay ?? count}{signal.statSuffix} {signal.statLabel}
           </span>
         </div>
       </div>
-      <p className="text-sm text-ink-500 leading-relaxed">{signal.description}</p>
+      <p style={{ fontSize: 14, color: 'var(--v3-text-secondary)', lineHeight: 1.6, margin: 0 }}>{signal.description}</p>
     </motion.div>
   )
+}
+
+const sectionStyle: React.CSSProperties = {
+  borderTop: '1px solid var(--v3-border)',
 }
 
 export default function LandingPage() {
   const [showHeroVideo, setShowHeroVideo] = useState(false)
   const [heroVideoDismissed, setHeroVideoDismissed] = useState(false)
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     const timer = setTimeout(() => setShowHeroVideo(true), 2000)
     return () => clearTimeout(timer)
   }, [])
 
+  // One restrained reveal pattern reused across sections; instant when reduced motion is requested.
+  const reveal = (delay = 0) => ({
+    initial: reduce ? (false as const) : { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { delay: reduce ? 0 : delay },
+  })
+
   return (
-    <main id="main-content" className="min-h-screen light-editorial">
+    <main id="main-content" className="v3" style={{ minHeight: '100vh' }}>
       {/* Navigation */}
-      <nav aria-label="Landing navigation" className="fixed top-0 left-0 right-0 z-50 border-b border-ink-800/40 bg-ink-950/85 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/logo-minimal.png" alt="BrightClause" width={36} height={36} className="object-contain" />
-            <span className="font-display text-xl font-bold tracking-tight text-ink-100">BrightClause</span>
+      <nav
+        aria-label="Landing navigation"
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+          background: 'var(--v3-panel)', borderBottom: '1px solid var(--v3-border)',
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-6" style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Image src="/logo-minimal.png" alt="BrightClause" width={32} height={32} style={{ objectFit: 'contain' }} priority />
+            <span style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--v3-text-primary)' }}>BrightClause</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 px-5 py-2.5 bg-accent text-[#1a1a2e] font-semibold rounded-xl
-                       hover:brightness-110 hover:shadow-lg hover:shadow-accent/20 transition-all text-sm"
-            >
-              Try It Live
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-          </div>
+          <Link
+            href="/dashboard"
+            className="v3-btn v3-btn-primary"
+            style={{ height: 38, padding: '0 18px', fontSize: 14 }}
+          >
+            Try It Live
+            <ArrowRight style={{ width: 16, height: 16 }} aria-hidden="true" />
+          </Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-16 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 relative">
+      <section style={{ position: 'relative', paddingTop: 128, paddingBottom: 64, overflow: 'hidden' }}>
+        <div className="max-w-6xl mx-auto px-6" style={{ position: 'relative' }}>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={reduce ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
+            transition={{ duration: reduce ? 0 : 0.6 }}
+            style={{ textAlign: 'center', maxWidth: 768, margin: '0 auto' }}
           >
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-ink-50">
+            <h1
+              style={{
+                fontSize: 'clamp(2.75rem, 6vw, 4.5rem)', fontWeight: 600, letterSpacing: '-0.03em',
+                lineHeight: 1.1, marginBottom: 24, color: 'var(--v3-text-primary)',
+              }}
+            >
               Upload a Contract.{' '}
-              <span className="block mt-1">Know the Risks.</span>
+              <span style={{ display: 'block', marginTop: 4 }}>Know the Risks.</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-ink-400 leading-relaxed mb-10 max-w-2xl mx-auto">
+            <p
+              style={{
+                fontSize: 'clamp(1.0625rem, 2vw, 1.25rem)', color: 'var(--v3-text-secondary)',
+                lineHeight: 1.6, marginBottom: 40, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto',
+              }}
+            >
               Upload contracts and chat with them in plain English. AI extracts clauses,
               scores risk, tracks obligations, and generates executive reports.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
               <Link
                 href="/dashboard"
-                className="group flex items-center gap-3 px-8 py-4 bg-accent text-[#1a1a2e] rounded-xl font-semibold text-lg
-                         hover:brightness-110 hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
+                className="v3-btn v3-btn-primary group"
+                style={{ height: 52, padding: '0 32px', fontSize: 17 }}
               >
                 Try It Live
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight style={{ width: 20, height: 20 }} className="transition-transform group-hover:translate-x-1" />
               </Link>
               {heroVideoDismissed && (
                 <button
                   onClick={() => { setHeroVideoDismissed(false); setShowHeroVideo(true) }}
-                  className="group flex items-center gap-3 px-8 py-4 bg-ink-900 border border-ink-700 rounded-xl font-semibold text-lg
-                           text-ink-200 hover:bg-ink-800 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all"
+                  className="v3-btn"
+                  style={{ height: 52, padding: '0 28px', fontSize: 17 }}
                 >
-                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
-                    <Play className="w-4 h-4 text-accent ml-0.5" />
-                  </div>
+                  <span
+                    style={{
+                      width: 32, height: 32, borderRadius: 999, background: 'rgba(212, 168, 45, 0.18)',
+                      color: 'var(--v3-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Play style={{ width: 16, height: 16, marginLeft: 2 }} />
+                  </span>
                   Watch Demo
                 </button>
               )}
             </div>
           </motion.div>
 
-          {/* Hero visual / video dissolve — dark frame for product preview */}
-          <div className="relative mt-16 max-w-5xl mx-auto grid theme-dark-frame" style={{ gridTemplate: '1fr / 1fr' }}>
+          {/* Hero visual / video dissolve - the single signature motion moment */}
+          <div
+            style={{ position: 'relative', marginTop: 64, maxWidth: 1024, marginLeft: 'auto', marginRight: 'auto', display: 'grid', gridTemplate: '1fr / 1fr' }}
+          >
             <div style={{ gridArea: '1 / 1' }}>
               <HeroVisual />
             </div>
@@ -263,12 +308,11 @@ export default function LandingPage() {
               {showHeroVideo && !heroVideoDismissed && (
                 <motion.div
                   key="video"
-                  style={{ gridArea: '1 / 1' }}
-                  className="z-10"
-                  initial={{ opacity: 0, y: 20 }}
+                  style={{ gridArea: '1 / 1', zIndex: 10 }}
+                  initial={reduce ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] } }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  exit={{ opacity: 0, transition: { duration: reduce ? 0 : 1.5, ease: [0.22, 1, 0.36, 1] } }}
+                  transition={{ duration: reduce ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <Suspense fallback={null}>
                     <HeroVideoPlayer
@@ -282,49 +326,35 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Screenshot Showcase (lazy — below fold) */}
-      <Suspense fallback={<div className="py-24" />}>
+      {/* Screenshot Showcase (lazy - below fold) */}
+      <Suspense fallback={<div style={{ padding: '96px 0' }} />}>
         <ScreenshotShowcase />
       </Suspense>
 
       {/* How It Works */}
-      <section className="py-20 border-t border-ink-800/30">
+      <section style={{ ...sectionStyle, padding: '80px 0' }}>
         <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-ink-400 max-w-xl mx-auto">
+          <motion.div {...reveal()} style={{ textAlign: 'center', marginBottom: 64 }}>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
+              How It Works
+            </h2>
+            <p style={{ color: 'var(--v3-text-secondary)', maxWidth: 576, margin: '0 auto' }}>
               End-to-end pipeline from PDF upload to actionable insights in six stages
             </p>
           </motion.div>
 
-          <div className="relative">
-            <div className="hidden lg:block absolute top-[2.25rem] left-[calc(8.333%+2rem)] right-[calc(8.333%+2rem)] h-px">
+          <div style={{ position: 'relative' }}>
+            <div className="hidden lg:block" style={{ position: 'absolute', top: '2.25rem', left: 'calc(8.333% + 2rem)', right: 'calc(8.333% + 2rem)', height: 1 }}>
               <motion.div
-                initial={{ scaleX: 0 }}
+                initial={reduce ? false : { scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2, ease: 'easeInOut' }}
-                className="h-full origin-left bg-gradient-to-r from-accent/40 via-accent/20 to-accent/40"
+                transition={{ duration: reduce ? 0 : 0.8, delay: reduce ? 0 : 0.2, ease: 'easeInOut' }}
+                style={{ height: '100%', transformOrigin: 'left', background: 'var(--v3-border-hover)' }}
               />
-              {[0, 0.8, 1.6].map((dotDelay, di) => (
-                <motion.div
-                  key={di}
-                  className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-accent"
-                  style={{ boxShadow: '0 0 6px rgba(201,162,39,0.6)' }}
-                  initial={{ left: '0%', opacity: 0 }}
-                  whileInView={{ left: ['0%', '100%'], opacity: [0, 0.8, 0.8, 0.8, 0] }}
-                  viewport={{ once: false }}
-                  transition={{ delay: 1.2 + dotDelay, duration: 2.5, ease: 'linear', repeat: Infinity, repeatDelay: 2 + dotDelay * 0.3 }}
-                />
-              ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-10">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ columnGap: 16, rowGap: 40 }}>
               {[
                 { title: 'Upload', desc: 'PDF ingestion & storage', Icon: FileText },
                 { title: 'Extract', desc: '4-tier OCR pipeline', Icon: Layers },
@@ -335,30 +365,37 @@ export default function LandingPage() {
               ].map((item, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={reduce ? false : { opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className="flex flex-col items-center text-center group"
+                  transition={{ delay: reduce ? 0 : i * 0.08 }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+                  className="group"
                 >
-                  <div className="relative mb-5">
-                    <motion.div
-                      className="absolute inset-0 rounded-2xl border border-accent/40"
-                      initial={{ scale: 1, opacity: 0 }}
-                      whileInView={{ scale: [1, 1.35], opacity: [0, 0.4, 0] }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 1.4 + i * 0.4, duration: 0.6, ease: 'easeOut' }}
-                    />
-                    <div className="w-[4.5rem] h-[4.5rem] rounded-2xl bg-ink-900 border border-ink-700/80 flex items-center justify-center text-accent
-                                    group-hover:border-accent/50 group-hover:bg-accent/10 group-hover:shadow-lg group-hover:shadow-accent/10 transition-all duration-300">
-                      <item.Icon className="w-6 h-6" />
+                  <div style={{ position: 'relative', marginBottom: 20 }}>
+                    <div
+                      className="v3-card v3-card-hover"
+                      style={{
+                        width: '4.5rem', height: '4.5rem', borderRadius: 'var(--v3-radius-lg)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--v3-accent)',
+                      }}
+                    >
+                      <item.Icon style={{ width: 24, height: 24 }} />
                     </div>
-                    <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-ink-950 border border-accent/40 flex items-center justify-center">
-                      <span className="text-[11px] font-mono text-accent font-bold leading-none">{String(i + 1).padStart(2, '0')}</span>
+                    <div
+                      className="v3-mono"
+                      style={{
+                        position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: 999,
+                        background: 'var(--v3-canvas)', border: '1px solid var(--v3-border-hover)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, color: 'var(--v3-accent)', fontWeight: 600,
+                      }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
                     </div>
                   </div>
-                  <h3 className="font-display text-sm font-semibold text-ink-100 mb-1">{item.title}</h3>
-                  <p className="text-xs text-ink-500 leading-relaxed">{item.desc}</p>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--v3-text-primary)', marginBottom: 4 }}>{item.title}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--v3-text-muted)', lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -366,95 +403,103 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features — Bento Layout */}
-      <section className="py-28 border-t border-ink-800/30">
+      {/* Features - Bento Layout */}
+      <section style={{ ...sectionStyle, padding: '112px 0' }}>
         <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Key Features</h2>
-            <p className="text-ink-400 max-w-xl mx-auto">
+          <motion.div {...reveal()} style={{ textAlign: 'center', marginBottom: 64 }}>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
+              Key Features
+            </h2>
+            <p style={{ color: 'var(--v3-text-secondary)', maxWidth: 576, margin: '0 auto' }}>
               Enterprise-grade contract analysis capabilities built from scratch
             </p>
           </motion.div>
 
           {/* Hero feature + 2 supporting features in bento layout */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-5">
-            {/* Primary feature — large card spanning 3 cols */}
+          <div className="grid grid-cols-1 md:grid-cols-5" style={{ gap: 20, marginBottom: 20 }}>
             {(() => {
               const primary = features[0]
               const PrimaryIcon = primary.Icon
               return (
                 <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="md:col-span-3 relative p-8 lg:p-10 bg-ink-900/50 border border-ink-700/60 rounded-2xl group overflow-hidden hover:border-accent/40 transition-all duration-300"
+                  {...reveal()}
+                  className="md:col-span-3 v3-card v3-card-hover"
+                  style={{ padding: 40 }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                  <div className="relative">
-                    <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                      <PrimaryIcon className="w-7 h-7" />
-                    </div>
-                    <h3 className="font-display text-2xl font-semibold mb-3 text-ink-50">{primary.title}</h3>
-                    <p className="text-ink-400 leading-relaxed text-base max-w-md">{primary.description}</p>
+                  <div
+                    style={{
+                      width: 56, height: 56, borderRadius: 'var(--v3-radius-lg)',
+                      background: 'rgba(212, 168, 45, 0.1)', color: 'var(--v3-accent)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24,
+                    }}
+                  >
+                    <PrimaryIcon style={{ width: 28, height: 28 }} />
                   </div>
+                  <h3 style={{ fontSize: 24, fontWeight: 600, marginBottom: 12, color: 'var(--v3-text-primary)' }}>{primary.title}</h3>
+                  <p style={{ color: 'var(--v3-text-secondary)', lineHeight: 1.6, fontSize: 16, maxWidth: 448, margin: 0 }}>{primary.description}</p>
                 </motion.div>
               )
             })()}
 
-            {/* Two supporting features stacked */}
-            <div className="md:col-span-2 flex flex-col gap-5">
+            <div className="md:col-span-2" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {features.slice(1, 3).map((feature, i) => {
                 const FeatureIcon = feature.Icon
                 return (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: (i + 1) * 0.1 }}
-                    className="flex-1 relative p-6 bg-ink-900/50 border border-ink-700/60 rounded-2xl group overflow-hidden hover:border-accent/40 transition-all duration-300"
+                    {...reveal((i + 1) * 0.1)}
+                    className="v3-card v3-card-hover"
+                    style={{ flex: 1, padding: 24 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                    <div className="relative">
-                      <div className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
-                        <FeatureIcon className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-display text-lg font-semibold mb-2 text-ink-50">{feature.title}</h3>
-                      <p className="text-ink-400 leading-relaxed text-sm">{feature.description}</p>
+                    <div
+                      style={{
+                        width: 44, height: 44, borderRadius: 'var(--v3-radius-md)',
+                        background: 'rgba(212, 168, 45, 0.1)', color: 'var(--v3-accent)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+                      }}
+                    >
+                      <FeatureIcon style={{ width: 20, height: 20 }} />
                     </div>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: 'var(--v3-text-primary)' }}>{feature.title}</h3>
+                    <p style={{ color: 'var(--v3-text-secondary)', lineHeight: 1.6, fontSize: 14, margin: 0 }}>{feature.description}</p>
                   </motion.div>
                 )
               })}
             </div>
           </div>
 
-          {/* Remaining 9 features — alternating wide/compact rhythm */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Remaining 9 features - alternating wide/compact rhythm */}
+          <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 12 }}>
             {features.slice(3).map((feature, i) => {
               const isWide = i % 3 === 0
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={reduce ? false : { opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.04 }}
-                  className={`${isWide
-                    ? 'sm:col-span-2 flex items-center gap-6 p-6 bg-ink-900/30 border border-ink-800/50'
-                    : 'flex items-start gap-4 p-5 bg-ink-900/20 border border-ink-800/40'
-                  } rounded-xl hover:border-accent/20 hover:bg-ink-900/40 transition-all group`}
+                  transition={{ delay: reduce ? 0 : i * 0.04 }}
+                  className={`v3-card v3-card-hover ${isWide ? 'sm:col-span-2' : ''}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: isWide ? 'center' : 'flex-start',
+                    gap: isWide ? 24 : 16,
+                    padding: isWide ? 24 : 20,
+                  }}
                 >
-                  <div className={`${isWide ? 'w-11 h-11 rounded-xl' : 'w-9 h-9 rounded-lg'} bg-accent/10 text-accent flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors`}>
-                    <feature.Icon className={isWide ? 'w-5 h-5' : 'w-4 h-4'} />
+                  <div
+                    style={{
+                      width: isWide ? 44 : 36, height: isWide ? 44 : 36,
+                      borderRadius: isWide ? 'var(--v3-radius-md)' : 'var(--v3-radius-sm)',
+                      background: 'rgba(212, 168, 45, 0.1)', color: 'var(--v3-accent)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}
+                  >
+                    <feature.Icon style={{ width: isWide ? 20 : 16, height: isWide ? 20 : 16 }} />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className={`font-display ${isWide ? 'text-base' : 'text-sm'} font-semibold text-ink-100 mb-1`}>{feature.title}</h3>
-                    <p className={`${isWide ? 'text-sm' : 'text-xs'} text-ink-500 leading-relaxed`}>{feature.description}</p>
+                  <div style={{ minWidth: 0 }}>
+                    <h3 style={{ fontSize: isWide ? 16 : 14, fontWeight: 600, color: 'var(--v3-text-primary)', marginBottom: 4 }}>{feature.title}</h3>
+                    <p style={{ fontSize: isWide ? 14 : 12, color: 'var(--v3-text-muted)', lineHeight: 1.6, margin: 0 }}>{feature.description}</p>
                   </div>
                 </motion.div>
               )
@@ -463,36 +508,32 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Clause Types — light break section */}
-      <section className="py-16 border-t border-ink-800/30">
+      {/* Clause Types */}
+      <section style={{ ...sectionStyle, padding: '64px 0' }}>
         <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10"
-          >
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">16+ Clause Types</h2>
-            <p className="text-ink-400 max-w-xl mx-auto">
+          <motion.div {...reveal()} style={{ textAlign: 'center', marginBottom: 40 }}>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
+              16+ Clause Types
+            </h2>
+            <p style={{ color: 'var(--v3-text-secondary)', maxWidth: 576, margin: '0 auto' }}>
               AI identifies and classifies clause types across commercial contracts
             </p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={reduce ? false : { opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto"
+            style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12, maxWidth: 896, margin: '0 auto' }}
           >
             {clauseTypes.map((type, i) => (
               <motion.span
                 key={type}
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={reduce ? false : { opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.03 }}
-                className="px-4 py-2 bg-ink-900/50 border border-ink-800/50 rounded-lg text-sm text-ink-300
-                         hover:border-accent/30 hover:text-accent transition-all cursor-default"
+                transition={{ delay: reduce ? 0 : i * 0.03 }}
+                className="v3-pill-landing"
               >
                 {type}
               </motion.span>
@@ -501,125 +542,133 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Built for Trust — replaces raw Tech Stack */}
-      <section className="py-24 border-t border-ink-800/30">
+      {/* Built for Trust */}
+      <section style={{ ...sectionStyle, padding: '96px 0' }}>
         <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Built for Trust</h2>
-            <p className="text-ink-400 max-w-xl mx-auto">
+          <motion.div {...reveal()} style={{ textAlign: 'center', marginBottom: 64 }}>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
+              Built for Trust
+            </h2>
+            <p style={{ color: 'var(--v3-text-secondary)', maxWidth: 576, margin: '0 auto' }}>
               Security and accuracy your legal team can rely on
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: 24 }}>
             {trustSignals.map((signal, i) => (
               <TrustCard key={i} signal={signal} index={i} />
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* Architecture — dramatic section */}
-      <section className="py-28 border-t border-ink-800/30">
+      {/* Architecture */}
+      <section style={{ ...sectionStyle, padding: '112px 0' }}>
         <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 48, alignItems: 'center' }}>
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={reduce ? false : { opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-6">
+              <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 24, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
                 Production-Grade Architecture
               </h2>
-              <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {[
-                  { icon: <MessageCircle className="w-5 h-5" />, title: 'Ask Questions in Plain English', desc: 'AI chat grounded in your actual contract text — every answer cites specific clauses and page numbers' },
-                  { icon: <Database className="w-5 h-5" />, title: 'Non-Blocking Analysis', desc: 'Upload multiple contracts and keep working — extraction, embedding, and risk scoring happen in the background' },
-                  { icon: <Activity className="w-5 h-5" />, title: 'Full Audit Trail', desc: 'Every upload, analysis, and export logged with timestamps for compliance and governance requirements' },
-                  { icon: <Lock className="w-5 h-5" />, title: 'Secure by Design', desc: 'Server-side processing with encrypted data at rest and in transit. Your contracts are never exposed to the client' },
+                  { icon: <MessageCircle style={{ width: 20, height: 20 }} />, title: 'Ask Questions in Plain English', desc: 'AI chat grounded in your actual contract text - every answer cites specific clauses and page numbers' },
+                  { icon: <Database style={{ width: 20, height: 20 }} />, title: 'Non-Blocking Analysis', desc: 'Upload multiple contracts and keep working - extraction, embedding, and risk scoring happen in the background' },
+                  { icon: <Activity style={{ width: 20, height: 20 }} />, title: 'Full Audit Trail', desc: 'Every upload, analysis, and export logged with timestamps for compliance and governance requirements' },
+                  { icon: <Lock style={{ width: 20, height: 20 }} />, title: 'Secure by Design', desc: 'Server-side processing with encrypted data at rest and in transit. Your contracts are never exposed to the client' },
                 ].map((item, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, x: -10 }}
+                    initial={reduce ? false : { opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex items-start gap-4"
+                    transition={{ delay: reduce ? 0 : i * 0.1 }}
+                    style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}
                   >
-                    <div className="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center shrink-0 mt-0.5">
+                    <div
+                      style={{
+                        width: 40, height: 40, borderRadius: 'var(--v3-radius-md)', flexShrink: 0, marginTop: 2,
+                        background: 'rgba(212, 168, 45, 0.1)', color: 'var(--v3-accent)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
                       {item.icon}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-ink-100 mb-1">{item.title}</h3>
-                      <p className="text-sm text-ink-500">{item.desc}</p>
+                      <h3 style={{ fontWeight: 600, color: 'var(--v3-text-primary)', marginBottom: 4 }}>{item.title}</h3>
+                      <p style={{ fontSize: 14, color: 'var(--v3-text-muted)', margin: 0 }}>{item.desc}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
 
-            {/* Architecture diagram — dark frame for contrast */}
+            {/* Architecture diagram */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={reduce ? false : { opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="rounded-xl border border-ink-800/50 overflow-hidden theme-dark-frame relative"
+              className="v3-card"
+              style={{ overflow: 'hidden', padding: 0 }}
             >
               {([
                 {
                   label: 'Presentation',
-                  bar: 'bg-blue-400',
+                  bar: 'var(--v3-risk-low)',
                   items: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
                 },
                 {
                   label: 'API Gateway',
-                  bar: 'bg-amber-500',
+                  bar: 'var(--v3-accent)',
                   items: ['FastAPI', '8 Routers', 'Server Proxy', 'Pydantic'],
                 },
                 {
                   label: 'Processing',
-                  bar: 'bg-purple-400',
+                  bar: 'var(--v3-risk-medium)',
                   items: ['Celery Workers', 'RAG Pipeline', 'Tesseract OCR', 'Clause Extraction'],
                 },
                 {
                   label: 'Storage',
-                  bar: 'bg-emerald-400',
+                  bar: 'var(--v3-risk-low)',
                   items: ['PostgreSQL 16', 'pgvector', 'Redis 7', 'MinIO S3'],
                 },
                 {
                   label: 'AI',
-                  bar: 'bg-orange-400',
+                  bar: 'var(--v3-risk-high)',
                   items: ['Ollama', 'llama3.2', 'Nomic Embeddings', 'Vector Search'],
                 },
               ] as const).map((tier, i, arr) => (
                 <div key={tier.label}>
                   <motion.div
-                    initial={{ opacity: 0, x: 30 }}
+                    initial={reduce ? false : { opacity: 0, x: 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex items-center bg-ink-900/50 hover:bg-ink-900/70 transition-colors"
+                    transition={{ delay: reduce ? 0 : i * 0.15, duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    className="v3-card-hover"
+                    style={{ display: 'flex', alignItems: 'stretch' }}
                   >
-                    <div className={`w-0.5 self-stretch ${tier.bar} opacity-70`} />
-                    <div className="flex-1 px-5 py-3 flex items-center gap-4">
-                      <span className="text-[11px] font-mono uppercase tracking-[0.12em] w-[5.5rem] shrink-0 text-ink-500">
+                    <div style={{ width: 2, background: tier.bar, opacity: 0.7 }} />
+                    <div style={{ flex: 1, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <span
+                        className="v3-mono"
+                        style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', width: '5.5rem', flexShrink: 0, color: 'var(--v3-text-muted)' }}
+                      >
                         {tier.label}
                       </span>
-                      <div className="flex gap-2 flex-wrap">
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {tier.items.map((item, j) => (
                           <span
                             key={item}
-                            className={`px-2.5 py-0.5 rounded text-xs border ${
-                              j === 0
-                                ? 'bg-ink-800 border-ink-600/60 text-ink-200'
-                                : 'bg-ink-900/60 border-ink-800/60 text-ink-500'
-                            }`}
+                            style={{
+                              padding: '2px 10px', borderRadius: 'var(--v3-radius-sm)', fontSize: 12,
+                              border: '1px solid var(--v3-border)',
+                              background: j === 0 ? 'var(--v3-card-hover)' : 'transparent',
+                              color: j === 0 ? 'var(--v3-text-secondary)' : 'var(--v3-text-muted)',
+                            }}
                           >
                             {item}
                           </span>
@@ -628,62 +677,50 @@ export default function LandingPage() {
                     </div>
                   </motion.div>
                   {i < arr.length - 1 && (
-                    <div className="flex items-center px-[1.15rem] py-0.5 bg-ink-950/60">
-                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" className="ml-[5.75rem]">
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '2px 1.15rem', background: 'var(--v3-panel)' }}>
+                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ marginLeft: '5.75rem' }}>
                         <motion.path
                           d="M5 0v8M1 5l4 5 4-5"
-                          stroke="#c9a227"
+                          stroke="var(--v3-accent)"
                           strokeWidth="1.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          initial={{ pathLength: 0, opacity: 0 }}
-                          whileInView={{ pathLength: 1, opacity: 0.25 }}
+                          initial={reduce ? false : { pathLength: 0, opacity: 0 }}
+                          whileInView={{ pathLength: 1, opacity: 0.35 }}
                           viewport={{ once: true }}
-                          transition={{ delay: i * 0.15 + 0.3, duration: 0.4, ease: 'easeOut' }}
+                          transition={{ delay: reduce ? 0 : i * 0.15 + 0.3, duration: reduce ? 0 : 0.4, ease: 'easeOut' }}
                         />
                       </svg>
                     </div>
                   )}
                 </div>
               ))}
-              <motion.div
-                className="absolute left-[calc(1.15rem+5.75rem+5px)] w-1.5 h-1.5 rounded-full bg-accent pointer-events-none z-10"
-                style={{ boxShadow: '0 0 6px rgba(201,162,39,0.5)' }}
-                initial={{ top: 0, opacity: 0 }}
-                whileInView={{ top: ['0%', '20%', '40%', '60%', '80%', '100%'], opacity: [0, 0.7, 0.7, 0.7, 0.7, 0] }}
-                viewport={{ once: false }}
-                transition={{ delay: 1.2, duration: 3, ease: 'linear', repeat: Infinity, repeatDelay: 1.5 }}
-              />
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 border-t border-ink-800/30">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="mx-auto mb-8 w-fit">
-              <Image src="/logo-minimal.png" alt="BrightClause" width={64} height={64} className="object-contain" />
+      <section style={{ ...sectionStyle, padding: '80px 0' }}>
+        <div className="max-w-3xl mx-auto px-6" style={{ textAlign: 'center' }}>
+          <motion.div {...reveal()}>
+            <div style={{ margin: '0 auto 32px', width: 'fit-content' }}>
+              <Image src="/logo-minimal.png" alt="BrightClause" width={64} height={64} style={{ objectFit: 'contain' }} />
             </div>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
+            <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
               Upload Your First Contract
             </h2>
-            <p className="text-ink-400 text-lg mb-10 max-w-lg mx-auto">
+            <p style={{ color: 'var(--v3-text-secondary)', fontSize: 18, marginBottom: 40, maxWidth: 512, marginLeft: 'auto', marginRight: 'auto' }}>
               See clause extraction, risk scoring, obligation tracking, and knowledge graph visualization in action.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
               <Link
                 href="/dashboard"
-                className="group flex items-center gap-3 px-8 py-4 bg-accent text-[#1a1a2e] rounded-xl font-semibold text-lg
-                         hover:brightness-110 hover:shadow-xl hover:shadow-accent/20 transition-all hover:scale-[1.02]"
+                className="v3-btn v3-btn-primary group"
+                style={{ height: 52, padding: '0 32px', fontSize: 17 }}
               >
                 Try It Live
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight style={{ width: 20, height: 20 }} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </motion.div>
@@ -691,33 +728,35 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-ink-800/30 py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-ink-500 text-sm">
-            <Image src="/logo-minimal.png" alt="BrightClause" width={20} height={20} className="object-contain" />
+      <footer style={{ borderTop: '1px solid var(--v3-border)', padding: '32px 0' }}>
+        <div
+          className="max-w-6xl mx-auto px-6"
+          style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--v3-text-muted)', fontSize: 14 }}>
+            <Image src="/logo-minimal.png" alt="BrightClause" width={20} height={20} style={{ objectFit: 'contain' }} />
             <span>BrightClause</span>
-            <span className="text-ink-700">&middot;</span>
+            <span style={{ color: 'var(--v3-border-hover)' }}>&middot;</span>
             <span>Built by Macdara</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-500">
-            <Link href="/dashboard" className="hover:text-ink-300 transition-colors">Dashboard</Link>
-            <Link href="/analytics" className="hover:text-ink-300 transition-colors">Analytics</Link>
-            <Link href="/search" className="hover:text-ink-300 transition-colors">Search</Link>
-            <Link href="/compare" className="hover:text-ink-300 transition-colors">Compare</Link>
-            <Link href="/obligations" className="hover:text-ink-300 transition-colors">Obligations</Link>
-            <Link href="/deals" className="hover:text-ink-300 transition-colors">Deals</Link>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '8px 24px', fontSize: 14 }}>
+            <Link href="/dashboard" className="v3-foot-link">Dashboard</Link>
+            <Link href="/analytics" className="v3-foot-link">Analytics</Link>
+            <Link href="/search" className="v3-foot-link">Search</Link>
+            <Link href="/compare" className="v3-foot-link">Compare</Link>
+            <Link href="/obligations" className="v3-foot-link">Obligations</Link>
+            <Link href="/deals" className="v3-foot-link">Deals</Link>
             <a
               href="https://github.com/m4cd4r4/BrightClause"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-ink-300 transition-colors"
+              className="v3-foot-link"
             >
               GitHub
             </a>
           </div>
         </div>
       </footer>
-
     </main>
   )
 }
