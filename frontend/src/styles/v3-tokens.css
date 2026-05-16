@@ -56,6 +56,28 @@
   letter-spacing: -0.01em;
 }
 
+/* Light theme — single-pass additive variant, hooks the existing
+   html.light toggle in src/lib/theme.tsx (same mechanism v1 uses). */
+html.light .v3 {
+  --v3-canvas: #f7f7f8;
+  --v3-panel: #ffffff;
+  --v3-card: #ffffff;
+  --v3-card-hover: #f4f4f5;
+  --v3-popover: #ffffff;
+  --v3-border: #e4e4e7;
+  --v3-border-hover: #d4d4d8;
+
+  --v3-text-primary: #18181b;
+  --v3-text-secondary: #52525b;
+  --v3-text-muted: #71717a;
+  --v3-text-disabled: #a1a1aa;
+
+  --v3-ring: rgba(212, 168, 45, 0.5);
+
+  --v3-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --v3-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .v3-mono {
   font-family: var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace;
   font-feature-settings: 'zero', 'ss02';

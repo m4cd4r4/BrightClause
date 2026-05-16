@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-display: var(--font-geist-sans), Inter, system-ui, sans-serif;
+  --font-body: var(--font-geist-sans), Inter, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Dark theme (default) — warm ink palette echoing gold/cream editorial identity */
