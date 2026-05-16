@@ -100,7 +100,7 @@ export function HeroVisual() {
         <div className="grid grid-cols-1 lg:grid-cols-5">
           {/* Left: Risk Analysis */}
           <div
-            className="lg:col-span-3"
+            className="lg:col-span-3 v3-hv-left"
             style={{ padding: 24, borderRight: '1px solid var(--v3-border)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
