@@ -1,17 +1,17 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ClipboardCheck, Clock, AlertTriangle, CheckCircle, FileText,
   Filter, Loader2, CreditCard, Truck, Bell, ShieldCheck,
-  FileBarChart, ChevronDown, ChevronRight, ExternalLink
+  FileBarChart, ChevronDown, ChevronRight, ExternalLink,
 } from 'lucide-react'
 import { api, ObligationItem } from '@/lib/api'
 import { useToast } from '@/lib/toast'
-import { Navigation } from '@/lib/navigation'
+import { V3Shell } from '@/components/v3/shell'
+import { PageHeader } from '@/components/v3/primitives'
 
 type ObligationWithDoc = ObligationItem & { document_id: string; filename: string }
 
@@ -28,6 +28,23 @@ const statusConfig: Record<string, { color: string; bg: string; label: string }>
   pending: { color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', label: 'Pending' },
   completed: { color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', label: 'Completed' },
   overdue: { color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', label: 'Overdue' },
+}
+
+// Map v1 status colors to v3 tokens
+const statusV3: Record<string, { color: string; border: string; bg: string; label: string }> = {
+  pending: { color: 'var(--v3-risk-medium)', border: 'rgba(234,179,8,0.3)', bg: 'rgba(234,179,8,0.08)', label: 'Pending' },
+  completed: { color: 'var(--v3-risk-low)', border: 'rgba(16,185,129,0.3)', bg: 'rgba(16,185,129,0.08)', label: 'Completed' },
+  overdue: { color: 'var(--v3-risk-critical)', border: 'rgba(239,68,68,0.3)', bg: 'rgba(239,68,68,0.08)', label: 'Overdue' },
+}
+
+// Map obligation types to v3-compatible icon colors
+const typeV3: Record<string, { color: string; bg: string; label: string; icon: typeof Clock }> = {
+  payment: { color: 'var(--v3-risk-low)', bg: 'rgba(16,185,129,0.1)', label: 'Payment', icon: CreditCard },
+  delivery: { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)', label: 'Delivery', icon: Truck },
+  notification: { color: 'var(--v3-risk-medium)', bg: 'rgba(234,179,8,0.1)', label: 'Notification', icon: Bell },
+  compliance: { color: '#a78bfa', bg: 'rgba(167,139,250,0.1)', label: 'Compliance', icon: ShieldCheck },
+  reporting: { color: '#22d3ee', bg: 'rgba(34,211,238,0.1)', label: 'Reporting', icon: FileBarChart },
+  general: { color: 'var(--v3-text-secondary)', bg: 'var(--v3-panel)', label: 'General', icon: ClipboardCheck },
 }
 
 export default function ObligationsPage() {
@@ -74,245 +91,320 @@ export default function ObligationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
-      <Navigation />
+    <V3Shell>
+      <PageHeader
+        crumb="Insights"
+        title="Obligation Tracker"
+        subtitle="Deadlines, commitments, and obligations across all contracts"
+      />
 
-      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50">
-            Obligation Tracker
-          </h1>
-          <p className="text-sm text-ink-500 mt-1">
-            Deadlines, commitments, and obligations across all contracts
-          </p>
-        </div>
-
-        {/* Status Cards */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6"
+      {/* Status KPI cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
+        <button
+          type="button"
+          onClick={() => setFilterStatus('')}
+          className="v3-card v3-card-hover"
+          style={{
+            padding: 16, height: 104, textAlign: 'left', cursor: 'pointer',
+            outline: filterStatus === '' ? '2px solid var(--v3-accent)' : 'none', outlineOffset: -2,
+            border: filterStatus === '' ? '1px solid var(--v3-accent)' : '1px solid var(--v3-border)',
+            borderRadius: 'var(--v3-radius-md)', background: filterStatus === '' ? 'rgba(212,168,45,0.04)' : 'var(--v3-card)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          }}
         >
-          {[
-            { key: '', label: 'All', count: statusCounts.all, color: 'text-ink-200', icon: ClipboardCheck },
-            { key: 'pending', label: 'Pending', count: statusCounts.pending, color: 'text-amber-400', icon: Clock },
-            { key: 'overdue', label: 'Overdue', count: statusCounts.overdue, color: 'text-red-400', icon: AlertTriangle },
-            { key: 'completed', label: 'Completed', count: statusCounts.completed, color: 'text-emerald-400', icon: CheckCircle },
-          ].map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setFilterStatus(item.key)}
-              className={`card p-4 text-left transition-all duration-200 ${
-                filterStatus === item.key
-                  ? 'border-accent/40 bg-accent/5'
-                  : 'hover:border-ink-700/70'
-              }`}
-            >
-              <item.icon className={`w-5 h-5 ${item.color} mb-2`} />
-              <p className={`text-2xl font-bold font-mono ${item.color}`}>{item.count}</p>
-              <p className="text-[11px] text-ink-500 font-mono uppercase tracking-wide mt-0.5">{item.label}</p>
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Type Filter */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.05, duration: 0.3 }}
-          className="flex items-center gap-2 mb-6 overflow-x-auto pb-1"
-        >
-          <Filter className="w-4 h-4 text-ink-500 shrink-0" />
-          <button
-            type="button"
-            onClick={() => setFilterType('')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
-              filterType === '' ? 'bg-accent/20 text-accent' : 'bg-ink-800/50 text-ink-400 hover:text-ink-200'
-            }`}
-          >
-            All Types
-          </button>
-          {Object.entries(typeConfig).map(([key, cfg]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setFilterType(key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors shrink-0 ${
-                filterType === key ? `${cfg.bg} ${cfg.color}` : 'bg-ink-800/50 text-ink-400 hover:text-ink-200'
-              }`}
-            >
-              {cfg.label}
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-accent animate-spin" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ClipboardCheck size={16} color="var(--v3-text-secondary)" />
+            <span className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)' }}>All</span>
           </div>
-        ) : obligations.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="card p-10 sm:p-14"
+          <div style={{ fontSize: 32, fontWeight: 600, lineHeight: 1, color: 'var(--v3-text-primary)' }}>{statusCounts.all}</div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilterStatus('pending')}
+          className="v3-card v3-card-hover"
+          style={{
+            padding: 16, height: 104, textAlign: 'left', cursor: 'pointer',
+            outline: filterStatus === 'pending' ? '2px solid var(--v3-risk-medium)' : 'none', outlineOffset: -2,
+            border: filterStatus === 'pending' ? '1px solid rgba(234,179,8,0.4)' : '1px solid var(--v3-border)',
+            borderRadius: 'var(--v3-radius-md)', background: filterStatus === 'pending' ? 'rgba(234,179,8,0.04)' : 'var(--v3-card)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Clock size={16} color="var(--v3-risk-medium)" />
+            <span className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)' }}>Pending</span>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 600, lineHeight: 1, color: 'var(--v3-risk-medium)' }}>{statusCounts.pending}</div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilterStatus('overdue')}
+          className="v3-card v3-card-hover"
+          style={{
+            padding: 16, height: 104, textAlign: 'left', cursor: 'pointer',
+            outline: filterStatus === 'overdue' ? '2px solid var(--v3-risk-critical)' : 'none', outlineOffset: -2,
+            border: filterStatus === 'overdue' ? '1px solid rgba(239,68,68,0.4)' : '1px solid var(--v3-border)',
+            borderRadius: 'var(--v3-radius-md)', background: filterStatus === 'overdue' ? 'rgba(239,68,68,0.04)' : 'var(--v3-card)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={16} color="var(--v3-risk-critical)" />
+            <span className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)' }}>Overdue</span>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 600, lineHeight: 1, color: 'var(--v3-risk-critical)' }}>{statusCounts.overdue}</div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFilterStatus('completed')}
+          className="v3-card v3-card-hover"
+          style={{
+            padding: 16, height: 104, textAlign: 'left', cursor: 'pointer',
+            outline: filterStatus === 'completed' ? '2px solid var(--v3-risk-low)' : 'none', outlineOffset: -2,
+            border: filterStatus === 'completed' ? '1px solid rgba(16,185,129,0.4)' : '1px solid var(--v3-border)',
+            borderRadius: 'var(--v3-radius-md)', background: filterStatus === 'completed' ? 'rgba(16,185,129,0.04)' : 'var(--v3-card)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CheckCircle size={16} color="var(--v3-risk-low)" />
+            <span className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)' }}>Completed</span>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 600, lineHeight: 1, color: 'var(--v3-risk-low)' }}>{statusCounts.completed}</div>
+        </button>
+      </div>
+
+      {/* Type filter chips */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, overflowX: 'auto', paddingBottom: 4 }}>
+        <Filter size={14} color="var(--v3-text-muted)" style={{ flexShrink: 0 }} />
+        <button
+          type="button"
+          onClick={() => setFilterType('')}
+          style={{
+            height: 28, padding: '0 12px', borderRadius: 999, fontSize: 12, fontWeight: 500,
+            cursor: 'pointer', flexShrink: 0, border: '1px solid',
+            background: filterType === '' ? 'rgba(212,168,45,0.12)' : 'var(--v3-card)',
+            color: filterType === '' ? 'var(--v3-accent)' : 'var(--v3-text-secondary)',
+            borderColor: filterType === '' ? 'rgba(212,168,45,0.3)' : 'var(--v3-border)',
+          }}
+        >
+          All Types
+        </button>
+        {Object.entries(typeV3).map(([key, cfg]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setFilterType(key)}
+            style={{
+              height: 28, padding: '0 12px', borderRadius: 999, fontSize: 12, fontWeight: 500,
+              cursor: 'pointer', flexShrink: 0, border: '1px solid',
+              background: filterType === key ? cfg.bg : 'var(--v3-card)',
+              color: filterType === key ? cfg.color : 'var(--v3-text-secondary)',
+              borderColor: filterType === key ? cfg.color : 'var(--v3-border)',
+            }}
           >
-            <div className="max-w-md mx-auto text-center">
-              {filterStatus || filterType ? (
-                <>
-                  <Filter className="w-10 h-10 text-ink-600 mx-auto" />
-                  <h2 className="font-display text-xl font-semibold mt-4">No Matching Obligations</h2>
-                  <p className="text-ink-500 mt-2 text-sm leading-relaxed">
-                    No obligations found for
-                    {filterStatus && <span className="text-ink-300 font-medium"> {statusConfig[filterStatus]?.label || filterStatus}</span>}
-                    {filterStatus && filterType && ' +'}
-                    {filterType && <span className="text-ink-300 font-medium"> {typeConfig[filterType]?.label || filterType}</span>}
-                    . Try broadening your filters or check a different status.
-                  </p>
+            {cfg.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+          <Loader2 size={24} color="var(--v3-accent)" style={{ animation: 'spin 1s linear infinite' }} />
+        </div>
+      ) : obligations.length === 0 ? (
+        <div className="v3-card" style={{ padding: '56px 40px' }}>
+          <div style={{ maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
+            {filterStatus || filterType ? (
+              <>
+                <Filter size={36} color="var(--v3-text-muted)" style={{ margin: '0 auto 16px' }} />
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', marginBottom: 8 }}>No Matching Obligations</h2>
+                <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
+                  No obligations found for
+                  {filterStatus && <span style={{ color: 'var(--v3-text-primary)', fontWeight: 500 }}> {statusConfig[filterStatus]?.label || filterStatus}</span>}
+                  {filterStatus && filterType && ' +'}
+                  {filterType && <span style={{ color: 'var(--v3-text-primary)', fontWeight: 500 }}> {typeConfig[filterType]?.label || filterType}</span>}
+                  . Try broadening your filters or check a different status.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setFilterStatus(''); setFilterType('') }}
+                  className="v3-btn"
+                  style={{ fontSize: 13, color: 'var(--v3-accent)' }}
+                >
+                  Clear All Filters
+                </button>
+              </>
+            ) : (
+              <>
+                <ClipboardCheck size={36} color="var(--v3-text-muted)" style={{ margin: '0 auto 16px' }} />
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', marginBottom: 8 }}>No Obligations Yet</h2>
+                <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
+                  Obligations are extracted automatically when you analyze a contract — payment deadlines,
+                  delivery requirements, compliance milestones, and notification duties. Upload and analyze
+                  a contract from the dashboard to get started.
+                </p>
+                <Link
+                  href="/dashboard"
+                  className="v3-btn v3-btn-primary"
+                  style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}
+                >
+                  Go to Dashboard
+                  <ChevronRight size={14} />
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {Object.entries(grouped).map(([key, docObligations]) => {
+            const [docId, filename] = key.split('::')
+            return (
+              <section key={key} className="v3-card" style={{ overflow: 'hidden' }}>
+                {/* Document header */}
+                <div style={{
+                  padding: '12px 16px', borderBottom: '1px solid var(--v3-border)',
+                  background: 'var(--v3-panel)', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <FileText size={14} color="var(--v3-accent)" style={{ flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <h3 className="v3-mono" style={{ fontSize: 13, fontWeight: 500, color: 'var(--v3-text-primary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {filename}
+                      </h3>
+                      <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                        {docObligations.length} obligation{docObligations.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => { setFilterStatus(''); setFilterType('') }}
-                    className="mt-5 text-sm text-accent hover:text-accent-light transition-colors font-medium"
+                    onClick={() => router.push(`/documents/${docId}`)}
+                    className="v3-btn v3-btn-ghost"
+                    style={{ padding: '0 8px', height: 28 }}
+                    aria-label="View document"
                   >
-                    Clear All Filters
+                    <ExternalLink size={13} />
                   </button>
-                </>
-              ) : (
-                <>
-                  <ClipboardCheck className="w-10 h-10 text-ink-600 mx-auto" />
-                  <h2 className="font-display text-xl font-semibold mt-4">No Obligations Yet</h2>
-                  <p className="text-ink-500 mt-2 text-sm leading-relaxed">
-                    Obligations are extracted automatically when you analyze a contract - payment deadlines,
-                    delivery requirements, compliance milestones, and notification duties. Upload and analyze
-                    a contract from the dashboard to get started.
-                  </p>
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-accent text-ink-950 font-semibold rounded-xl hover:bg-accent-light transition-colors"
-                  >
-                    Go to Dashboard
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </>
-              )}
-            </div>
-          </motion.div>
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(grouped).map(([key, docObligations], gi) => {
-              const [docId, filename] = key.split('::')
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: gi * 0.05, type: 'spring', stiffness: 200, damping: 22 }}
-                  className="card overflow-hidden"
-                >
-                  {/* Document Header */}
-                  <div className="px-4 sm:px-6 py-4 border-b border-ink-800/50 bg-ink-925 flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <FileText className="w-4 h-4 text-accent shrink-0" />
-                      <div className="min-w-0">
-                        <h3 className="font-medium text-ink-100 text-sm truncate">{filename}</h3>
-                        <p className="text-[11px] text-ink-500 font-mono">{docObligations.length} obligations</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => router.push(`/documents/${docId}`)}
-                      className="p-2 text-ink-400 hover:text-accent transition-colors"
-                      aria-label="View document"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                  </div>
+                </div>
 
-                  {/* Obligation List */}
-                  <div className="divide-y divide-ink-800/30">
-                    {docObligations.map((ob, i) => {
-                      const cfg = typeConfig[ob.obligation_type] || typeConfig.general
-                      const sCfg = statusConfig[ob.status] || statusConfig.pending
-                      const Icon = cfg.icon
-                      const isExpanded = expandedId === ob.id
+                {/* Obligation rows */}
+                <div>
+                  {docObligations.map((ob, i) => {
+                    const cfg = typeV3[ob.obligation_type] || typeV3.general
+                    const sV3 = statusV3[ob.status] || statusV3.pending
+                    const Icon = cfg.icon
+                    const isExpanded = expandedId === ob.id
 
-                      return (
-                        <motion.div
-                          key={ob.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: i * 0.02 }}
-                          className="px-4 sm:px-6 py-4 hover:bg-ink-900/30 transition-colors"
+                    return (
+                      <div
+                        key={ob.id}
+                        style={{ borderBottom: i < docObligations.length - 1 ? '1px solid var(--v3-border)' : 0 }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setExpandedId(isExpanded ? null : ob.id)}
+                          style={{
+                            width: '100%', textAlign: 'left', padding: '12px 16px',
+                            display: 'flex', alignItems: 'flex-start', gap: 12,
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            color: 'inherit',
+                          }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => setExpandedId(isExpanded ? null : ob.id)}
-                            className="w-full text-left flex items-start gap-3"
-                          >
-                            <div className={`mt-0.5 p-2 rounded-lg shrink-0 ${cfg.bg}`}>
-                              <Icon className={`w-4 h-4 ${cfg.color}`} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-ink-100 leading-relaxed">{ob.description}</p>
-                              <div className="flex flex-wrap items-center gap-2 mt-2">
-                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono uppercase border ${sCfg.bg} ${sCfg.color}`}>
-                                  {sCfg.label}
-                                </span>
-                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono uppercase ${cfg.bg} ${cfg.color}`}>
-                                  {cfg.label}
-                                </span>
-                                {ob.due_date && (
-                                  <span className="text-[11px] text-ink-400 font-mono flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {ob.due_date}
-                                  </span>
-                                )}
-                                {ob.responsible_party && (
-                                  <span className="text-[11px] text-ink-400">
-                                    {ob.responsible_party}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <ChevronDown className={`w-4 h-4 text-ink-500 shrink-0 mt-1 transition-transform ${
-                              isExpanded ? 'rotate-180' : ''
-                            }`} />
-                          </button>
-
-                          <AnimatePresence>
-                            {isExpanded && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden"
+                          <div style={{
+                            marginTop: 2, padding: 8, borderRadius: 'var(--v3-radius-sm)',
+                            background: cfg.bg, flexShrink: 0,
+                          }}>
+                            <Icon size={14} color={cfg.color} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 13, color: 'var(--v3-text-primary)', lineHeight: 1.5, margin: '0 0 8px' }}>
+                              {ob.description}
+                            </p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                              {/* Status pill using v3 tokens */}
+                              <span
+                                className="v3-mono"
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', height: 20,
+                                  padding: '0 8px', borderRadius: 'var(--v3-radius-sm)',
+                                  fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase',
+                                  background: sV3.bg, color: sV3.color,
+                                  border: `1px solid ${sV3.border}`,
+                                }}
                               >
-                                <div className="mt-3 ml-11 p-3 bg-ink-900/40 border border-ink-800/50 rounded-lg text-xs text-ink-400 space-y-1.5">
-                                  {ob.responsible_party && (
-                                    <p><span className="text-ink-500">Responsible:</span> {ob.responsible_party}</p>
-                                  )}
-                                  {ob.due_date && (
-                                    <p><span className="text-ink-500">Due:</span> {ob.due_date}</p>
-                                  )}
-                                  <p><span className="text-ink-500">Type:</span> {ob.obligation_type}</p>
-                                  <p><span className="text-ink-500">Extracted:</span> {new Date(ob.created_at).toLocaleDateString()}</p>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.div>
-                      )
-                    })}
-                  </div>
-                </motion.div>
-              )
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+                                {sV3.label}
+                              </span>
+                              {/* Type pill */}
+                              <span
+                                className="v3-mono"
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', height: 20,
+                                  padding: '0 8px', borderRadius: 'var(--v3-radius-sm)',
+                                  fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase',
+                                  background: cfg.bg, color: cfg.color,
+                                  border: '1px solid transparent',
+                                }}
+                              >
+                                {cfg.label}
+                              </span>
+                              {/* Due date */}
+                              {ob.due_date && (
+                                <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  <Clock size={11} />
+                                  {ob.due_date}
+                                </span>
+                              )}
+                              {/* Responsible party */}
+                              {ob.responsible_party && (
+                                <span style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                                  {ob.responsible_party}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronDown
+                            size={14}
+                            color="var(--v3-text-muted)"
+                            style={{ flexShrink: 0, marginTop: 4, transform: isExpanded ? 'rotate(180deg)' : undefined, transition: 'transform 150ms' }}
+                          />
+                        </button>
+
+                        {/* Expanded detail */}
+                        {isExpanded && (
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{
+                              margin: '0 16px 12px 56px', padding: 12,
+                              background: 'var(--v3-panel)', border: '1px solid var(--v3-border)',
+                              borderRadius: 'var(--v3-radius-sm)',
+                              fontSize: 12, color: 'var(--v3-text-muted)',
+                              display: 'flex', flexDirection: 'column', gap: 6,
+                            }}>
+                              {ob.responsible_party && (
+                                <p style={{ margin: 0 }}><span style={{ color: 'var(--v3-text-muted)' }}>Responsible:</span> <span style={{ color: 'var(--v3-text-secondary)' }}>{ob.responsible_party}</span></p>
+                              )}
+                              {ob.due_date && (
+                                <p style={{ margin: 0 }}><span style={{ color: 'var(--v3-text-muted)' }}>Due:</span> <span style={{ color: 'var(--v3-text-secondary)' }}>{ob.due_date}</span></p>
+                              )}
+                              <p style={{ margin: 0 }}><span style={{ color: 'var(--v3-text-muted)' }}>Type:</span> <span style={{ color: 'var(--v3-text-secondary)' }}>{ob.obligation_type}</span></p>
+                              <p style={{ margin: 0 }}><span style={{ color: 'var(--v3-text-muted)' }}>Extracted:</span> <span style={{ color: 'var(--v3-text-secondary)' }}>{new Date(ob.created_at).toLocaleDateString()}</span></p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )
+          })}
+        </div>
+      )}
+    </V3Shell>
   )
 }
