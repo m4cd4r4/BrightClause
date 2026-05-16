@@ -31,11 +31,32 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const sideRef = useRef<HTMLElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
 
   // Trap focus inside the open overlay; restore it on close. The drawer
   // trap is inert on desktop (mobileNavOpen is never true there).
   useFocusTrap(sideRef, mobileNavOpen)
   useFocusTrap(paletteRef, paletteOpen)
+
+  // Background isolation: while an overlay is open, mark the content
+  // behind it `inert` so AT / pointer / focus cannot reach it. The
+  // scrim and the palette overlay are separate siblings, so they stay
+  // interactive (scrim/backdrop click-to-close still works). When the
+  // drawer is open the sidebar IS the dialog, so only the content
+  // column is inert; the palette sits above the whole shell, so the
+  // sidebar is inert too. (`inert` set imperatively - React 18 has no
+  // JSX prop for it; a no-op in browsers without support, where the
+  // focus trap still covers keyboard.)
+  useEffect(() => {
+    const body = bodyRef.current
+    const side = sideRef.current
+    if (body) body.inert = mobileNavOpen || paletteOpen
+    if (side) side.inert = paletteOpen
+    return () => {
+      if (body) body.inert = false
+      if (side) side.inert = false
+    }
+  }, [mobileNavOpen, paletteOpen])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -98,7 +119,7 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
         <div className="v3-scrim" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
       )}
 
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <div ref={bodyRef} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <header className="v3-top">
           <button
             className="v3-side-toggle"

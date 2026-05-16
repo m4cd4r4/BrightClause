@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Maximize2, Minimize2 } from 'lucide-react'
@@ -46,8 +47,20 @@ export function ScreenshotShowcase() {
   const [paused, setPaused] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const cinemaRef = useRef<HTMLDivElement>(null)
   useFocusTrap(cinemaRef, isExpanded)
+  useEffect(() => setMounted(true), [])
+
+  // Cinema is a true top-level modal (portaled to <body>), so the rest
+  // of the landing can be marked `inert` while it is open - AT / focus
+  // cannot reach the page behind it. The portaled overlay is outside
+  // #main-content, so it (and its click-to-close backdrop) stay live.
+  useEffect(() => {
+    const main = document.getElementById('main-content')
+    if (main) main.inert = isExpanded
+    return () => { if (main) main.inert = false }
+  }, [isExpanded])
 
   const next = useCallback(() => {
     setActive(i => (i + 1) % SCREENS.length)
@@ -233,8 +246,12 @@ export function ScreenshotShowcase() {
         </motion.div>
       </div>
 
-      {/* Cinema mode overlay */}
-      <AnimatePresence>
+      {/* Cinema mode overlay — portaled to <body> so #main-content can be inert while it is open.
+          The .v3 wrapper (display:contents = no box) re-establishes the --v3-* token scope at
+          body level, since .v3 is only on <main>; it also inherits html.light .v3 for light theme. */}
+      {mounted && createPortal(
+        <div className="v3" style={{ display: 'contents' }}>
+        <AnimatePresence>
         {isExpanded && (
           <>
             {/* Backdrop — click anywhere on it to close */}
@@ -266,6 +283,9 @@ export function ScreenshotShowcase() {
           </>
         )}
       </AnimatePresence>
+        </div>,
+        document.body,
+      )}
     </section>
   )
 }
