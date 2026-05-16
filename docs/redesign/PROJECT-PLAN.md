@@ -52,7 +52,7 @@ Every batch is one PR, branched fresh off `master`, merged via the git-integrati
 | Batch | Branch | Surfaces reskinned | Why grouped | Effort | Status |
 |---|---|---|---|---|---|
 | 1 | `feat/v3-batch1-dashboard-obligations` | `/dashboard`, `/obligations` | Heaviest KpiCard + table + RiskPill reuse — fastest wins, lowest risk, proves the shell on real app routes | M | **merged** (PR #31, master `27b315f`, live + prod-verified 2026-05-16; writer/2×opus-reviewer) |
-| 2 | `feat/v3-batch2-docdetail-graph` | `/documents/[id]`, `/documents/[id]/graph` | The two complex workspace layouts; doc-detail is the core work surface, graph just needs the shell + fullscreen canvas | L | later |
+| 2 | `feat/v3-batch2-docdetail-graph` | `/documents/[id]`, `/documents/[id]/graph` | The two complex workspace layouts; doc-detail is the core work surface, graph just needs the shell + fullscreen canvas | L | **merged** (PR #33, master `d04e7fc`, live + prod-verified 2026-05-16; writer/opus-reviewer OVERALL PASS; alias-stickiness footgun recurred, remediated once with sanctioned git-deployment re-alias) |
 | 3 | `feat/v3-batch3-search-compare-deals` | `/search`, `/compare`, `/deals`, `/deals/[id]` | Lighter, empty-state-heavy surfaces; all kept (no demotion) | M | later |
 | 4 | `chore/v3-finalise` | Promote `/analytics-v2` → `/analytics`, drop the now-duplicate old Analytics, light-theme token map, drop Cormorant + DM Sans imports, remove stray `frontend/nul` + PWA artefacts, consistency pass | M | later |
 
