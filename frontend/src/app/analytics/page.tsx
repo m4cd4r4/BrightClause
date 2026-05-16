@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts'
 import { api, Document, AnalysisSummary } from '@/lib/api'
 import { V3Shell } from '@/components/v3/shell'
@@ -23,6 +24,8 @@ export default function AnalyticsPage() {
     documents: Array<{ document_id: string; filename: string; contexts: string[] }>
   }>>([])
   const [loading, setLoading] = useState(true)
+  // Mobile heatmap accordion: which document row is expanded (single-open).
+  const [openDoc, setOpenDoc] = useState<string | null>(null)
 
   useEffect(() => {
     ;(async () => {
@@ -123,7 +126,7 @@ export default function AnalyticsPage() {
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
+      <div className="v3-grid-resp" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
         <KpiCard label="Health score" value={stats.healthScore} delta={{ value: 3, period: '30d' }} spark={[40, 48, 55, 52, 60, 63, stats.healthScore]} intent={stats.healthScore >= 70 ? 'low' : stats.healthScore >= 40 ? 'medium' : 'critical'} />
         <KpiCard label="Critical risks" value={stats.critical} spark={[0, 1, 2, 2, 3, 3, stats.critical]} intent="critical" />
         <KpiCard label="High risks" value={stats.high} spark={[1, 1, 2, 2, 2, 2, stats.high]} intent="high" />
@@ -131,7 +134,7 @@ export default function AnalyticsPage() {
       </div>
 
       <Section title="Risk heatmap" hint="clause type × document">
-        <div style={{ padding: 16, overflowX: 'auto' }}>
+        <div className="v3-hm-matrix" style={{ padding: 16, overflowX: 'auto' }}>
           <table className="v3-table" style={{ background: 'transparent', borderCollapse: 'separate', borderSpacing: 2 }}>
             <thead>
               <tr>
@@ -168,9 +171,79 @@ export default function AnalyticsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile: a wide matrix is unusable on a phone, so the same data
+            becomes a single-open per-document accordion. */}
+        <div className="v3-hm-accordion">
+          {docAnalyses.length === 0 && (
+            <div style={{ padding: 20, fontSize: 13, color: 'var(--v3-text-muted)' }}>No analyzed contracts yet.</div>
+          )}
+          {docAnalyses.map(({ doc, summary }) => {
+            const breakdown = summary?.clause_breakdown ?? {}
+            const rows = allClauseTypes
+              .map((t) => ({ t, cell: breakdown[t] }))
+              .filter((r) => (r.cell?.total ?? 0) > 0)
+            const total = rows.reduce((s, r) => s + (r.cell?.total ?? 0), 0)
+            const agg = rows.reduce<Record<string, number>>((acc, r) => {
+              for (const [lvl, n] of Object.entries(r.cell?.risk_levels ?? {})) acc[lvl] = (acc[lvl] ?? 0) + (n as number)
+              return acc
+            }, {})
+            const dominant = cellLevel(agg)
+            const open = openDoc === doc.id
+            return (
+              <div key={doc.id} style={{ borderBottom: '1px solid var(--v3-border)' }}>
+                <button
+                  type="button"
+                  onClick={() => setOpenDoc(open ? null : doc.id)}
+                  aria-expanded={open}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '12px 14px', minHeight: 48, background: 'transparent',
+                    border: 0, cursor: 'pointer', textAlign: 'left', color: 'inherit',
+                  }}
+                >
+                  <span className="v3-mono" style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--v3-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {doc.filename}
+                  </span>
+                  {dominant && <RiskPill level={dominant} />}
+                  <span className="v3-mono" style={{ fontSize: 12, color: 'var(--v3-text-muted)' }}>{total}</span>
+                  <ChevronDown
+                    size={16}
+                    style={{ flexShrink: 0, color: 'var(--v3-text-muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 150ms ease' }}
+                  />
+                </button>
+                {open && (
+                  <div style={{ padding: '4px 14px 14px' }}>
+                    {rows.length === 0 ? (
+                      <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', margin: '4px 0' }}>No risk-scored clauses.</p>
+                    ) : (
+                      rows.map(({ t, cell }) => {
+                        const lvl = cellLevel(cell?.risk_levels)
+                        return (
+                          <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid var(--v3-border)' }}>
+                            <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: 'var(--v3-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatClauseType(t)}</span>
+                            <span className="v3-mono" style={{ fontSize: 12, color: 'var(--v3-text-muted)' }}>{cell?.total ?? 0}</span>
+                            {lvl && <RiskPill level={lvl} />}
+                          </div>
+                        )
+                      })
+                    )}
+                    <Link
+                      href={`/documents/${doc.id}`}
+                      className="v3-btn"
+                      style={{ marginTop: 12, height: 32, fontSize: 12, width: '100%', justifyContent: 'center' }}
+                    >
+                      Open document
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </Section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+      <div className="v3-split-resp" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
         <Section title="Clause distribution" hint="across portfolio">
           <div style={{ padding: 16, height: 280 }}>
             <ResponsiveContainer>
