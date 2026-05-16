@@ -10,8 +10,9 @@ import {
 } from 'lucide-react'
 import { api, Document, AnalysisSummary, Clause } from '@/lib/api'
 import { useToast } from '@/lib/toast'
-import { Navigation } from '@/lib/navigation'
-import { type RiskLevel, riskConfig, formatClauseType, getTopRisk } from '@/lib/risk'
+import { type RiskLevel, formatClauseType, getTopRisk } from '@/lib/risk'
+import { V3Shell } from '@/components/v3/shell'
+import { PageHeader, RiskPill } from '@/components/v3/primitives'
 
 interface CompareDoc {
   doc: Document
@@ -19,6 +20,9 @@ interface CompareDoc {
   clauses: Clause[]
   loading: boolean
 }
+
+const toRiskLevel = (level: string | null | undefined): RiskLevel =>
+  level === 'critical' || level === 'high' || level === 'medium' || level === 'low' ? level : 'low'
 
 function ComparePageContent() {
   const searchParams = useSearchParams()
@@ -166,348 +170,371 @@ function ComparePageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
-      <Navigation />
+    <V3Shell>
+      <PageHeader
+        crumb="Workspace"
+        title="Document Comparison"
+        subtitle="Compare clause coverage and risk levels across contracts side-by-side"
+      />
 
-      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold tracking-tight text-ink-50">Document Comparison</h1>
-          <p className="text-sm text-ink-500 mt-1">
-            Compare clause coverage and risk levels across contracts side-by-side
-          </p>
-        </div>
-
-        {/* Selected Documents Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap items-center gap-3 mb-8"
-        >
-          {compareDocs.map(cd => (
-            <div
-              key={cd.doc.id}
-              className="flex items-center gap-2 px-4 py-2.5 bg-ink-900/50 border border-ink-800/50 rounded-xl group"
-            >
-              {cd.loading ? (
-                <Loader2 className="w-4 h-4 text-accent animate-spin" />
-              ) : (
-                <FileText className="w-4 h-4 text-accent" />
-              )}
-              <span className="text-sm text-ink-200 font-medium max-w-[200px] truncate">{cd.doc.filename}</span>
-              {cd.summary && (
-                <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded
-                  ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk]?.color : 'text-ink-500'}
-                  ${cd.summary.overall_risk ? riskConfig[cd.summary.overall_risk]?.bg + '/15' : 'bg-ink-800/30'}`}>
-                  {cd.summary.overall_risk}
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() => removeDocument(cd.doc.id)}
-                className="p-0.5 text-ink-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                aria-label="Remove document"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-
-          {compareDocs.length < 5 && (
-            <div ref={pickerRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setShowPicker(!showPicker)}
-                className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-ink-700 rounded-xl
-                         text-sm text-ink-400 hover:text-accent hover:border-accent/30 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Document {compareDocs.length === 0 && '(select 2-5)'}
-              </button>
-
-              {/* Document Picker Dropdown */}
-              <AnimatePresence>
-                {showPicker && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="absolute top-full left-0 mt-2 w-80 bg-ink-900 border border-ink-700 rounded-xl shadow-xl z-20 overflow-hidden"
-                  >
-                    <div className="p-3 border-b border-ink-800/50">
-                      <p className="text-xs text-ink-500 font-mono">Select a document to compare</p>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto divide-y divide-ink-800/20">
-                      {availableDocs.length === 0 ? (
-                        <div className="p-4 text-center text-ink-500 text-sm">No more documents available</div>
-                      ) : (
-                        availableDocs.map(doc => (
-                          <button
-                            key={doc.id}
-                            type="button"
-                            onClick={() => addDocument(doc)}
-                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-ink-800/50 transition-colors text-left"
-                          >
-                            <FileText className="w-4 h-4 text-ink-500 shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-ink-200 truncate">{doc.filename}</p>
-                              <p className="text-[11px] text-ink-500 font-mono">
-                                {doc.page_count ? `${doc.page_count} pages` : 'Unknown pages'} &middot; {doc.chunk_count} chunks
-                              </p>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Empty State */}
-        {compareDocs.length < 2 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="card p-10 sm:p-14"
+      {/* Selected Documents Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 32 }}
+      >
+        {compareDocs.map(cd => (
+          <div
+            key={cd.doc.id}
+            className="v3-card"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px' }}
           >
-            <div className="max-w-lg mx-auto text-center">
-              {/* Mini side-by-side comparison preview */}
-              <div className="mb-8 opacity-40 pointer-events-none select-none" aria-hidden="true">
-                <div className="flex gap-3 justify-center">
-                  {[0, 1].map((col) => (
-                    <div key={col} className="flex-1 max-w-[180px] rounded-lg border border-ink-800/30 p-3">
-                      <div className="flex items-center gap-2 mb-3">
-                        <FileText className="w-3.5 h-3.5 text-ink-600" />
-                        <div className="h-2.5 w-16 bg-ink-800/50 rounded" />
-                      </div>
-                      {Array.from({ length: 4 }).map((_, row) => (
-                        <div key={row} className="flex items-center gap-2 mb-2">
-                          <div className="h-2 w-14 bg-ink-800/30 rounded" />
-                          <div
-                            className="w-5 h-5 rounded-sm"
-                            style={{
-                              backgroundColor: col === 0
-                                ? ['rgba(239,68,68,0.2)', 'rgba(245,158,11,0.2)', 'rgba(16,185,129,0.15)', 'rgba(99,102,106,0.1)'][row]
-                                : ['rgba(245,158,11,0.2)', 'rgba(16,185,129,0.15)', 'rgba(99,102,106,0.1)', 'rgba(239,68,68,0.2)'][row],
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {cd.loading ? (
+              <Loader2 size={16} color="var(--v3-accent)" style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <FileText size={16} color="var(--v3-accent)" />
+            )}
+            <span style={{ fontSize: 13, color: 'var(--v3-text-primary)', fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cd.doc.filename}</span>
+            {cd.summary && (
+              <RiskPill level={cd.summary.overall_risk ? toRiskLevel(cd.summary.overall_risk) : 'neutral'}>
+                {cd.summary.overall_risk}
+              </RiskPill>
+            )}
+            <button
+              type="button"
+              onClick={() => removeDocument(cd.doc.id)}
+              style={{ display: 'flex', padding: 2, background: 'transparent', border: 0, cursor: 'pointer', color: 'var(--v3-text-muted)' }}
+              aria-label="Remove document"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
 
-              <GitCompareArrows className="w-10 h-10 text-ink-600 mx-auto" />
-              <h2 className="font-display text-xl font-semibold mt-4">
-                {compareDocs.length === 0 ? 'Compare Your Contracts' : 'Add One More Document'}
-              </h2>
-              <p className="text-ink-500 mt-2 max-w-md mx-auto text-sm leading-relaxed">
-                {compareDocs.length === 0
-                  ? 'Select 2-5 contracts to see a clause-by-clause comparison matrix. Spot coverage gaps, risk differences, and missing provisions across agreements.'
-                  : 'You need at least two documents to build the comparison matrix. Use the "Add Document" button above to pick another contract.'
-                }
+        {compareDocs.length < 5 && (
+          <div ref={pickerRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowPicker(!showPicker)}
+              className="v3-btn"
+              style={{ borderStyle: 'dashed', color: 'var(--v3-text-secondary)' }}
+            >
+              <Plus size={16} />
+              Add Document {compareDocs.length === 0 && '(select 2-5)'}
+            </button>
+
+            {/* Document Picker Dropdown */}
+            <AnimatePresence>
+              {showPicker && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 5 }}
+                  style={{
+                    position: 'absolute', top: '100%', left: 0, marginTop: 8, width: 320,
+                    background: 'var(--v3-popover)', border: '1px solid var(--v3-border)',
+                    borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)', zIndex: 20, overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ padding: 12, borderBottom: '1px solid var(--v3-border)' }}>
+                    <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', margin: 0 }}>Select a document to compare</p>
+                  </div>
+                  <div style={{ maxHeight: 256, overflowY: 'auto' }}>
+                    {availableDocs.length === 0 ? (
+                      <div style={{ padding: 16, textAlign: 'center', color: 'var(--v3-text-muted)', fontSize: 13 }}>No more documents available</div>
+                    ) : (
+                      availableDocs.map(doc => (
+                        <button
+                          key={doc.id}
+                          type="button"
+                          onClick={() => addDocument(doc)}
+                          style={{
+                            width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12,
+                            background: 'transparent', border: 0, borderBottom: '1px solid var(--v3-border)',
+                            cursor: 'pointer', textAlign: 'left',
+                          }}
+                        >
+                          <FileText size={16} color="var(--v3-text-muted)" style={{ flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 13, color: 'var(--v3-text-primary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.filename}</p>
+                            <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', margin: 0 }}>
+                              {doc.page_count ? `${doc.page_count} pages` : 'Unknown pages'} &middot; {doc.chunk_count} chunks
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Empty State */}
+      {compareDocs.length < 2 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="v3-card"
+          style={{ padding: 56 }}
+        >
+          <div style={{ maxWidth: 512, margin: '0 auto', textAlign: 'center' }}>
+            {/* Mini side-by-side comparison preview */}
+            <div style={{ marginBottom: 32, opacity: 0.4, pointerEvents: 'none', userSelect: 'none' }} aria-hidden="true">
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                {[0, 1].map((col) => (
+                  <div key={col} style={{ flex: 1, maxWidth: 180, borderRadius: 'var(--v3-radius-md)', border: '1px solid var(--v3-border)', padding: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <FileText size={14} color="var(--v3-text-disabled)" />
+                      <div style={{ height: 10, width: 64, background: 'var(--v3-border)', borderRadius: 3 }} />
+                    </div>
+                    {Array.from({ length: 4 }).map((_, row) => (
+                      <div key={row} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <div style={{ height: 8, width: 56, background: 'var(--v3-border)', borderRadius: 3 }} />
+                        <div
+                          style={{
+                            width: 20, height: 20, borderRadius: 'var(--v3-radius-sm)',
+                            backgroundColor: col === 0
+                              ? ['rgba(239,68,68,0.2)', 'rgba(249,115,22,0.2)', 'rgba(16,185,129,0.15)', 'rgba(113,113,122,0.1)'][row]
+                              : ['rgba(249,115,22,0.2)', 'rgba(16,185,129,0.15)', 'rgba(113,113,122,0.1)', 'rgba(239,68,68,0.2)'][row],
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <GitCompareArrows size={40} color="var(--v3-text-disabled)" style={{ margin: '0 auto', display: 'block' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 16, color: 'var(--v3-text-primary)' }}>
+              {compareDocs.length === 0 ? 'Compare Your Contracts' : 'Add One More Document'}
+            </h2>
+            <p style={{ color: 'var(--v3-text-muted)', marginTop: 8, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto', fontSize: 13, lineHeight: 1.6 }}>
+              {compareDocs.length === 0
+                ? 'Select 2-5 contracts to see a clause-by-clause comparison matrix. Spot coverage gaps, risk differences, and missing provisions across agreements.'
+                : 'You need at least two documents to build the comparison matrix. Use the "Add Document" button above to pick another contract.'
+              }
+            </p>
+          </div>
+        </motion.div>
+      ) : (
+        <>
+          {/* Comparison Matrix */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+            className="v3-card"
+            style={{ overflow: 'hidden', marginBottom: 32 }}
+          >
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Clause Comparison Matrix</h2>
+              <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 4, marginBottom: 0 }}>
+                {allClauseTypes.length} clause types across {compareDocs.length} documents
               </p>
             </div>
-          </motion.div>
-        ) : (
-          <>
-            {/* Comparison Matrix */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-              className="card overflow-hidden mb-8"
-            >
-              <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                <h2 className="font-display text-lg font-semibold text-ink-50">Clause Comparison Matrix</h2>
-                <p className="text-[11px] text-ink-500 mt-0.5 font-mono">
-                  {allClauseTypes.length} clause types across {compareDocs.length} documents
-                </p>
-              </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-ink-800/30">
-                      <th className="sticky left-0 bg-ink-950 z-10 px-6 py-3 text-left text-[11px] font-mono uppercase tracking-widest text-ink-500 min-w-[160px]">
-                        Clause Type
+            <div style={{ overflowX: 'auto' }}>
+              <table className="v3-table">
+                <thead>
+                  <tr>
+                    <th style={{ position: 'sticky', left: 0, zIndex: 10, minWidth: 160 }}>
+                      Clause Type
+                    </th>
+                    {compareDocs.map(cd => (
+                      <th key={cd.doc.id} style={{ textAlign: 'center', minWidth: 180 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                          <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-secondary)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textTransform: 'none', letterSpacing: 0 }}>
+                            {cd.doc.filename}
+                          </span>
+                          {cd.summary && (
+                            <RiskPill level={cd.summary.overall_risk ? toRiskLevel(cd.summary.overall_risk) : 'neutral'}>
+                              {cd.summary.overall_risk}
+                            </RiskPill>
+                          )}
+                        </div>
                       </th>
-                      {compareDocs.map(cd => (
-                        <th key={cd.doc.id} className="px-4 py-3 text-center min-w-[180px]">
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-[11px] font-mono text-ink-400 truncate max-w-[160px]">
-                              {cd.doc.filename}
-                            </span>
-                            {cd.summary && (
-                              <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded
-                                ${riskConfig[cd.summary.overall_risk]?.color}
-                                ${riskConfig[cd.summary.overall_risk]?.bg}/15`}>
-                                {cd.summary.overall_risk}
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allClauseTypes.map((clauseType) => (
+                    <tr key={clauseType}>
+                      <td style={{ position: 'sticky', left: 0, zIndex: 10, background: 'var(--v3-card)' }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--v3-text-secondary)' }}>{formatClauseType(clauseType)}</span>
+                      </td>
+                      {compareDocs.map(cd => {
+                        const cellData = getCellData(cd, clauseType)
+                        const cellKey = `${cd.doc.id}-${clauseType}`
+                        const isExpanded = expandedCell === cellKey
+
+                        return (
+                          <td key={cd.doc.id} style={{ textAlign: 'center', position: 'relative' }}>
+                            {cd.loading ? (
+                              <Loader2 size={16} color="var(--v3-text-muted)" style={{ animation: 'spin 1s linear infinite', margin: '0 auto', display: 'block' }} />
+                            ) : cellData ? (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedCell(isExpanded ? null : cellKey)}
+                                style={{
+                                  display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                                  padding: '8px 12px', borderRadius: 'var(--v3-radius-md)', cursor: 'pointer',
+                                  background: isExpanded ? 'var(--v3-card-hover)' : 'transparent',
+                                  border: isExpanded ? '1px solid rgba(212,168,45,0.35)' : '1px solid transparent',
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <span style={{
+                                    width: 8, height: 8, borderRadius: 'var(--v3-radius-sm)',
+                                    background: cellData.topRisk === 'critical' ? 'var(--v3-risk-critical)'
+                                      : cellData.topRisk === 'high' ? 'var(--v3-risk-high)'
+                                      : cellData.topRisk === 'medium' ? 'var(--v3-risk-medium)'
+                                      : 'var(--v3-risk-low)',
+                                  }} />
+                                  <span className="v3-mono" style={{
+                                    fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
+                                    color: cellData.topRisk === 'critical' ? 'var(--v3-risk-critical)'
+                                      : cellData.topRisk === 'high' ? 'var(--v3-risk-high)'
+                                      : cellData.topRisk === 'medium' ? 'var(--v3-risk-medium)'
+                                      : cellData.topRisk === 'low' ? 'var(--v3-risk-low)'
+                                      : 'var(--v3-text-muted)',
+                                  }}>{cellData.topRisk}</span>
+                                </div>
+                                <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>{cellData.breakdown.total} clause(s)</span>
+                              </button>
+                            ) : (
+                              <span className="v3-mono" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--v3-text-disabled)' }}>
+                                <span style={{ width: 8, height: 8, borderRadius: 'var(--v3-radius-sm)', background: 'var(--v3-border)' }} />
+                                Not found
                               </span>
                             )}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-ink-800/20">
-                    {allClauseTypes.map((clauseType) => (
-                      <tr key={clauseType} className="hover:bg-ink-900/20 transition-colors">
-                        <td className="sticky left-0 bg-ink-950 z-10 px-6 py-3">
-                          <span className="text-xs font-medium text-ink-300">{formatClauseType(clauseType)}</span>
-                        </td>
-                        {compareDocs.map(cd => {
-                          const cellData = getCellData(cd, clauseType)
-                          const cellKey = `${cd.doc.id}-${clauseType}`
-                          const isExpanded = expandedCell === cellKey
 
-                          return (
-                            <td key={cd.doc.id} className="px-4 py-3 text-center relative">
-                              {cd.loading ? (
-                                <Loader2 className="w-4 h-4 text-ink-600 animate-spin mx-auto" />
-                              ) : cellData ? (
-                                <button
-                                  type="button"
-                                  onClick={() => setExpandedCell(isExpanded ? null : cellKey)}
-                                  className={`inline-flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all
-                                    ${isExpanded ? 'bg-ink-800/50 ring-1 ring-accent/30' : 'hover:bg-ink-800/30'}
-                                    ${cellData.topRisk ? riskConfig[cellData.topRisk]?.color : 'text-ink-500'}`}
-                                >
-                                  <div className="flex items-center gap-1.5">
-                                    <div className={`w-2.5 h-2.5 rounded-sm ${
-                                      cellData.topRisk === 'critical' ? 'bg-red-500/60' :
-                                      cellData.topRisk === 'high' ? 'bg-orange-500/50' :
-                                      cellData.topRisk === 'medium' ? 'bg-amber-500/40' :
-                                      'bg-emerald-500/30'
-                                    }`} />
-                                    <span className="text-[11px] font-mono font-bold uppercase">{cellData.topRisk}</span>
-                                  </div>
-                                  <span className="text-[11px] text-ink-500 font-mono">{cellData.breakdown.total} clause(s)</span>
-                                </button>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 text-[11px] text-ink-600 font-mono">
-                                  <span className="w-2 h-2 rounded-sm bg-ink-800/50" />
-                                  Not found
-                                </span>
-                              )}
-
-                              {/* Expanded clause detail */}
-                              {isExpanded && cellData && cellData.clauses.length > 0 && (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 5 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-72 bg-ink-900 border border-ink-700 rounded-xl shadow-xl z-30 p-4 text-left"
-                                >
-                                  <div className="flex items-center justify-between mb-3">
-                                    <span className="text-xs font-semibold text-ink-200">{formatClauseType(clauseType)}</span>
-                                    <button type="button" onClick={() => setExpandedCell(null)} className="p-0.5 text-ink-500 hover:text-ink-300">
-                                      <X className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    {cellData.clauses.slice(0, 3).map((clause) => (
-                                      <div key={clause.id} className="p-2.5 bg-ink-800/30 rounded-lg">
-                                        {clause.risk_level && (
-                                          <span className={`text-[11px] font-mono uppercase px-1.5 py-0.5 rounded mb-1.5 inline-block
-                                            ${riskConfig[clause.risk_level as RiskLevel]?.color}
-                                            ${riskConfig[clause.risk_level as RiskLevel]?.bg}/15`}>
-                                            {clause.risk_level}
-                                          </span>
-                                        )}
-                                        <p className="text-[11px] text-ink-400 leading-relaxed line-clamp-3">
-                                          {clause.summary || clause.content.substring(0, 200)}
-                                        </p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <Link
-                                    href={`/documents/${cd.doc.id}`}
-                                    className="flex items-center justify-center gap-1.5 mt-3 text-[11px] text-accent hover:text-accent-light transition-colors"
-                                  >
-                                    <Eye className="w-3 h-3" />
-                                    View Full Document
-                                  </Link>
-                                </motion.div>
-                              )}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-
-            {/* Coverage Gaps */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 22 }}
-              className="card overflow-hidden"
-            >
-              <div className="px-6 py-5 border-b border-ink-800/50 bg-ink-925">
-                <h2 className="font-display text-lg font-semibold text-ink-50">Coverage Gaps</h2>
-                <p className="text-[11px] text-ink-500 mt-0.5 font-mono">
-                  Clause types missing from individual documents
-                </p>
-              </div>
-              <div className="p-6">
-                {(() => {
-                  const gaps: Array<{ doc: Document; missing: string[] }> = []
-                  for (const cd of compareDocs) {
-                    if (!cd.summary) continue
-                    const missing = allClauseTypes.filter(type => !cd.summary?.clause_breakdown[type])
-                    if (missing.length > 0) {
-                      gaps.push({ doc: cd.doc, missing })
-                    }
-                  }
-
-                  if (gaps.length === 0) {
-                    return (
-                      <div className="text-center py-6">
-                        <CheckCircle className="w-10 h-10 text-emerald-500/50 mx-auto" />
-                        <p className="text-ink-500 text-sm mt-3">All documents cover the same clause types</p>
-                      </div>
-                    )
-                  }
-
-                  return (
-                    <div className="space-y-4">
-                      {gaps.map(({ doc, missing }) => (
-                        <div key={doc.id} className="p-4 bg-ink-900/30 border border-ink-800/30 rounded-xl">
-                          <div className="flex items-center gap-2 mb-3">
-                            <AlertTriangle className="w-4 h-4 text-amber-400" />
-                            <span className="text-sm font-medium text-ink-200">{doc.filename}</span>
-                            <span className="text-[11px] text-ink-500 font-mono">
-                              missing {missing.length} clause type{missing.length !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {missing.map(type => (
-                              <span
-                                key={type}
-                                className="text-[11px] font-mono px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-md text-amber-400"
+                            {/* Expanded clause detail */}
+                            {isExpanded && cellData && cellData.clauses.length > 0 && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{
+                                  position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+                                  marginTop: 4, width: 288, background: 'var(--v3-popover)',
+                                  border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-lg)',
+                                  boxShadow: 'var(--v3-shadow-md)', zIndex: 30, padding: 16, textAlign: 'left',
+                                }}
                               >
-                                {formatClauseType(type)}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--v3-text-primary)' }}>{formatClauseType(clauseType)}</span>
+                                  <button type="button" onClick={() => setExpandedCell(null)} style={{ display: 'flex', padding: 2, background: 'transparent', border: 0, cursor: 'pointer', color: 'var(--v3-text-muted)' }}>
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 192, overflowY: 'auto' }}>
+                                  {cellData.clauses.slice(0, 3).map((clause) => (
+                                    <div key={clause.id} style={{ padding: 10, background: 'var(--v3-card)', borderRadius: 'var(--v3-radius-md)' }}>
+                                      {clause.risk_level && (
+                                        <div style={{ marginBottom: 6 }}>
+                                          <RiskPill level={toRiskLevel(clause.risk_level)}>
+                                            {clause.risk_level}
+                                          </RiskPill>
+                                        </div>
+                                      )}
+                                      <p style={{ fontSize: 11, color: 'var(--v3-text-secondary)', lineHeight: 1.6, margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                        {clause.summary || clause.content.substring(0, 200)}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                                <Link
+                                  href={`/documents/${cd.doc.id}`}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, fontSize: 11, color: 'var(--v3-accent)', textDecoration: 'none' }}
+                                >
+                                  <Eye size={12} />
+                                  View Full Document
+                                </Link>
+                              </motion.div>
+                            )}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+
+          {/* Coverage Gaps */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 22 }}
+            className="v3-card"
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Coverage Gaps</h2>
+              <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 4, marginBottom: 0 }}>
+                Clause types missing from individual documents
+              </p>
+            </div>
+            <div style={{ padding: 24 }}>
+              {(() => {
+                const gaps: Array<{ doc: Document; missing: string[] }> = []
+                for (const cd of compareDocs) {
+                  if (!cd.summary) continue
+                  const missing = allClauseTypes.filter(type => !cd.summary?.clause_breakdown[type])
+                  if (missing.length > 0) {
+                    gaps.push({ doc: cd.doc, missing })
+                  }
+                }
+
+                if (gaps.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                      <CheckCircle size={40} color="var(--v3-risk-low)" style={{ margin: '0 auto', display: 'block', opacity: 0.6 }} />
+                      <p style={{ color: 'var(--v3-text-muted)', fontSize: 13, marginTop: 12 }}>All documents cover the same clause types</p>
                     </div>
                   )
-                })()}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </main>
-    </div>
+                }
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {gaps.map(({ doc, missing }) => (
+                      <div key={doc.id} style={{ padding: 16, background: 'var(--v3-panel)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-md)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                          <AlertTriangle size={16} color="var(--v3-risk-medium)" />
+                          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--v3-text-primary)' }}>{doc.filename}</span>
+                          <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                            missing {missing.length} clause type{missing.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          {missing.map(type => (
+                            <span
+                              key={type}
+                              className="v3-mono"
+                              style={{
+                                fontSize: 11, padding: '4px 10px',
+                                background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)',
+                                borderRadius: 'var(--v3-radius-sm)', color: 'var(--v3-risk-medium)',
+                              }}
+                            >
+                              {formatClauseType(type)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </V3Shell>
   )
 }
 
