@@ -49,12 +49,14 @@ Production verified 2026-05-16: `/` and `/analytics` render v1 unchanged; `/anal
 
 Every batch is one PR, branched fresh off `master`, merged via the git-integration path (see §6). Surfaces grouped by primitive-reuse similarity so each batch compounds on the last.
 
-| Batch | Branch | Surfaces reskinned | Why grouped | Effort |
-|---|---|---|---|---|
-| 1 | `feat/v3-batch1-dashboard-obligations` | `/dashboard`, `/obligations` | Heaviest KpiCard + table + RiskPill reuse — fastest wins, lowest risk, proves the shell on real app routes | M |
-| 2 | `feat/v3-batch2-docdetail-graph` | `/documents/[id]`, `/documents/[id]/graph` | The two complex workspace layouts; doc-detail is the core work surface, graph just needs the shell + fullscreen canvas | L |
-| 3 | `feat/v3-batch3-search-compare-deals` | `/search`, `/compare`, `/deals`, `/deals/[id]` | Lighter, empty-state-heavy surfaces; all kept (no demotion) | M |
-| 4 | `chore/v3-finalise` | Promote `/analytics-v2` → `/analytics`, drop the now-duplicate old Analytics, light-theme token map, drop Cormorant + DM Sans imports, remove stray `frontend/nul` + PWA artefacts, consistency pass | M |
+| Batch | Branch | Surfaces reskinned | Why grouped | Effort | Status |
+|---|---|---|---|---|---|
+| 1 | `feat/v3-batch1-dashboard-obligations` | `/dashboard`, `/obligations` | Heaviest KpiCard + table + RiskPill reuse — fastest wins, lowest risk, proves the shell on real app routes | M | **merged** (PR #31, master `27b315f`, live + prod-verified 2026-05-16; writer/2×opus-reviewer) |
+| 2 | `feat/v3-batch2-docdetail-graph` | `/documents/[id]`, `/documents/[id]/graph` | The two complex workspace layouts; doc-detail is the core work surface, graph just needs the shell + fullscreen canvas | L | later |
+| 3 | `feat/v3-batch3-search-compare-deals` | `/search`, `/compare`, `/deals`, `/deals/[id]` | Lighter, empty-state-heavy surfaces; all kept (no demotion) | M | later |
+| 4 | `chore/v3-finalise` | Promote `/analytics-v2` → `/analytics`, drop the now-duplicate old Analytics, light-theme token map, drop Cormorant + DM Sans imports, remove stray `frontend/nul` + PWA artefacts, consistency pass | M | later |
+
+**Batch 1 retro (2026-05-16):** Executed via writer (sonnet) + 2 opus review rounds. Round 1 caught 3 dropped stat-tile nav handlers, a narrowed drag-drop zone, and a scope-creep 4th tile. Round 2 caught the `display:contents` drag wrapper failing for empty-state drops; fixed by adding additive optional `onDragOver/onDragLeave/onDrop` props to `V3Shell`. Lesson for Batch 2+: the writer/reviewer loop is mandatory for reskins — self-review missed real handler loss both times. Also during Batch 1 the API broke twice from infra recurrences (Vercel manual-alias stickiness; nginx.conf regeneration wiping the `api.brightclause.com` vhost) — both are now memory-documented; check `api.brightclause.com` TLS cert + the nginx vhost before assuming a frontend bug.
 
 Batches are independent enough to parallelise across worktrees if desired, but the recommended order is 1 → 2 → 3 → 4 because each batch hardens the primitives the next one reuses, and Batch 4 must be last (it removes the v1 fallbacks).
 
