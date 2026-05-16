@@ -39,9 +39,12 @@ If this plan contradicts BRIEF.md, the brief wins. Direction is not re-litigated
 | Geist Sans/Mono fonts wired (`layout.tsx`) | **merged** |
 | Dev-only CSP `unsafe-eval` (`next.config.js`) | **merged** |
 | `/analytics-v2` route (v3 Analytics pilot) | **merged, live at brightclause.com/analytics-v2** |
+| Batch 1 `/dashboard` + `/obligations` v3 reskin | **merged** (PR #31) |
+| Batch 2 `/documents/[id]` + `/documents/[id]/graph` v3 reskin | **merged** (PR #33) |
+| Batch 3 `/search` + `/compare` + `/deals` + `/deals/[id]` v3 reskin | **merged, live at brightclause.com** (PR #35, master `999c1e2`) |
 | v1 audit + brief + this plan | **merged** |
 
-Production verified 2026-05-16: `/` and `/analytics` render v1 unchanged; `/analytics-v2` renders v3 with real data; `/api/health` healthy.
+Production verified 2026-05-16: `/` and `/analytics` render v1 unchanged; `/analytics-v2`, `/dashboard`, `/obligations`, `/documents/[id]`, `/search`, `/compare`, `/deals`, `/deals/[id]` render v3; `/api/health` healthy.
 
 ---
 
@@ -53,10 +56,12 @@ Every batch is one PR, branched fresh off `master`, merged via the git-integrati
 |---|---|---|---|---|---|
 | 1 | `feat/v3-batch1-dashboard-obligations` | `/dashboard`, `/obligations` | Heaviest KpiCard + table + RiskPill reuse — fastest wins, lowest risk, proves the shell on real app routes | M | **merged** (PR #31, master `27b315f`, live + prod-verified 2026-05-16; writer/2×opus-reviewer) |
 | 2 | `feat/v3-batch2-docdetail-graph` | `/documents/[id]`, `/documents/[id]/graph` | The two complex workspace layouts; doc-detail is the core work surface, graph just needs the shell + fullscreen canvas | L | **merged** (PR #33, master `d04e7fc`, live + prod-verified 2026-05-16; writer/opus-reviewer OVERALL PASS; alias-stickiness footgun recurred, remediated once with sanctioned git-deployment re-alias) |
-| 3 | `feat/v3-batch3-search-compare-deals` | `/search`, `/compare`, `/deals`, `/deals/[id]` | Lighter, empty-state-heavy surfaces; all kept (no demotion) | M | later |
+| 3 | `feat/v3-batch3-search-compare-deals` | `/search`, `/compare`, `/deals`, `/deals/[id]` | Lighter, empty-state-heavy surfaces; all kept (no demotion) | M | **merged** (PR #35, master `999c1e2`, live + prod-verified 2026-05-16; writer/opus-reviewer OVERALL PASS first pass; `/design-review` SHIP READY; alias-stickiness footgun recurred again, remediated once with sanctioned git-deployment re-alias) |
 | 4 | `chore/v3-finalise` | Promote `/analytics-v2` → `/analytics`, drop the now-duplicate old Analytics, light-theme token map, drop Cormorant + DM Sans imports, remove stray `frontend/nul` + PWA artefacts, consistency pass | M | later |
 
 **Batch 1 retro (2026-05-16):** Executed via writer (sonnet) + 2 opus review rounds. Round 1 caught 3 dropped stat-tile nav handlers, a narrowed drag-drop zone, and a scope-creep 4th tile. Round 2 caught the `display:contents` drag wrapper failing for empty-state drops; fixed by adding additive optional `onDragOver/onDragLeave/onDrop` props to `V3Shell`. Lesson for Batch 2+: the writer/reviewer loop is mandatory for reskins — self-review missed real handler loss both times. Also during Batch 1 the API broke twice from infra recurrences (Vercel manual-alias stickiness; nginx.conf regeneration wiping the `api.brightclause.com` vhost) — both are now memory-documented; check `api.brightclause.com` TLS cert + the nginx vhost before assuming a frontend bug.
+
+**Batch 3 retro (2026-05-16):** Writer (opus) inventoried every hook/handler/api-call across all 4 target files before writing, per the Batch 2 lesson. The fresh-context opus reviewer's line-by-line behavioural diff returned **OVERALL PASS with zero behavioural defects on the first pass** (no fix round needed) - the inventory-first discipline held. `/design-review` ran via the Playwright fallback (chrome-devtools MCP unavailable, accepted): SHIP READY at desktop/laptop/tablet, every v1 AUDIT §4/§5/§7 section preserved, no demotion. The mobile-393 sidebar overflow surfaced again and was confirmed identical on the already-shipped dashboard/obligations/analytics-v2 - pre-existing shared-shell behaviour, not a Batch 3 regression, captured in `docs/CLAUDE-TODO.md` for a future v3 responsive pass. The Vercel manual-alias stickiness footgun recurred a third consecutive time and was remediated once with the sanctioned `vercel alias set <git-production-deployment> brightclause.com` against the CI-built deployment only. Lesson: the alias-stickiness recurrence is now reliably predictable - Batch 4 should expect it and budget the single sanctioned re-alias.
 
 Batches are independent enough to parallelise across worktrees if desired, but the recommended order is 1 → 2 → 3 → 4 because each batch hardens the primitives the next one reuses, and Batch 4 must be last (it removes the v1 fallbacks).
 
