@@ -201,6 +201,7 @@ html.light .v3 {
   align-items: center;
   gap: 8px;
   height: 32px;
+  min-width: 0;
   padding: 0 12px;
   background: var(--v3-card);
   border: 1px solid var(--v3-border);
@@ -209,6 +210,12 @@ html.light .v3 {
   font-size: 13px;
   cursor: pointer;
   max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v3-search-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .v3-search-trigger:hover { background: var(--v3-card-hover); border-color: var(--v3-border-hover); }
 .v3-search-trigger kbd {
@@ -219,4 +226,61 @@ html.light .v3 {
   border-radius: 4px;
   background: var(--v3-panel);
   border: 1px solid var(--v3-border);
+}
+
+/* Content area padding — desktop value identical to the prior inline style. */
+.v3-main { padding: 24px 32px; }
+
+/* Responsive shell — off-canvas drawer below 1024px.
+   Additive only: desktop (>=1024px) keeps the exact 240px in-flow sidebar.
+   Hamburger lives in the existing topbar; hidden on desktop. */
+.v3-side-toggle { display: none; }
+.v3-scrim { display: none; }
+
+@media (max-width: 1023px) {
+  .v3-side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 200ms ease;
+    will-change: transform;
+  }
+  .v3-side[data-open='true'] {
+    transform: translateX(0);
+    box-shadow: var(--v3-shadow-md);
+  }
+  .v3-side-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: var(--v3-radius-md);
+    border: 1px solid var(--v3-border);
+    background: var(--v3-card);
+    color: var(--v3-text-secondary);
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .v3-side-toggle:hover { background: var(--v3-card-hover); border-color: var(--v3-border-hover); }
+  .v3-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgba(0, 0, 0, 0.55);
+  }
+  /* Tighter gutters on phones; contain dense desktop-built page content
+     (wide KPI grids / tables) within the content area instead of
+     overflowing the viewport. Per-page grid reflow is a separate follow-up. */
+  .v3-main {
+    padding: 20px 16px;
+    overflow-x: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-side { transition: none; }
 }

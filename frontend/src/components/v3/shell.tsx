@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { type DragEventHandler, ReactNode, useEffect, useState } from 'react'
 import {
-  LayoutGrid, BarChart3, Search, ClipboardCheck, Briefcase, GitBranch, Settings, Command,
+  LayoutGrid, BarChart3, Search, ClipboardCheck, Briefcase, GitBranch, Settings, Command, Menu,
 } from 'lucide-react'
 
 const WORKSPACE = [
@@ -27,6 +27,7 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
 }) {
   const path = usePathname() || ''
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -35,43 +36,70 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
         setPaletteOpen((v) => !v)
       } else if (e.key === 'Escape') {
         setPaletteOpen(false)
+        setMobileNavOpen(false)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Close the mobile drawer on navigation.
+  useEffect(() => { setMobileNavOpen(false) }, [path])
+
+  // Lock body scroll while the mobile drawer is open (same pattern as ScreenshotShowcase cinema mode).
+  useEffect(() => {
+    document.body.style.overflow = mobileNavOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileNavOpen])
+
   return (
     <div className="v3" style={{ minHeight: '100vh', display: 'flex' }} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-      <aside className="v3-side">
-        <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--v3-border)' }}>
+      <aside className="v3-side" id="v3-sidenav" data-open={mobileNavOpen}>
+        <Link
+          href="/"
+          onClick={() => setMobileNavOpen(false)}
+          aria-label="BrightClause home"
+          style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--v3-border)', textDecoration: 'none', color: 'inherit' }}
+        >
           <Image src="/logo-minimal.png" alt="BrightClause" width={28} height={28} style={{ objectFit: 'contain' }} priority />
           <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em' }}>BrightClause</div>
-        </div>
+        </Link>
 
         <div className="v3-side-group">Workspace</div>
         {WORKSPACE.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href} className="v3-side-link" data-active={path === href || path.startsWith(href + '/')}>
+          <Link key={href} href={href} onClick={() => setMobileNavOpen(false)} className="v3-side-link" data-active={path === href || path.startsWith(href + '/')}>
             <Icon size={16} /> {label}
           </Link>
         ))}
 
         <div className="v3-side-group">Insights</div>
         {INSIGHTS.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href} className="v3-side-link" data-active={path === href || path.startsWith(href + '/')}>
+          <Link key={href} href={href} onClick={() => setMobileNavOpen(false)} className="v3-side-link" data-active={path === href || path.startsWith(href + '/')}>
             <Icon size={16} /> {label}
           </Link>
         ))}
 
         <div style={{ flex: 1 }} />
-        <Link href="#" className="v3-side-link"><Settings size={16} /> Settings</Link>
+        <Link href="#" onClick={() => setMobileNavOpen(false)} className="v3-side-link"><Settings size={16} /> Settings</Link>
         <div className="v3-mono" style={{ padding: '12px 16px', fontSize: 10, color: 'var(--v3-text-muted)', borderTop: '1px solid var(--v3-border)' }}>
           v3.preview · 2026-05-16
         </div>
       </aside>
+      {mobileNavOpen && (
+        <div className="v3-scrim" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+      )}
 
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <header className="v3-top">
+          <button
+            className="v3-side-toggle"
+            onClick={() => setMobileNavOpen((v) => !v)}
+            aria-label="Open navigation"
+            aria-expanded={mobileNavOpen}
+            aria-controls="v3-sidenav"
+          >
+            <Menu size={18} />
+          </button>
           <button className="v3-search-trigger" onClick={() => setPaletteOpen(true)}>
             <Search size={14} />
             <span>Search documents, clauses, entities…</span>
@@ -81,7 +109,7 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
           <button className="v3-btn v3-btn-ghost"><Command size={14} /></button>
         </header>
 
-        <main style={{ flex: 1, padding: '24px 32px', maxWidth: 1440, width: '100%', margin: '0 auto' }}>
+        <main className="v3-main" style={{ flex: 1, maxWidth: 1440, width: '100%', margin: '0 auto' }}>
           {children}
         </main>
       </div>

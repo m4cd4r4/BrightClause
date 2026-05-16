@@ -485,3 +485,12 @@ html.light .bg-ink-800\/50 {
   color: var(--v3-text-secondary);
 }
 
+/* HeroVisual: the right-edge divider only makes sense when the two panels
+   sit side by side (>=1024px). Stacked on mobile it becomes a bottom rule. */
+@media (max-width: 1023px) {
+  .v3-hv-left {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--v3-border);
+  }
+}
+
