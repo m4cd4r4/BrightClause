@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { type DragEventHandler, ReactNode, useEffect, useState } from 'react'
 import {
@@ -44,11 +45,7 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
     <div className="v3" style={{ minHeight: '100vh', display: 'flex' }} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
       <aside className="v3-side">
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--v3-border)' }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 8, background: 'var(--v3-accent)', color: 'var(--v3-accent-fg)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-geist-mono), monospace',
-            fontWeight: 700, fontSize: 14,
-          }}>§</div>
+          <Image src="/logo-minimal.png" alt="BrightClause" width={28} height={28} style={{ objectFit: 'contain' }} priority />
           <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em' }}>BrightClause</div>
         </div>
 

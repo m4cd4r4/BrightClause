@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion'
 
 const riskBars = [
-  { level: 'Critical', count: 3, color: 'bg-red-500', text: 'text-red-400' },
-  { level: 'High', count: 7, color: 'bg-orange-500', text: 'text-orange-400' },
-  { level: 'Medium', count: 12, color: 'bg-amber-500', text: 'text-amber-400' },
-  { level: 'Low', count: 24, color: 'bg-emerald-500', text: 'text-emerald-400' },
+  { level: 'Critical', count: 3, color: 'var(--v3-risk-critical)' },
+  { level: 'High', count: 7, color: 'var(--v3-risk-high)' },
+  { level: 'Medium', count: 12, color: 'var(--v3-risk-medium)' },
+  { level: 'Low', count: 24, color: 'var(--v3-risk-low)' },
 ]
 
 const maxCount = 24
@@ -20,19 +20,27 @@ const mockClauses = [
 ]
 
 const clauseColors: Record<string, string> = {
-  critical: 'text-red-400 bg-red-500/15',
-  high: 'text-orange-400 bg-orange-500/15',
-  medium: 'text-amber-400 bg-amber-500/15',
-  low: 'text-emerald-400 bg-emerald-500/15',
+  critical: 'var(--v3-risk-critical)',
+  high: 'var(--v3-risk-high)',
+  medium: 'var(--v3-risk-medium)',
+  low: 'var(--v3-risk-low)',
+}
+
+// Risk-tinted pill backgrounds, matching the .v3-pill convention in v3-tokens.css.
+const clauseBg: Record<string, string> = {
+  critical: 'rgba(239, 68, 68, 0.15)',
+  high: 'rgba(249, 115, 22, 0.15)',
+  medium: 'rgba(234, 179, 8, 0.15)',
+  low: 'rgba(16, 185, 129, 0.15)',
 }
 
 const graphNodes = [
-  { id: 'amount', label: '$5.2M', x: 150, y: 22, color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
+  { id: 'amount', label: '$5.2M', x: 150, y: 22, color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
   { id: 'acme', label: 'Acme Corp', x: 60, y: 65, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
   { id: 'tech', label: 'TechStart', x: 240, y: 65, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
-  { id: 'ip', label: 'IP License', x: 150, y: 108, color: '#c084fc', bg: 'rgba(192,132,252,0.12)' },
-  { id: 'date', label: 'Jan 2024', x: 50, y: 158, color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-  { id: 'loc', label: 'Delaware', x: 250, y: 158, color: '#f87171', bg: 'rgba(248,113,113,0.12)' },
+  { id: 'ip', label: 'IP License', x: 150, y: 108, color: '#a78bfa', bg: 'rgba(167,139,250,0.12)' },
+  { id: 'date', label: 'Jan 2024', x: 50, y: 158, color: '#facc15', bg: 'rgba(250,204,21,0.12)' },
+  { id: 'loc', label: 'Delaware', x: 250, y: 158, color: '#fb923c', bg: 'rgba(251,146,60,0.12)' },
 ]
 
 const graphEdges: [string, string][] = [
@@ -44,11 +52,11 @@ const graphEdges: [string, string][] = [
 const nodeMap = Object.fromEntries(graphNodes.map(n => [n.id, n]))
 
 const entityLegend = [
-  { label: 'Party', color: 'bg-blue-400' },
-  { label: 'Amount', color: 'bg-amber-400' },
-  { label: 'Date', color: 'bg-emerald-400' },
-  { label: 'Location', color: 'bg-red-400' },
-  { label: 'Clause', color: 'bg-purple-400' },
+  { label: 'Party', color: '#60a5fa' },
+  { label: 'Amount', color: '#34d399' },
+  { label: 'Date', color: '#facc15' },
+  { label: 'Location', color: '#fb923c' },
+  { label: 'Clause', color: '#a78bfa' },
 ]
 
 export function HeroVisual() {
@@ -57,19 +65,32 @@ export function HeroVisual() {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="relative"
+      style={{ position: 'relative' }}
     >
-      <div className="relative bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl overflow-hidden
-                      shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_80px_rgba(201,162,39,0.08)]">
+      <div
+        className="v3-card"
+        style={{ overflow: 'hidden', borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)' }}
+      >
         {/* Browser chrome */}
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-ink-800/40 bg-ink-900/60">
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-ink-700/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-ink-700/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-ink-700/80" />
+        <div
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
+            borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ width: 10, height: 10, borderRadius: 999, background: 'var(--v3-border-hover)' }} />
+            <div style={{ width: 10, height: 10, borderRadius: 999, background: 'var(--v3-border-hover)' }} />
+            <div style={{ width: 10, height: 10, borderRadius: 999, background: 'var(--v3-border-hover)' }} />
           </div>
-          <div className="flex-1 flex justify-center">
-            <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[11px] text-ink-500 font-mono">
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+            <div
+              className="v3-mono"
+              style={{
+                padding: '4px 16px', background: 'var(--v3-card)', borderRadius: 'var(--v3-radius-sm)',
+                fontSize: 11, color: 'var(--v3-text-muted)',
+              }}
+            >
               brightclause.com/documents/acme-techstart-ma
             </div>
           </div>
@@ -78,38 +99,50 @@ export function HeroVisual() {
         {/* Two-panel content */}
         <div className="grid grid-cols-1 lg:grid-cols-5">
           {/* Left: Risk Analysis */}
-          <div className="lg:col-span-3 p-5 lg:p-6 lg:border-r border-ink-800/30">
-            <div className="flex items-start justify-between mb-5">
+          <div
+            className="lg:col-span-3"
+            style={{ padding: 24, borderRight: '1px solid var(--v3-border)' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
-                <p className="text-[11px] text-ink-500 uppercase tracking-wider font-mono mb-1">Document Analysis</p>
-                <p className="text-sm font-medium text-ink-200">Acme Corp &ndash; TechStart Service Agreement</p>
+                <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+                  Document Analysis
+                </p>
+                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--v3-text-secondary)' }}>Acme Corp - TechStart Service Agreement</p>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-orange-500/15 text-orange-400 text-[11px] font-mono font-bold uppercase tracking-wide
-                             shadow-[0_0_12px_rgba(249,115,22,0.15)] border border-orange-500/20 shrink-0 ml-4">
+              <span
+                className="v3-mono"
+                style={{
+                  padding: '4px 10px', borderRadius: 'var(--v3-radius-sm)', fontSize: 11, fontWeight: 600,
+                  textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0, marginLeft: 16,
+                  background: 'rgba(249, 115, 22, 0.12)', color: 'var(--v3-risk-high)',
+                  border: '1px solid rgba(249, 115, 22, 0.3)',
+                }}
+              >
                 HIGH RISK
               </span>
             </div>
 
             {/* Risk distribution */}
-            <div className="grid grid-cols-4 gap-3 mb-5">
+            <div className="grid grid-cols-4" style={{ gap: 12, marginBottom: 20 }}>
               {riskBars.map((r, i) => (
-                <div key={r.level} className="text-center">
+                <div key={r.level} style={{ textAlign: 'center' }}>
                   <motion.p
-                    className={`text-lg font-mono font-bold ${r.text}`}
+                    className="v3-mono"
+                    style={{ fontSize: 18, fontWeight: 600, color: r.color }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.7 + i * 0.1 }}
                   >
                     {r.count}
                   </motion.p>
-                  <p className="text-[11px] text-ink-500 uppercase tracking-wider font-mono mt-0.5">{r.level}</p>
-                  <div className="h-1.5 bg-ink-800/50 rounded-full mt-2 overflow-hidden">
+                  <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>{r.level}</p>
+                  <div style={{ height: 6, background: 'var(--v3-card-hover)', borderRadius: 999, marginTop: 8, overflow: 'hidden' }}>
                     <motion.div
                       initial={{ scaleX: 0 }}
                       animate={{ scaleX: r.count / maxCount }}
                       transition={{ delay: 0.8 + i * 0.15, duration: 0.6, ease: 'easeOut' }}
-                      className={`h-full w-full rounded-full origin-left ${r.color}`}
-                      style={{ opacity: 0.7 }}
+                      style={{ height: '100%', width: '100%', borderRadius: 999, transformOrigin: 'left', background: r.color, opacity: 0.7 }}
                     />
                   </div>
                 </div>
@@ -117,21 +150,32 @@ export function HeroVisual() {
             </div>
 
             {/* Clause list */}
-            <p className="text-[11px] text-ink-500 uppercase tracking-wider font-mono mb-2">Extracted Clauses</p>
-            <div className="space-y-1.5">
+            <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Extracted Clauses</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {mockClauses.map((c, i) => (
                 <motion.div
                   key={c.section}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.2 + i * 0.08 }}
-                  className="flex items-center justify-between py-2 px-3 bg-ink-800/30 rounded-lg"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '8px 12px', background: 'var(--v3-card-hover)', borderRadius: 'var(--v3-radius-sm)',
+                  }}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-[11px] text-ink-300 font-mono shrink-0">{c.section}</span>
-                    <span className="text-xs text-ink-100 truncate">{c.type}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-secondary)', flexShrink: 0 }}>{c.section}</span>
+                    <span style={{ fontSize: 12, color: 'var(--v3-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.type}</span>
                   </div>
-                  <span className={`text-[11px] font-mono font-bold uppercase px-1.5 py-0.5 rounded shrink-0 ml-2 ${clauseColors[c.risk]}`}>
+                  <span
+                    className="v3-mono"
+                    style={{
+                      fontSize: 11, fontWeight: 600, textTransform: 'uppercase', padding: '2px 6px',
+                      borderRadius: 'var(--v3-radius-sm)', flexShrink: 0, marginLeft: 8,
+                      color: clauseColors[c.risk],
+                      background: clauseBg[c.risk],
+                    }}
+                  >
                     {c.risk}
                   </span>
                 </motion.div>
@@ -140,14 +184,17 @@ export function HeroVisual() {
           </div>
 
           {/* Right: Knowledge Graph */}
-          <div className="lg:col-span-2 p-5 lg:p-6 border-t lg:border-t-0 border-ink-800/30 flex flex-col">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] text-ink-500 uppercase tracking-wider font-mono">Knowledge Graph</p>
-              <p className="text-[11px] text-ink-600 font-mono">6 entities &middot; 7 relations</p>
+          <div
+            className="lg:col-span-2"
+            style={{ padding: 24, display: 'flex', flexDirection: 'column' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Knowledge Graph</p>
+              <p className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-disabled)' }}>6 entities &middot; 7 relations</p>
             </div>
 
-            <div className="flex-1 flex items-center justify-center">
-              <svg viewBox="0 0 300 185" className="w-full max-h-[240px]" aria-hidden="true">
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg viewBox="0 0 300 185" style={{ width: '100%', maxHeight: 240 }} aria-hidden="true">
                 {graphEdges.map(([fromId, toId], i) => {
                   const from = nodeMap[fromId]
                   const to = nodeMap[toId]
@@ -155,7 +202,7 @@ export function HeroVisual() {
                     <motion.line
                       key={`${fromId}-${toId}`}
                       x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                      stroke="rgba(113,113,122,0.15)"
+                      stroke="rgba(113,113,122,0.25)"
                       strokeWidth={1}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -182,7 +229,7 @@ export function HeroVisual() {
                       textAnchor="middle"
                       fill={n.color}
                       fontSize={9}
-                      fontFamily="ui-monospace, monospace"
+                      fontFamily="var(--font-geist-mono), monospace"
                       opacity={0.75}
                     >
                       {n.label}
@@ -192,11 +239,11 @@ export function HeroVisual() {
               </svg>
             </div>
 
-            <div className="flex flex-wrap gap-3 mt-3 pt-3 border-t border-ink-800/20">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--v3-border)' }}>
               {entityLegend.map(t => (
-                <div key={t.label} className="flex items-center gap-1.5">
-                  <div className={`w-1.5 h-1.5 rounded-full ${t.color}`} />
-                  <span className="text-[11px] text-ink-500 font-mono">{t.label}</span>
+                <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: 999, background: t.color }} />
+                  <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>{t.label}</span>
                 </div>
               ))}
             </div>

@@ -131,33 +131,46 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
     <>
       {/* Backdrop overlay when expanded */}
       {isExpanded && (
-        <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm pointer-events-none" />
+        <div className="fixed inset-0 z-40 pointer-events-none" style={{ background: 'rgba(0,0,0,0.7)' }} />
       )}
 
       <div className={isExpanded ? 'fixed inset-0 z-[60] flex items-center justify-center' : 'relative'}>
         <div
           ref={containerRef}
-          className={`relative bg-ink-950 overflow-hidden flex flex-col
-            ${isExpanded
-              ? 'w-full h-full'
-              : 'bg-ink-950/80 border border-ink-700/40 rounded-2xl backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_80px_rgba(201,162,39,0.08)]'
-            }`}
+          className={`relative overflow-hidden flex flex-col ${isExpanded ? 'w-full h-full' : ''}`}
+          style={
+            isExpanded
+              ? { background: 'var(--v3-canvas)' }
+              : {
+                  background: 'var(--v3-card)',
+                  border: '1px solid var(--v3-border)',
+                  borderRadius: 'var(--v3-radius-lg)',
+                  boxShadow: 'var(--v3-shadow-md)',
+                }
+          }
         >
           {/* Browser chrome header */}
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-ink-800/40 bg-ink-900/60">
+          <div
+            className="flex items-center gap-2 px-4 py-2.5"
+            style={{ borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}
+          >
             <div className="flex gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--v3-border-hover)' }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--v3-border-hover)' }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--v3-border-hover)' }} />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="px-4 py-1 bg-ink-800/50 rounded-md text-[11px] text-ink-500 font-mono">
-                brightclause.com — Demo
+              <div
+                className="px-4 py-1 text-[11px] v3-mono"
+                style={{ background: 'var(--v3-card)', borderRadius: 'var(--v3-radius-sm)', color: 'var(--v3-text-muted)' }}
+              >
+                brightclause.com - Demo
               </div>
             </div>
             <button
               onClick={onDismiss}
-              className="p-1 text-ink-600 hover:text-ink-300 transition-colors"
+              className="p-1 transition-colors"
+              style={{ color: 'var(--v3-text-muted)' }}
               aria-label="Close video"
             >
               <X className="w-3.5 h-3.5" />
@@ -191,7 +204,7 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
           </div>
 
           {/* Combined scene progress + labels — single row to avoid overlapping touch targets */}
-          <div className="flex bg-ink-950/60">
+          <div className="flex" style={{ background: 'var(--v3-panel)' }}>
           {SCENES.map((scene, i) => {
             const widthPct = (scene.duration / TOTAL_FRAMES) * 100
             const isActive = i === activeSceneIndex
@@ -203,24 +216,28 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
               <button
                 key={scene.name}
                 onClick={() => handleSeekToScene(scene.from)}
-                className={`relative flex flex-col items-stretch transition-colors overflow-hidden
-                  ${i > 0 ? 'border-l border-ink-700/30' : ''}`}
-                style={{ width: `${widthPct}%` }}
+                className="relative flex flex-col items-stretch transition-colors overflow-hidden"
+                style={{ width: `${widthPct}%`, borderLeft: i > 0 ? '1px solid var(--v3-border)' : undefined }}
                 aria-label={`Jump to ${scene.name}`}
               >
                 {/* Progress indicator */}
                 <div className="relative h-1.5">
-                  <div className={`absolute inset-0 ${isPast ? 'bg-accent/50' : 'bg-ink-800/40'}`} />
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: isPast ? 'rgba(212, 168, 45, 0.5)' : 'var(--v3-card-hover)' }}
+                  />
                   {isActive && (
                     <div
-                      className="absolute inset-0 bg-accent origin-left transition-transform duration-100"
-                      style={{ transform: `scaleX(${progressInScene / 100})` }}
+                      className="absolute inset-0 origin-left transition-transform duration-100"
+                      style={{ transform: `scaleX(${progressInScene / 100})`, background: 'var(--v3-accent)' }}
                     />
                   )}
                 </div>
                 {/* Label */}
-                <span className={`font-mono truncate text-[11px] py-2.5 px-1 text-center
-                  ${isActive ? 'text-accent' : 'text-ink-600 hover:text-ink-400'}`}>
+                <span
+                  className="v3-mono truncate text-[11px] py-2.5 px-1 text-center"
+                  style={{ color: isActive ? 'var(--v3-accent)' : 'var(--v3-text-muted)' }}
+                >
                   {scene.name}
                 </span>
               </button>
@@ -229,10 +246,14 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
         </div>
 
         {/* Controls bar */}
-        <div className="flex items-center gap-2 bg-ink-950/80 border-t border-ink-800/40 px-4 py-2">
+        <div
+          className="flex items-center gap-2 px-4 py-2"
+          style={{ background: 'var(--v3-panel)', borderTop: '1px solid var(--v3-border)' }}
+        >
           <button
             onClick={handleTogglePlay}
-            className="p-1.5 text-ink-500 hover:text-white transition-colors"
+            className="p-1.5 transition-colors"
+            style={{ color: 'var(--v3-text-secondary)' }}
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying
@@ -241,7 +262,8 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
           </button>
           <button
             onClick={handleRestart}
-            className="p-1.5 text-ink-500 hover:text-white transition-colors"
+            className="p-1.5 transition-colors"
+            style={{ color: 'var(--v3-text-secondary)' }}
             aria-label="Restart"
           >
             <SkipBack className="w-3.5 h-3.5" />
@@ -249,7 +271,8 @@ export const HeroVideoPlayer: React.FC<HeroVideoPlayerProps> = ({ onDismiss }) =
 
           <button
             onClick={handleToggleExpanded}
-            className="ml-auto p-1.5 text-ink-500 hover:text-accent transition-colors"
+            className="ml-auto p-1.5 transition-colors"
+            style={{ color: 'var(--v3-text-secondary)' }}
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
           >
             {isExpanded

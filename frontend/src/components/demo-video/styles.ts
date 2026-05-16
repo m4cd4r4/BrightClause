@@ -1,31 +1,33 @@
 import { CSSProperties } from "react";
 
+// Palette aligned to the v3 design tokens (see frontend/src/styles/v3-tokens.css).
 export const colors = {
-  bg: "#0d0b08",
-  bgCard: "#14120e",
-  bgCardHover: "#1c1a15",
-  border: "#1a1a2e",
-  borderLight: "#252540",
-  accent: "#c9a227",
-  accentGlow: "rgba(201, 162, 39, 0.15)",
-  accentBright: "#e4c040",
-  text: "#eef0f6",
-  textSoft: "#a0a4b8",
-  textDim: "#5c5f73",
-  critical: "#ff4d6a",
-  high: "#ff8c42",
-  medium: "#f5c542",
-  low: "#34d399",
-  blue: "#5b8af5",
-  purple: "#9c6afa",
+  bg: "#0a0a0c",
+  bgCard: "#16161a",
+  bgCardHover: "#1c1c22",
+  border: "#27272a",
+  borderLight: "#3f3f46",
+  accent: "#d4a82d",
+  accentGlow: "rgba(212, 168, 45, 0.15)",
+  accentBright: "#e6bb3f",
+  text: "#fafafa",
+  textSoft: "#a1a1aa",
+  textDim: "#71717a",
+  critical: "#ef4444",
+  high: "#f97316",
+  medium: "#eab308",
+  low: "#10b981",
+  blue: "#60a5fa",
+  purple: "#a78bfa",
   cyan: "#38bdf8",
-  green: "#22c55e",
+  green: "#10b981",
 };
 
+// Geist throughout, matching the v3 system. No serif anywhere in the bundle.
 export const fonts = {
-  display: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-  body: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
-  mono: "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace",
+  display: "var(--font-geist-sans), Inter, system-ui, sans-serif",
+  body: "var(--font-geist-sans), Inter, system-ui, sans-serif",
+  mono: "var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace",
 };
 
 export const springs = {
