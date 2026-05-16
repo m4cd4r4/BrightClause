@@ -1,2 +1,9 @@
 .vercel
 .env*.local
+
+# next-pwa build artefacts — never commit
+public/sw.js
+public/workbox-*.js
+
+# stray Windows reserved-name file
+nul

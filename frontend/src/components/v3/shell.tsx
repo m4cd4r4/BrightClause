@@ -13,7 +13,7 @@ const WORKSPACE = [
 ] as const
 
 const INSIGHTS = [
-  { href: '/analytics-v2', label: 'Analytics', icon: BarChart3 },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/obligations', label: 'Obligations', icon: ClipboardCheck },
   { href: '/search', label: 'Search', icon: Search },
 ] as const
