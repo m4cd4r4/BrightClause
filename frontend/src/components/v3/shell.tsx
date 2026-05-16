@@ -3,10 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { type DragEventHandler, ReactNode, useEffect, useState } from 'react'
+import { type DragEventHandler, ReactNode, useEffect, useRef, useState } from 'react'
 import {
   LayoutGrid, BarChart3, Search, ClipboardCheck, Briefcase, GitBranch, Settings, Command, Menu,
 } from 'lucide-react'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 const WORKSPACE = [
   { href: '/dashboard', label: 'Portfolio', icon: LayoutGrid },
@@ -28,11 +29,19 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
   const path = usePathname() || ''
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const sideRef = useRef<HTMLElement>(null)
+  const paletteRef = useRef<HTMLDivElement>(null)
+
+  // Trap focus inside the open overlay; restore it on close. The drawer
+  // trap is inert on desktop (mobileNavOpen is never true there).
+  useFocusTrap(sideRef, mobileNavOpen)
+  useFocusTrap(paletteRef, paletteOpen)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
+        setMobileNavOpen(false) // never let the drawer and palette trap focus at once
         setPaletteOpen((v) => !v)
       } else if (e.key === 'Escape') {
         setPaletteOpen(false)
@@ -54,7 +63,7 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
 
   return (
     <div className="v3" style={{ minHeight: '100vh', display: 'flex' }} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-      <aside className="v3-side" id="v3-sidenav" data-open={mobileNavOpen}>
+      <aside ref={sideRef} tabIndex={-1} className="v3-side" id="v3-sidenav" data-open={mobileNavOpen} style={{ outline: 'none' }}>
         <Link
           href="/"
           onClick={() => setMobileNavOpen(false)}
@@ -108,7 +117,7 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
           >
             <Image src="/logo-minimal.png" alt="BrightClause" width={24} height={24} style={{ objectFit: 'contain' }} />
           </Link>
-          <button className="v3-search-trigger" onClick={() => setPaletteOpen(true)}>
+          <button className="v3-search-trigger" onClick={() => { setMobileNavOpen(false); setPaletteOpen(true) }}>
             <Search size={14} />
             <span>Search documents, clauses, entities…</span>
             <kbd>⌘K</kbd>
@@ -128,8 +137,13 @@ export function V3Shell({ children, onDragOver, onDragLeave, onDrop }: {
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 50, display: 'flex', justifyContent: 'center', paddingTop: '15vh' }}
         >
           <div
+            ref={paletteRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             onClick={(e) => e.stopPropagation()}
-            style={{ width: 640, background: 'var(--v3-popover)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)', overflow: 'hidden', animation: 'v3-palette-in 200ms ease-out' }}
+            style={{ width: 640, background: 'var(--v3-popover)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)', overflow: 'hidden', animation: 'v3-palette-in 200ms ease-out', outline: 'none' }}
           >
             <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--v3-border)', display: 'flex', alignItems: 'center', gap: 10 }}>
               <Search size={16} color="var(--v3-text-muted)" />
