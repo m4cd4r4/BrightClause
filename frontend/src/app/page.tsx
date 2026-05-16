@@ -8,7 +8,7 @@ import {
   Shield, ArrowRight, FileText, Search, Zap, Network,
   Database, Brain, Eye, BarChart3, Lock, Layers,
   MessageCircle, Lightbulb, ClipboardCheck, Calendar,
-  Briefcase, Sun, Activity, Play,
+  Briefcase, Sun, Activity, Play, Github,
 } from 'lucide-react'
 import { HeroVisual } from './hero-visual'
 
@@ -227,14 +227,26 @@ export default function LandingPage() {
             <Image src="/logo-minimal.png" alt="BrightClause" width={32} height={32} style={{ objectFit: 'contain' }} priority />
             <span style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--v3-text-primary)' }}>BrightClause</span>
           </div>
-          <Link
-            href="/dashboard"
-            className="v3-btn v3-btn-primary"
-            style={{ height: 38, padding: '0 18px', fontSize: 14 }}
-          >
-            Try It Live
-            <ArrowRight style={{ width: 16, height: 16 }} aria-hidden="true" />
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <a
+              href="https://github.com/m4cd4r4/BrightClause"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="BrightClause on GitHub"
+              className="v3-btn v3-btn-ghost"
+              style={{ height: 38, width: 38, padding: 0, justifyContent: 'center' }}
+            >
+              <Github style={{ width: 18, height: 18 }} aria-hidden="true" />
+            </a>
+            <Link
+              href="/dashboard"
+              className="v3-btn v3-btn-primary"
+              style={{ height: 38, padding: '0 18px', fontSize: 14 }}
+            >
+              Try It Live
+              <ArrowRight style={{ width: 16, height: 16 }} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </nav>
 
