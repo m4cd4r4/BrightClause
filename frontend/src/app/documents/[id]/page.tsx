@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
-  FileText, AlertTriangle, Shield,
+  FileText, AlertTriangle,
   Loader2, ChevronDown, ChevronRight, Network,
   Download, Zap, FileSpreadsheet, FileType, FileJson, Lightbulb,
   FileBarChart, X, CheckCircle, ClipboardCheck, BookOpen, Key
@@ -13,8 +13,9 @@ import {
 import { api, Document, Clause, AnalysisSummary, Entity, ReportData } from '@/lib/api'
 import { useToast } from '@/lib/toast'
 import { exportToExcel, exportToWord, exportToPDF, exportToCSV, exportToJSON, exportReport } from '@/lib/export-lazy'
-import { Navigation } from '@/lib/navigation'
-import { type RiskLevel, riskConfig } from '@/lib/risk'
+import { type RiskLevel } from '@/lib/risk'
+import { V3Shell } from '@/components/v3/shell'
+import { PageHeader, Section, RiskPill } from '@/components/v3/primitives'
 import { ChatPanel } from './chat-panel'
 import { Timeline } from './timeline'
 import { PdfViewer } from './pdf-viewer'
@@ -37,6 +38,17 @@ const clauseTypeLabels: Record<string, string> = {
   audit_rights: 'Audit Rights',
 }
 
+const v3RiskColor = (level: string | null | undefined): string =>
+  level === 'critical' ? 'var(--v3-risk-critical)'
+  : level === 'high' ? 'var(--v3-risk-high)'
+  : level === 'medium' ? 'var(--v3-risk-medium)'
+  : level === 'low' ? 'var(--v3-risk-low)'
+  : 'var(--v3-text-secondary)'
+
+// Mirrors v1's `riskConfig[level] || riskConfig.low` fallback for clause/report pills
+const toRiskLevel = (level: string | null | undefined): RiskLevel =>
+  level === 'critical' || level === 'high' || level === 'medium' || level === 'low' ? level : 'low'
+
 function ByokForm({ onSubmit, initialKey, onCancel }: {
   onSubmit: (key: string) => void
   initialKey: string
@@ -53,24 +65,28 @@ function ByokForm({ onSubmit, initialKey, onCancel }: {
         placeholder="sk-ant-api03-..."
         value={key}
         onChange={(e) => setKey(e.target.value)}
-        className={`w-full px-3 py-2 bg-ink-900 border rounded-lg text-sm font-mono text-ink-200 placeholder-ink-600 focus:outline-none focus:border-accent mb-1 ${
-          showValidationHint ? 'border-red-500/50' : 'border-ink-700'
-        }`}
+        className="v3-mono"
+        style={{
+          width: '100%', height: 38, padding: '0 12px',
+          background: 'var(--v3-card)', color: 'var(--v3-text-primary)',
+          border: `1px solid ${showValidationHint ? 'rgba(239,68,68,0.5)' : 'var(--v3-border)'}`,
+          borderRadius: 'var(--v3-radius-md)', fontSize: 13, outline: 'none', marginBottom: 4,
+        }}
       />
       {showValidationHint && (
-        <p className="text-[11px] text-red-400 mb-3">Key must start with &quot;sk-ant-&quot;</p>
+        <p style={{ fontSize: 11, color: 'var(--v3-risk-critical)', marginBottom: 12 }}>Key must start with &quot;sk-ant-&quot;</p>
       )}
-      {!showValidationHint && <div className="mb-3" />}
-      <div className="flex gap-2">
-        <button type="submit" disabled={!isValidKey} className="flex-1 btn-primary text-sm py-2 disabled:opacity-40">
-          <Zap className="w-4 h-4 mr-2" /> Extract Clauses
+      {!showValidationHint && <div style={{ marginBottom: 12 }} />}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button type="submit" disabled={!isValidKey} className="v3-btn v3-btn-primary" style={{ flex: 1, justifyContent: 'center', height: 38, opacity: !isValidKey ? 0.4 : 1 }}>
+          <Zap size={14} /> Extract Clauses
         </button>
-        <button type="button" onClick={onCancel} className="px-4 py-2 text-sm text-ink-400 hover:text-ink-200 border border-ink-700 rounded-lg">
+        <button type="button" onClick={onCancel} className="v3-btn" style={{ height: 38 }}>
           Cancel
         </button>
       </div>
-      <p className="text-[11px] text-ink-600 mt-3 text-center">
-        Get your key at <span className="text-ink-400">console.anthropic.com</span>
+      <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 12, textAlign: 'center' }}>
+        Get your key at <span style={{ color: 'var(--v3-text-secondary)' }}>console.anthropic.com</span>
       </p>
     </form>
   )
@@ -301,51 +317,48 @@ export default function DocumentDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Navigation />
-        <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-            <div className="skeleton h-28 rounded-lg col-span-2 md:col-span-3 lg:col-span-2" />
+      <V3Shell>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
+          <div className="v3-card" style={{ height: 112, gridColumn: 'span 2' }} />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="v3-card" style={{ height: 112 }} />
+          ))}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 24 }}>
+          <div className="v3-card" style={{ height: 320 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="skeleton h-28 rounded-lg" />
+              <div key={i} className="v3-card" style={{ height: 80 }} />
             ))}
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1">
-              <div className="card p-4 space-y-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="skeleton h-8 rounded-lg" />
-                ))}
-              </div>
-            </div>
-            <div className="lg:col-span-3 space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="skeleton h-20 rounded-lg" />
-              ))}
-            </div>
-          </div>
-        </main>
-      </div>
+        </div>
+      </V3Shell>
     )
   }
 
   if (!document) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <FileText className="w-16 h-16 text-ink-700 mx-auto" />
-          <h2 className="mt-4 text-xl font-display font-semibold">Document Not Found</h2>
-          <p className="mt-2 text-ink-500">The requested document could not be found.</p>
-          <Link href="/dashboard" className="mt-6 btn-primary inline-block">
-            Return to Dashboard
-          </Link>
+      <V3Shell>
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <FileText size={56} color="var(--v3-text-disabled)" style={{ margin: '0 auto' }} />
+            <h2 style={{ marginTop: 16, fontSize: 20, fontWeight: 600, color: 'var(--v3-text-primary)' }}>Document Not Found</h2>
+            <p style={{ marginTop: 8, fontSize: 14, color: 'var(--v3-text-muted)' }}>The requested document could not be found.</p>
+            <Link href="/dashboard" className="v3-btn v3-btn-primary" style={{ marginTop: 24, display: 'inline-flex' }}>
+              Return to Dashboard
+            </Link>
+          </div>
         </div>
-      </div>
+      </V3Shell>
     )
   }
 
+  const overallRiskLevel: RiskLevel | 'neutral' = (['critical', 'high', 'medium', 'low'] as const).includes(
+    analysis?.overall_risk as RiskLevel
+  ) ? (analysis!.overall_risk as RiskLevel) : 'neutral'
+
   return (
-    <div className="min-h-screen">
+    <V3Shell>
       {/* BYOK Modal */}
       <AnimatePresence>
         {showByokModal && (
@@ -353,31 +366,31 @@ export default function DocumentDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', padding: 16 }}
             onMouseDown={(e) => e.target === e.currentTarget && setShowByokModal(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="card max-w-md w-full p-6"
+              style={{ width: '100%', maxWidth: 440, background: 'var(--v3-popover)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)', padding: 24 }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                    <Key className="w-5 h-5 text-accent" />
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 'var(--v3-radius-md)', background: 'rgba(212,168,45,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Key size={20} color="var(--v3-accent)" />
                   </div>
                   <div>
-                    <h3 className="font-display font-semibold">AI Extraction Key</h3>
-                    <p className="text-xs text-ink-500">Powered by Anthropic Claude</p>
+                    <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>AI Extraction Key</h3>
+                    <p style={{ fontSize: 12, color: 'var(--v3-text-muted)', margin: 0 }}>Powered by Anthropic Claude</p>
                   </div>
                 </div>
-                <button onClick={() => setShowByokModal(false)} className="text-ink-500 hover:text-ink-200">
-                  <X className="w-5 h-5" />
+                <button onClick={() => setShowByokModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--v3-text-muted)', cursor: 'pointer' }}>
+                  <X size={20} />
                 </button>
               </div>
-              <p className="text-sm text-ink-400 mb-4">
-                Enter your <span className="text-accent font-medium">Anthropic API key</span> to run AI clause extraction on this document. Your key is stored in session only and never saved to our servers.
+              <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+                Enter your <span style={{ color: 'var(--v3-accent)', fontWeight: 500 }}>Anthropic API key</span> to run AI clause extraction on this document. Your key is stored in session only and never saved to our servers.
               </p>
               <ByokForm onSubmit={handleByokSubmit} initialKey={byokApiKey} onCancel={() => setShowByokModal(false)} />
             </motion.div>
@@ -385,472 +398,436 @@ export default function DocumentDetailPage() {
         )}
       </AnimatePresence>
 
-      <Navigation>
-        {/* Document Info */}
-        <div className="hidden sm:flex items-center gap-3 text-sm text-ink-400">
-          <FileText className="w-4 h-4" />
-          <span className="max-w-[200px] truncate font-medium text-ink-200">{document.filename}</span>
-          <span className="text-ink-600">|</span>
-          <span className="text-[11px] font-mono">
-            {document.page_count && `${document.page_count}p`}
-            {analysis && ` / ${analysis.clauses_extracted} clauses`}
-          </span>
-        </div>
+      <PageHeader
+        crumb="Workspace · Document"
+        title={document.filename}
+        subtitle={[
+          document.page_count ? `${document.page_count}p` : null,
+          analysis ? `${analysis.clauses_extracted} clauses` : null,
+        ].filter(Boolean).join(' · ') || undefined}
+        actions={
+          <div ref={exportMenuRef} style={{ display: 'flex', gap: 8, position: 'relative' }}>
+            <Link href={`/documents/${documentId}/graph`} className="v3-btn">
+              <Network size={14} />
+              <span>Graph</span>
+            </Link>
 
-        <Link
-          href={`/documents/${documentId}/graph`}
-          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
-                   hover:bg-ink-700 transition-colors text-sm"
-        >
-          <Network className="w-4 h-4" />
-          <span className="hidden sm:inline">Graph</span>
-        </Link>
-
-        <button
-          type="button"
-          onClick={() => setViewMode(viewMode === 'pdf' ? 'analysis' : 'pdf')}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
-            viewMode === 'pdf'
-              ? 'bg-accent/20 text-accent border border-accent/30'
-              : 'bg-ink-800 text-ink-200 hover:bg-ink-700'
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span className="hidden sm:inline">PDF</span>
-        </button>
-
-        <button
-          onClick={handleGenerateReport}
-          disabled={generatingReport || !analysis}
-          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
-                   hover:bg-ink-700 transition-colors disabled:opacity-50 text-sm"
-        >
-          {generatingReport ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <FileBarChart className="w-4 h-4" />
-          )}
-          <span className="hidden sm:inline">{generatingReport ? 'Generating...' : 'Report'}</span>
-        </button>
-
-        <button
-          onClick={handleExtractObligations}
-          disabled={extractingObligations || !analysis}
-          className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
-                   hover:bg-ink-700 transition-colors disabled:opacity-50 text-sm"
-        >
-          {extractingObligations ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <ClipboardCheck className="w-4 h-4" />
-          )}
-          <span className="hidden sm:inline">{extractingObligations ? 'Extracting...' : 'Obligations'}</span>
-        </button>
-
-        {/* Export Dropdown */}
-        <div ref={exportMenuRef} className="relative">
-          <button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            disabled={exporting !== null}
-            className="flex items-center gap-2 px-3 py-2 bg-ink-800 text-ink-200 rounded-lg
-                     hover:bg-ink-700 transition-colors disabled:opacity-50 text-sm"
-          >
-            {exporting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'Export'}</span>
-            <ChevronDown className="w-3 h-3" />
-          </button>
-
-          <AnimatePresence>
-            {showExportMenu && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute right-0 mt-2 w-48 bg-ink-900 border border-ink-700 rounded-lg shadow-xl overflow-hidden z-50"
-              >
-                <button
-                  onClick={() => handleExport('pdf')}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                >
-                  <FileText className="w-4 h-4 text-red-400" />
-                  PDF Report
-                </button>
-                <button
-                  onClick={() => handleExport('excel')}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                  Excel (.xlsx)
-                </button>
-                <button
-                  onClick={() => handleExport('word')}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                >
-                  <FileType className="w-4 h-4 text-blue-400" />
-                  Word (.docx)
-                </button>
-                <div className="border-t border-ink-700" />
-                <button
-                  onClick={() => handleExport('csv')}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-ink-400" />
-                  CSV (Clauses)
-                </button>
-                <button
-                  onClick={() => handleExport('json')}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-ink-200 hover:bg-ink-800 transition-colors"
-                >
-                  <FileJson className="w-4 h-4 text-amber-400" />
-                  JSON (Full Data)
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </Navigation>
-
-      <main id="main-content" className="max-w-[1920px] mx-auto px-4 sm:px-8 py-8">
-        {/* PDF Viewer Mode */}
-        {viewMode === 'pdf' ? (
-          <PdfViewer
-            documentId={documentId}
-            clauses={clauses}
-            activeClauseId={expandedClauses.size === 1 ? Array.from(expandedClauses)[0] : null}
-            onClauseClick={(id) => {
-              setExpandedClauses(new Set([id]))
-              setViewMode('analysis')
-            }}
-          />
-        ) : (
-        <>
-        {/* Risk Summary */}
-        {analysis && analysis.clauses_extracted > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8"
-          >
-            {/* Overall Risk */}
-            <div className={`card p-5 col-span-2 md:col-span-3 lg:col-span-2 ${
-              analysis.overall_risk === 'critical' ? 'risk-critical' :
-              analysis.overall_risk === 'high' ? 'risk-high' : ''
-            }`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-ink-400">Overall Risk Assessment</p>
-                  <p className={`text-3xl font-display font-bold mt-1 capitalize
-                              ${riskConfig[analysis.overall_risk]?.color || 'text-ink-300'}`}>
-                    {analysis.overall_risk}
-                  </p>
-                </div>
-                <Shield className={`w-12 h-12 ${
-                  riskConfig[analysis.overall_risk]?.color || 'text-ink-600'
-                }`} />
-              </div>
-            </div>
-
-            {/* Risk Distribution */}
-            {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
-              <button
-                key={level}
-                className={`card p-5 cursor-pointer transition-all hover:scale-[1.02] text-left w-full
-                          focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50
-                          ${selectedRiskLevel === level ? 'ring-2 ring-accent' : ''}
-                          ${level === 'critical' || level === 'high' ? riskConfig[level].glow : ''}`}
-                onClick={() => setSelectedRiskLevel(selectedRiskLevel === level ? null : level)}
-                aria-pressed={selectedRiskLevel === level}
-                aria-label={`Filter by ${level} risk: ${analysis.risk_summary[level] || 0} clauses`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`text-xs font-medium uppercase tracking-wider ${riskConfig[level].color}`}>
-                    {level}
-                  </span>
-                  {(level === 'critical' || level === 'high') && analysis.risk_summary[level] > 0 && (
-                    <AlertTriangle className={`w-4 h-4 ${riskConfig[level].color}`} />
-                  )}
-                </div>
-                <p className="text-2xl font-mono font-bold text-ink-100">
-                  {analysis.risk_summary[level] || 0}
-                </p>
-                <p className="text-xs text-ink-500 mt-1">clauses</p>
-              </button>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card p-8 mb-8 text-center"
-          >
-            <Zap className="w-12 h-12 text-accent/50 mx-auto" />
-            <h3 className="font-display text-lg font-semibold mt-4">
-              {analysis ? 'No Clauses Found' : 'Analysis Not Yet Run'}
-            </h3>
-            <p className="text-ink-500 mt-2">
-              {analysis
-                ? 'The AI extraction found no clauses in this document. Try re-running the extraction.'
-                : 'Extract clauses and assess risk levels for this document.'}
-            </p>
             <button
-              onClick={() => triggerExtraction()}
-              disabled={extracting}
-              className="mt-6 btn-primary"
+              type="button"
+              onClick={() => setViewMode(viewMode === 'pdf' ? 'analysis' : 'pdf')}
+              className={`v3-btn${viewMode === 'pdf' ? ' v3-btn-primary' : ''}`}
             >
-              {extracting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Extracting...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  {analysis ? 'Re-run Clause Extraction' : 'Run Clause Extraction'}
-                </>
-              )}
+              <BookOpen size={14} />
+              <span>PDF</span>
             </button>
-          </motion.div>
-        )}
 
-        {/* Clauses Section */}
-        {clauses.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Clause Type Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="card sticky top-24">
-                <div className="px-4 py-3 border-b border-ink-800/50">
-                  <h3 className="font-display font-semibold text-sm">Clause Types</h3>
-                </div>
-                <div className="p-2">
-                  <button
-                    onClick={() => setSelectedClauseType(null)}
-                    className={`w-full px-3 py-2 rounded-lg text-left text-sm transition-colors
-                              ${!selectedClauseType ? 'bg-accent/10 text-accent' : 'hover:bg-ink-800 text-ink-300'}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>All Clauses</span>
-                      <span className="font-mono text-xs">{clauses.length}</span>
-                    </div>
-                  </button>
-                  {Object.entries(clauseTypeCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([type, count]) => (
-                      <button
-                        key={type}
-                        onClick={() => setSelectedClauseType(selectedClauseType === type ? null : type)}
-                        className={`w-full px-3 py-2 rounded-lg text-left text-sm transition-colors
-                                  ${selectedClauseType === type ? 'bg-accent/10 text-accent' : 'hover:bg-ink-800 text-ink-300'}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span>{clauseTypeLabels[type] || type.replace(/_/g, ' ')}</span>
-                          <span className="font-mono text-xs">{count}</span>
-                        </div>
-                      </button>
-                    ))}
-                </div>
-              </div>
+            <button
+              onClick={handleGenerateReport}
+              disabled={generatingReport || !analysis}
+              className="v3-btn"
+              style={{ opacity: generatingReport || !analysis ? 0.5 : 1 }}
+            >
+              {generatingReport ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <FileBarChart size={14} />}
+              <span>{generatingReport ? 'Generating...' : 'Report'}</span>
+            </button>
 
-              {/* Timeline */}
-              <div className="card mt-4 p-4">
-                <Timeline documentId={documentId} />
-              </div>
-            </div>
+            <button
+              onClick={handleExtractObligations}
+              disabled={extractingObligations || !analysis}
+              className="v3-btn"
+              style={{ opacity: extractingObligations || !analysis ? 0.5 : 1 }}
+            >
+              {extractingObligations ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <ClipboardCheck size={14} />}
+              <span>{extractingObligations ? 'Extracting...' : 'Obligations'}</span>
+            </button>
 
-            {/* Clauses List */}
-            <div className="lg:col-span-3">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display text-lg font-semibold">
-                  Extracted Clauses
-                  {(selectedClauseType || selectedRiskLevel) && (
-                    <span className="ml-2 text-sm font-normal text-ink-500">
-                      ({filteredClauses.length} of {clauses.length})
-                    </span>
-                  )}
-                </h3>
-                {(selectedClauseType || selectedRiskLevel) && (
-                  <button
-                    onClick={() => {
-                      setSelectedClauseType(null)
-                      setSelectedRiskLevel(null)
-                    }}
-                    className="text-sm text-accent hover:text-accent-light"
-                  >
-                    Clear filters
-                  </button>
-                )}
-              </div>
+            {/* Export Dropdown */}
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={exporting !== null}
+              className="v3-btn"
+              style={{ opacity: exporting !== null ? 0.5 : 1 }}
+            >
+              {exporting ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Download size={14} />}
+              <span>{exporting ? 'Exporting...' : 'Export'}</span>
+              <ChevronDown size={12} />
+            </button>
 
-              <div className="space-y-3">
-                <AnimatePresence mode="popLayout">
-                  {filteredClauses.map((clause, index) => {
-                    const risk = riskConfig[clause.risk_level as RiskLevel] || riskConfig.low
-                    const isExpanded = expandedClauses.has(clause.id)
-
-                    return (
-                      <motion.div
-                        key={clause.id}
-                        layout
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: index * 0.02 }}
-                        className={`card overflow-hidden transition-all ${risk.border} border border-l-4 ${
-                                  clause.risk_level === 'critical' ? 'border-l-red-500' :
-                                  clause.risk_level === 'high' ? 'border-l-orange-500' :
-                                  clause.risk_level === 'medium' ? 'border-l-amber-500' : 'border-l-emerald-500'}
-                                  ${clause.risk_level === 'critical' ? 'risk-critical' : ''}
-                                  ${clause.risk_level === 'high' ? 'risk-high' : ''}`}
-                      >
-                        <button
-                          onClick={() => toggleClause(clause.id)}
-                          className="w-full px-5 py-4 text-left"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3">
-                              {isExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-ink-500 mt-1 flex-shrink-0" />
-                              ) : (
-                                <ChevronRight className="w-4 h-4 text-ink-500 mt-1 flex-shrink-0" />
-                              )}
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-ink-100">
-                                    {clauseTypeLabels[clause.clause_type] || (clause.clause_type ?? '').replace(/_/g, ' ')}
-                                  </span>
-                                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium uppercase ${risk.color} ${risk.bg}/10`}>
-                                    {clause.risk_level}
-                                  </span>
-
-                                  {clause.page_number != null && (
-                                    <span className="text-xs text-ink-600 font-mono">
-                                      p.{clause.page_number}
-                                    </span>
-                                  )}
-                                </div>
-                                {clause.summary && (
-                                  <p className="text-sm text-ink-400 mt-1 line-clamp-1">{clause.summary}</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </button>
-
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="border-t border-ink-800/50"
-                            >
-                              <div className="px-5 py-4 space-y-4">
-                                {/* Full Summary */}
-                                {clause.summary && (
-                                  <div>
-                                    <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2">
-                                      Summary
-                                    </h4>
-                                    <p className="text-sm text-ink-300">{clause.summary}</p>
-                                  </div>
-                                )}
-
-                                {/* Risk Factors */}
-                                {clause.risk_factors && clause.risk_factors.length > 0 && (
-                                  <div>
-                                    <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2">
-                                      Risk Factors
-                                    </h4>
-                                    <ul className="space-y-1">
-                                      {clause.risk_factors.map((factor, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm text-ink-400">
-                                          <AlertTriangle className={`w-3 h-3 mt-0.5 flex-shrink-0 ${risk.color}`} />
-                                          {factor}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-
-                                {/* Original Content */}
-                                <div>
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h4 className="text-xs font-medium text-ink-500 uppercase tracking-wider">
-                                      Original Text
-                                    </h4>
-                                    {clause.page_number != null && (
-                                      <span className="text-[11px] text-ink-500 font-mono">
-                                        Page {clause.page_number}
-                                        {clause.chunk_index != null && ` · Chunk ${clause.chunk_index + 1}`}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="p-4 bg-ink-900/50 rounded-lg border border-ink-800/50">
-                                    <p className="text-sm text-ink-300 font-mono whitespace-pre-wrap">
-                                      {clause.content}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* Plain English Explanation */}
-                                {explanations[clause.id] ? (
-                                  <div>
-                                    <h4 className="text-xs font-medium text-accent uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                      <Lightbulb className="w-3 h-3" />
-                                      Plain English Explanation
-                                    </h4>
-                                    <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
-                                      <p className="text-sm text-ink-300 whitespace-pre-wrap leading-relaxed">
-                                        {explanations[clause.id]}
-                                      </p>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => handleExplain(clause.id)}
-                                    disabled={explaining === clause.id}
-                                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg
-                                             bg-accent/10 text-accent hover:bg-accent/20 transition-colors
-                                             text-sm font-medium disabled:opacity-50"
-                                  >
-                                    {explaining === clause.id ? (
-                                      <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Explaining...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Lightbulb className="w-4 h-4" />
-                                        Explain in Plain English
-                                      </>
-                                    )}
-                                  </button>
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    )
-                  })}
-                </AnimatePresence>
-              </div>
-
-              {filteredClauses.length === 0 && (
-                <div className="card p-12 text-center">
-                  <FileText className="w-12 h-12 text-ink-700 mx-auto" />
-                  <p className="mt-4 text-ink-500">No clauses match the selected filters.</p>
-                </div>
+            <AnimatePresence>
+              {showExportMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 200, background: 'var(--v3-popover)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-md)', boxShadow: 'var(--v3-shadow-md)', overflow: 'hidden', zIndex: 50 }}
+                >
+                  {([
+                    { fmt: 'pdf', icon: <FileText size={14} color="var(--v3-risk-critical)" />, label: 'PDF Report', border: false },
+                    { fmt: 'excel', icon: <FileSpreadsheet size={14} color="var(--v3-risk-low)" />, label: 'Excel (.xlsx)', border: false },
+                    { fmt: 'word', icon: <FileType size={14} color="#60a5fa" />, label: 'Word (.docx)', border: true },
+                    { fmt: 'csv', icon: <FileSpreadsheet size={14} color="var(--v3-text-muted)" />, label: 'CSV (Clauses)', border: false },
+                    { fmt: 'json', icon: <FileJson size={14} color="var(--v3-risk-medium)" />, label: 'JSON (Full Data)', border: false },
+                  ] as const).map(({ fmt, icon, label, border }) => (
+                    <button
+                      key={fmt}
+                      onClick={() => handleExport(fmt)}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '12px 16px', textAlign: 'left', background: 'transparent',
+                        border: 'none', borderTop: border ? '1px solid var(--v3-border)' : 'none',
+                        color: 'var(--v3-text-primary)', cursor: 'pointer', fontSize: 13,
+                      }}
+                    >
+                      {icon}
+                      {label}
+                    </button>
+                  ))}
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
-        )}
+        }
+      />
+
+      {/* PDF Viewer Mode */}
+      {viewMode === 'pdf' ? (
+        <PdfViewer
+          documentId={documentId}
+          clauses={clauses}
+          activeClauseId={expandedClauses.size === 1 ? Array.from(expandedClauses)[0] : null}
+          onClauseClick={(id) => {
+            setExpandedClauses(new Set([id]))
+            setViewMode('analysis')
+          }}
+        />
+      ) : (
+        <>
+          {/* Risk Summary */}
+          {analysis && analysis.clauses_extracted > 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}
+            >
+              {/* Overall Risk */}
+              <div className="v3-card" style={{ gridColumn: 'span 2', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p className="v3-mono" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--v3-text-muted)', margin: 0 }}>Overall Risk Assessment</p>
+                  <div style={{ marginTop: 12 }}>
+                    <RiskPill level={overallRiskLevel} size="md">{analysis.overall_risk}</RiskPill>
+                  </div>
+                </div>
+                <div style={{ width: 12, height: 12, borderRadius: 999, background: v3RiskColor(analysis.overall_risk) }} />
+              </div>
+
+              {/* Risk Distribution */}
+              {(['critical', 'high', 'medium', 'low'] as RiskLevel[]).map((level) => (
+                <button
+                  key={level}
+                  className="v3-card v3-card-hover"
+                  style={{
+                    padding: 16, height: 104, textAlign: 'left', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                    border: selectedRiskLevel === level ? `1px solid ${v3RiskColor(level)}` : '1px solid var(--v3-border)',
+                    outline: selectedRiskLevel === level ? `2px solid var(--v3-accent)` : 'none', outlineOffset: -2,
+                  }}
+                  onClick={() => setSelectedRiskLevel(selectedRiskLevel === level ? null : level)}
+                  aria-pressed={selectedRiskLevel === level}
+                  aria-label={`Filter by ${level} risk: ${analysis.risk_summary[level] || 0} clauses`}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span className="v3-mono" style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: v3RiskColor(level) }}>
+                      {level}
+                    </span>
+                    {(level === 'critical' || level === 'high') && analysis.risk_summary[level] > 0 && (
+                      <AlertTriangle size={14} color={v3RiskColor(level)} />
+                    )}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 28, fontWeight: 600, color: 'var(--v3-text-primary)', lineHeight: 1, margin: 0 }}>
+                      {analysis.risk_summary[level] || 0}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--v3-text-muted)', marginTop: 4 }}>clauses</p>
+                  </div>
+                </button>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="v3-card"
+              style={{ padding: 40, marginBottom: 24, textAlign: 'center' }}
+            >
+              <Zap size={48} color="rgba(212,168,45,0.5)" style={{ margin: '0 auto' }} />
+              <h3 style={{ fontSize: 18, fontWeight: 600, marginTop: 16, color: 'var(--v3-text-primary)' }}>
+                {analysis ? 'No Clauses Found' : 'Analysis Not Yet Run'}
+              </h3>
+              <p style={{ color: 'var(--v3-text-muted)', marginTop: 8, fontSize: 14 }}>
+                {analysis
+                  ? 'The AI extraction found no clauses in this document. Try re-running the extraction.'
+                  : 'Extract clauses and assess risk levels for this document.'}
+              </p>
+              <button
+                onClick={() => triggerExtraction()}
+                disabled={extracting}
+                className="v3-btn v3-btn-primary"
+                style={{ marginTop: 24, display: 'inline-flex' }}
+              >
+                {extracting ? (
+                  <>
+                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    Extracting...
+                  </>
+                ) : (
+                  <>
+                    <Zap size={14} />
+                    {analysis ? 'Re-run Clause Extraction' : 'Run Clause Extraction'}
+                  </>
+                )}
+              </button>
+            </motion.div>
+          )}
+
+          {/* Clauses Section */}
+          {clauses.length > 0 && (
+            <>
+              {/* Timeline — horizontal strip under the action bar */}
+              <Section title="Contract Timeline" hint="dates and milestones">
+                <div style={{ padding: 16 }}>
+                  <Timeline documentId={documentId} />
+                </div>
+              </Section>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24 }}>
+                {/* Clause Type Sidebar */}
+                <div>
+                  <div className="v3-card" style={{ position: 'sticky', top: 24, padding: 0, overflow: 'hidden' }}>
+                    <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--v3-border)', background: 'var(--v3-panel)' }}>
+                      <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Clause Types</h3>
+                    </div>
+                    <div style={{ padding: 8 }}>
+                      <button
+                        onClick={() => setSelectedClauseType(null)}
+                        style={{
+                          width: '100%', padding: '8px 12px', borderRadius: 'var(--v3-radius-sm)',
+                          textAlign: 'left', fontSize: 13, cursor: 'pointer', border: 'none',
+                          background: !selectedClauseType ? 'rgba(212,168,45,0.12)' : 'transparent',
+                          color: !selectedClauseType ? 'var(--v3-accent)' : 'var(--v3-text-secondary)',
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>All Clauses</span>
+                          <span className="v3-mono" style={{ fontSize: 11 }}>{clauses.length}</span>
+                        </span>
+                      </button>
+                      {Object.entries(clauseTypeCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([type, count]) => (
+                          <button
+                            key={type}
+                            onClick={() => setSelectedClauseType(selectedClauseType === type ? null : type)}
+                            style={{
+                              width: '100%', padding: '8px 12px', borderRadius: 'var(--v3-radius-sm)',
+                              textAlign: 'left', fontSize: 13, cursor: 'pointer', border: 'none',
+                              background: selectedClauseType === type ? 'rgba(212,168,45,0.12)' : 'transparent',
+                              color: selectedClauseType === type ? 'var(--v3-accent)' : 'var(--v3-text-secondary)',
+                            }}
+                          >
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span>{clauseTypeLabels[type] || type.replace(/_/g, ' ')}</span>
+                              <span className="v3-mono" style={{ fontSize: 11 }}>{count}</span>
+                            </span>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clauses List */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>
+                      Extracted Clauses
+                      {(selectedClauseType || selectedRiskLevel) && (
+                        <span style={{ marginLeft: 8, fontSize: 13, fontWeight: 400, color: 'var(--v3-text-muted)' }}>
+                          ({filteredClauses.length} of {clauses.length})
+                        </span>
+                      )}
+                    </h3>
+                    {(selectedClauseType || selectedRiskLevel) && (
+                      <button
+                        onClick={() => {
+                          setSelectedClauseType(null)
+                          setSelectedRiskLevel(null)
+                        }}
+                        style={{ fontSize: 13, color: 'var(--v3-accent)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <AnimatePresence mode="popLayout">
+                      {filteredClauses.map((clause, index) => {
+                        const isExpanded = expandedClauses.has(clause.id)
+                        const riskColor = v3RiskColor(toRiskLevel(clause.risk_level))
+
+                        return (
+                          <motion.div
+                            key={clause.id}
+                            layout
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ delay: index * 0.02 }}
+                            className="v3-card"
+                            style={{ overflow: 'hidden', borderLeft: `3px solid ${riskColor}` }}
+                          >
+                            <button
+                              onClick={() => toggleClause(clause.id)}
+                              style={{ width: '100%', padding: '16px 20px', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit' }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                                  {isExpanded ? (
+                                    <ChevronDown size={16} color="var(--v3-text-muted)" style={{ marginTop: 2, flexShrink: 0 }} />
+                                  ) : (
+                                    <ChevronRight size={16} color="var(--v3-text-muted)" style={{ marginTop: 2, flexShrink: 0 }} />
+                                  )}
+                                  <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                      <span style={{ fontWeight: 500, color: 'var(--v3-text-primary)' }}>
+                                        {clauseTypeLabels[clause.clause_type] || (clause.clause_type ?? '').replace(/_/g, ' ')}
+                                      </span>
+                                      <RiskPill level={toRiskLevel(clause.risk_level)}>{clause.risk_level}</RiskPill>
+                                      {clause.page_number != null && (
+                                        <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                                          p.{clause.page_number}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {clause.summary && (
+                                      <p style={{ fontSize: 13, color: 'var(--v3-text-muted)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clause.summary}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  style={{ borderTop: '1px solid var(--v3-border)', overflow: 'hidden' }}
+                                >
+                                  <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    {/* Full Summary */}
+                                    {clause.summary && (
+                                      <div>
+                                        <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                                          Summary
+                                        </h4>
+                                        <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)' }}>{clause.summary}</p>
+                                      </div>
+                                    )}
+
+                                    {/* Risk Factors */}
+                                    {clause.risk_factors && clause.risk_factors.length > 0 && (
+                                      <div>
+                                        <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                                          Risk Factors
+                                        </h4>
+                                        <ul style={{ display: 'flex', flexDirection: 'column', gap: 4, margin: 0, padding: 0, listStyle: 'none' }}>
+                                          {clause.risk_factors.map((factor, i) => (
+                                            <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--v3-text-muted)' }}>
+                                              <AlertTriangle size={12} color={riskColor} style={{ marginTop: 3, flexShrink: 0 }} />
+                                              {factor}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+
+                                    {/* Original Content */}
+                                    <div>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                        <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                          Original Text
+                                        </h4>
+                                        {clause.page_number != null && (
+                                          <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>
+                                            Page {clause.page_number}
+                                            {clause.chunk_index != null && ` · Chunk ${clause.chunk_index + 1}`}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div style={{ padding: 16, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-md)', border: '1px solid var(--v3-border)' }}>
+                                        <p className="v3-mono" style={{ fontSize: 13, color: 'var(--v3-text-secondary)', whiteSpace: 'pre-wrap', margin: 0 }}>
+                                          {clause.content}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    {/* Plain English Explanation */}
+                                    {explanations[clause.id] ? (
+                                      <div>
+                                        <h4 className="v3-mono" style={{ fontSize: 11, fontWeight: 500, color: 'var(--v3-accent)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                          <Lightbulb size={12} />
+                                          Plain English Explanation
+                                        </h4>
+                                        <div style={{ padding: 16, background: 'rgba(212,168,45,0.05)', borderRadius: 'var(--v3-radius-md)', border: '1px solid rgba(212,168,45,0.2)' }}>
+                                          <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
+                                            {explanations[clause.id]}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleExplain(clause.id)}
+                                        disabled={explaining === clause.id}
+                                        className="v3-btn"
+                                        style={{ alignSelf: 'flex-start', color: 'var(--v3-accent)', background: 'rgba(212,168,45,0.1)', borderColor: 'rgba(212,168,45,0.2)', opacity: explaining === clause.id ? 0.5 : 1 }}
+                                      >
+                                        {explaining === clause.id ? (
+                                          <>
+                                            <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                                            Explaining...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Lightbulb size={14} />
+                                            Explain in Plain English
+                                          </>
+                                        )}
+                                      </button>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        )
+                      })}
+                    </AnimatePresence>
+                  </div>
+
+                  {filteredClauses.length === 0 && (
+                    <div className="v3-card" style={{ padding: 48, textAlign: 'center' }}>
+                      <FileText size={48} color="var(--v3-text-disabled)" style={{ margin: '0 auto' }} />
+                      <p style={{ marginTop: 16, color: 'var(--v3-text-muted)' }}>No clauses match the selected filters.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </>
-        )}
-      </main>
+      )}
+
       {/* Report Modal */}
       <AnimatePresence>
         {showReport && (
@@ -858,55 +835,55 @@ export default function DocumentDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: 16 }}
             onMouseDown={(e) => { if (e.target === e.currentTarget) setShowReport(false) }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-ink-950 border border-ink-800/50 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col"
+              style={{ background: 'var(--v3-popover)', border: '1px solid var(--v3-border)', borderRadius: 'var(--v3-radius-lg)', boxShadow: 'var(--v3-shadow-md)', width: '100%', maxWidth: 768, maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-ink-800/50">
-                <div className="flex items-center gap-3">
-                  <FileBarChart className="w-5 h-5 text-accent" />
-                  <h2 className="font-display text-lg font-semibold text-ink-100">Executive Summary Report</h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid var(--v3-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <FileBarChart size={20} color="var(--v3-accent)" />
+                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--v3-text-primary)', margin: 0 }}>Executive Summary Report</h2>
                 </div>
-                <div className="flex items-center gap-2">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {report && (
                     <button
                       onClick={handleDownloadReport}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 text-accent rounded-lg
-                               hover:bg-accent/20 transition-colors text-sm font-medium"
+                      className="v3-btn"
+                      style={{ color: 'var(--v3-accent)', background: 'rgba(212,168,45,0.1)', borderColor: 'rgba(212,168,45,0.2)', height: 30 }}
                     >
-                      <Download className="w-3.5 h-3.5" />
+                      <Download size={14} />
                       Download PDF
                     </button>
                   )}
-                  <button onClick={() => setShowReport(false)} className="p-1.5 text-ink-500 hover:text-ink-300">
-                    <X className="w-5 h-5" />
+                  <button onClick={() => setShowReport(false)} style={{ padding: 6, background: 'transparent', border: 'none', color: 'var(--v3-text-muted)', cursor: 'pointer' }}>
+                    <X size={20} />
                   </button>
                 </div>
               </div>
 
               {/* Modal Body */}
-              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
                 {generatingReport && !report ? (
-                  <div className="flex flex-col items-center justify-center py-16 gap-4">
-                    <Loader2 className="w-8 h-8 text-accent animate-spin" />
-                    <p className="text-ink-400 text-sm">Generating executive summary...</p>
-                    <p className="text-ink-600 text-xs">This may take a moment as the AI analyzes your contract</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '64px 0', gap: 16 }}>
+                    <Loader2 size={32} color="var(--v3-accent)" style={{ animation: 'spin 1s linear infinite' }} />
+                    <p style={{ color: 'var(--v3-text-secondary)', fontSize: 13 }}>Generating executive summary...</p>
+                    <p style={{ color: 'var(--v3-text-muted)', fontSize: 12 }}>This may take a moment as the AI analyzes your contract</p>
                   </div>
                 ) : report ? (
                   <>
                     {/* Executive Summary */}
                     <div>
-                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                      <h3 className="v3-mono" style={{ fontSize: 12, fontWeight: 600, color: 'var(--v3-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
                         Executive Summary
                       </h3>
-                      <div className="p-4 bg-ink-900/50 rounded-lg border border-ink-800/50">
-                        <p className="text-sm text-ink-300 whitespace-pre-wrap leading-relaxed">
+                      <div style={{ padding: 16, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-md)', border: '1px solid var(--v3-border)' }}>
+                        <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0 }}>
                           {report.executive_summary}
                         </p>
                       </div>
@@ -914,57 +891,51 @@ export default function DocumentDetailPage() {
 
                     {/* Risk Overview */}
                     <div>
-                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                      <h3 className="v3-mono" style={{ fontSize: 12, fontWeight: 600, color: 'var(--v3-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
                         Risk Overview
                       </h3>
-                      <div className="grid grid-cols-4 gap-3">
-                        {(['critical', 'high', 'medium', 'low'] as const).map((level) => {
-                          const config = riskConfig[level]
-                          return (
-                            <div key={level} className="card p-3 text-center">
-                              <span className={`text-xs font-medium uppercase ${config.color}`}>{level}</span>
-                              <p className="text-xl font-mono font-bold text-ink-100 mt-1">
-                                {report.risk_overview[level]}
-                              </p>
-                            </div>
-                          )
-                        })}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                        {(['critical', 'high', 'medium', 'low'] as const).map((level) => (
+                          <div key={level} className="v3-card" style={{ padding: 12, textAlign: 'center' }}>
+                            <span className="v3-mono" style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: v3RiskColor(level) }}>{level}</span>
+                            <p style={{ fontSize: 20, fontWeight: 600, color: 'var(--v3-text-primary)', marginTop: 4 }}>
+                              {report.risk_overview[level]}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
                     {/* Key Clauses */}
                     <div>
-                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                      <h3 className="v3-mono" style={{ fontSize: 12, fontWeight: 600, color: 'var(--v3-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
                         Key Clauses ({report.key_clauses.length})
                       </h3>
-                      <div className="space-y-2">
-                        {report.key_clauses.slice(0, 8).map((clause, i) => {
-                          const risk = riskConfig[clause.risk_level as RiskLevel] || riskConfig.low
-                          return (
-                            <div key={i} className="flex items-start gap-3 p-3 bg-ink-900/30 rounded-lg">
-                              <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium uppercase ${risk.color} ${risk.bg}/10 flex-shrink-0 mt-0.5`}>
-                                {clause.risk_level}
-                              </span>
-                              <div>
-                                <span className="text-sm font-medium text-ink-200">{clauseTypeLabels[clause.clause_type] || (clause.clause_type ?? '').replace(/_/g, ' ')}</span>
-                                <p className="text-xs text-ink-400 mt-0.5 line-clamp-2">{clause.summary}</p>
-                              </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {report.key_clauses.slice(0, 8).map((clause, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-md)' }}>
+                            <div style={{ flexShrink: 0, marginTop: 2 }}>
+                              <RiskPill level={toRiskLevel(clause.risk_level)}>{clause.risk_level}</RiskPill>
                             </div>
-                          )
-                        })}
+                            <div>
+                              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--v3-text-primary)' }}>{clauseTypeLabels[clause.clause_type] || (clause.clause_type ?? '').replace(/_/g, ' ')}</span>
+                              <p style={{ fontSize: 12, color: 'var(--v3-text-muted)', marginTop: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{clause.summary}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
                     {/* Recommendations */}
                     <div>
-                      <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                      <h3 className="v3-mono" style={{ fontSize: 12, fontWeight: 600, color: 'var(--v3-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
                         Recommendations
                       </h3>
-                      <div className="space-y-2">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {report.recommendations.map((rec, i) => (
-                          <div key={i} className="flex items-start gap-3 p-3 bg-accent/5 rounded-lg border border-accent/10">
-                            <CheckCircle className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-ink-300">{rec}</p>
+                          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, background: 'rgba(212,168,45,0.05)', borderRadius: 'var(--v3-radius-md)', border: '1px solid rgba(212,168,45,0.1)' }}>
+                            <CheckCircle size={16} color="var(--v3-accent)" style={{ flexShrink: 0, marginTop: 2 }} />
+                            <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', margin: 0 }}>{rec}</p>
                           </div>
                         ))}
                       </div>
@@ -973,17 +944,17 @@ export default function DocumentDetailPage() {
                     {/* Entities */}
                     {report.entities_summary.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-semibold text-ink-300 uppercase tracking-wider mb-3">
+                        <h3 className="v3-mono" style={{ fontSize: 12, fontWeight: 600, color: 'var(--v3-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
                           Entities Identified
                         </h3>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
                           {report.entities_summary.map((entity, i) => (
-                            <div key={i} className="p-3 bg-ink-900/30 rounded-lg">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs font-medium text-ink-400">{entity.type}</span>
-                                <span className="text-xs font-mono text-ink-500">{entity.count}</span>
+                            <div key={i} style={{ padding: 12, background: 'var(--v3-panel)', borderRadius: 'var(--v3-radius-md)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--v3-text-muted)' }}>{entity.type}</span>
+                                <span className="v3-mono" style={{ fontSize: 11, color: 'var(--v3-text-muted)' }}>{entity.count}</span>
                               </div>
-                              <p className="text-sm text-ink-300">{entity.examples.join(', ')}</p>
+                              <p style={{ fontSize: 13, color: 'var(--v3-text-secondary)', margin: 0 }}>{entity.examples.join(', ')}</p>
                             </div>
                           ))}
                         </div>
@@ -998,6 +969,6 @@ export default function DocumentDetailPage() {
       </AnimatePresence>
 
       <ChatPanel documentId={documentId} />
-    </div>
+    </V3Shell>
   )
 }
