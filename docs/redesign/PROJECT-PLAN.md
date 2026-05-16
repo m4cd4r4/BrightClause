@@ -1,136 +1,124 @@
-# BrightClause v3 Redesign — Execution Plan
+# BrightClause v3 Redesign — Execution Plan (Fast-Reskin, Batched)
 
 **Companion to:** [`docs/redesign/BRIEF.md`](./BRIEF.md) (visual + structural decisions, locked 2026-05-16)
 **Input:** [`docs/v1-audit/AUDIT.md`](../v1-audit/AUDIT.md) (per-surface audit of live v1)
-**Plan governs:** branch shape, wave gating, output paths reserved, definition-of-done. Per [c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md](file:///c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md), this file is the lock — other sessions check it before starting overlapping work.
+**Plan governs:** branch shape, batch sequencing, output paths, definition-of-done. Per [c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md](file:///c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md), this file is the lock — other sessions check it before starting overlapping work.
+
+**Revised 2026-05-16** after the foundation shipped and Macdara chose the fast path: *reskin every surface, keep every section/tool/function identical, lighter gates, no route demotions.*
 
 ---
 
-## 1. What this plan does NOT decide
+## 1. What changed from the original 9-wave plan
 
-Direction questions are settled in BRIEF.md. This plan does not re-litigate:
+The first version of this plan (9 waves, 24h soak gate between each, Compare demoted, Deals folded into Workspaces) was written before the Analytics pilot proved the approach. After Macdara saw the live `/analytics-v2` surface he chose a different shape:
 
-- Typography (Geist Sans + Geist Mono, no serif inside app — BRIEF §Typography)
-- Colour tokens (4-tier dark surface, accent `#d4a82d` — BRIEF §Color tokens)
-- Elevation, radius, spacing, density (BRIEF §Elevation through §Density)
-- Layout shell (240/56px sidebar + 48px topbar — BRIEF §Layout shell)
-- Component contracts (BRIEF §Component contracts)
-- Motion budget (BRIEF §Motion budget)
-- Chart library (Recharts — BRIEF §Chart library decision)
-- Build order (BRIEF §Surface priority — this plan maps that to waves)
-- What routes get demoted (Compare → bulk action, Deals → Workspaces — BRIEF §Surface priority + §Out-of-scope)
+- **Keep every route.** No demotions. Compare stays Compare. Deals stays Deals. This is a pure reskin: same sections, same tools, same functions, same data, same IA — only the rendering layer changes to v3 primitives.
+- **Batch surfaces.** Ship 2-3 reskinned surfaces per PR, not one-per-wave.
+- **No 24h soak between batches.** Each surface is additive-safe (v1 stays the fallback until the v3 page replaces it in the same PR, and the change is rendering-only). Verify on production after merge, rollback-ready.
+- **Foundation is done.** Tokens, shell, primitives, and the Analytics pilot are merged and live.
 
-If a decision in this plan contradicts BRIEF.md, the brief wins.
+If this plan contradicts BRIEF.md, the brief wins. Direction is not re-litigated here.
 
 ---
 
 ## 2. Scope
 
-In: visual + structural redesign of marketing landing + 5 retained product surfaces (Analytics, Dashboard, Document detail, Obligations, Knowledge Graph) + ⌘K command palette + layout shell + token system + Vercel deployment-protection hardening.
+**In:** rendering-layer reskin of every product surface to the v3 design system, keeping 100% of existing functionality, data flow, and information architecture.
 
-Out: backend, API, features, auth, billing, mobile, light-theme polish beyond a single-pass mapping, Compare matrix redesign (demoted to bulk action), Deals route redesign (folded into Workspaces).
-
----
-
-## 3. Wave structure
-
-BRIEF.md §Surface priority lists 10 build steps. This plan groups them into 9 waves with explicit gates between. **Wave N+1 cannot be scoped until Wave N is in production and stable for ≥24h.**
-
-| Wave | Slug | Maps to BRIEF step(s) | Output | Effort | Status |
-|---|---|---|---|---|---|
-| 0 | `feat/v3-redesign` | 1 (tokens + global CSS + fonts + theme provider) | `frontend/src/styles/v3-tokens.css`, `frontend/src/app/layout.tsx` font block, theme provider stub | S–M | **materialised** (in flight) |
-| 1 | `feat/v3-shell-primitives` | 2 (shell) + 3 (primitives) | Sidebar 240/56, topbar 48px, page wrapper, 5 primitives (KpiCard, RiskPill, DocumentRow, HeatmapCell, EntityChip). Not yet wired to existing routes. | M | later |
-| 2 | `feat/v3-analytics-pilot` | 4 (Analytics pilot at `/analytics-v2`) | New route `/analytics-v2` rendering the v3 Analytics surface. Existing `/analytics` untouched. | M | later |
-| 3 | `feat/v3-dashboard-cmdk` | 5 (Dashboard) + 9 (⌘K command palette) | `/dashboard` ported to v3. ⌘K palette shipped globally. `/search` route stays for direct linking. | M–L | later |
-| 4 | `feat/v3-document-detail` | 6 (Document detail) | `/documents/[id]` ported. Three-column shape per AUDIT §2 rebuild target. | L | later |
-| 5 | `feat/v3-obligations` | 7 (Obligations) | `/obligations` ported with due-date column + mark-complete inline action per AUDIT §6 rebuild target. | M | later |
-| 6 | `feat/v3-knowledge-graph` | 8 (Knowledge graph fullscreen) | `/documents/[id]/graph` fullscreen canvas + click-through entity side panel per AUDIT §8. | S–M | later |
-| 7 | `feat/v3-promote-analytics-light` | 10 (light theme) + analytics promotion | Promote `/analytics-v2` → `/analytics` (drop old). Light theme token mapping. | M | later |
-| 8 | `chore/v3-cleanup-hardening` | (post-build housekeeping) | Remove Compare + Deals routes. Drop Cormorant Garamond and DM Sans imports. Drop dead tokens from `tailwind.config.ts`. Lock Vercel production branch to `master` only. | S | later |
-
-`feat/v2-landing` is **superseded**. Do not merge, do not delete (work product preserved).
+**Out:** backend, API, features, auth, billing, mobile-specific layouts beyond what the shell gives for free, light-theme polish beyond a single-pass mapping. No route is removed. No feature is removed or demoted.
 
 ---
 
-## 4. Wave gates
+## 3. Status — what is already shipped
 
-Each gate is a hard stop. Wave N+1's brief cannot be drafted until Wave N's gate passes.
-
-| Gate | Condition |
+| Item | State |
 |---|---|
-| Wave 0 → 1 | `v3-tokens.css` final, theme provider working, dark theme default verified on staging route |
-| Wave 1 → 2 | Shell renders on every existing route without breaking them. Primitives renderable in isolation (Storybook-equivalent harness or `/_dev/primitives` route). |
-| Wave 2 → 3 | `/analytics-v2` deployed to brightclause.com, 24h soak, no rollback. Heatmap interactivity working. |
-| Wave 3 → 4 | `/dashboard` shipped in v3, ⌘K palette working from every page, 24h soak |
-| Wave 4 → 5 | `/documents/[id]` shipped, 24h soak |
-| Wave 5 → 6 | `/obligations` shipped, 24h soak |
-| Wave 6 → 7 | `/documents/[id]/graph` shipped, 24h soak |
-| Wave 7 → 8 | `/analytics-v2` promoted to `/analytics`, light theme working (theme toggle from topbar) |
-| Wave 8 closes plan | Cleanup PR merged, Vercel production branch locked |
+| v3 design tokens (`frontend/src/styles/v3-tokens.css`) | **merged** (master `5fbf8c3`, PR #29) |
+| App shell + sidebar + topbar + ⌘K palette (`frontend/src/components/v3/shell.tsx`) | **merged** |
+| Six primitives (`frontend/src/components/v3/primitives.tsx`) | **merged** |
+| Geist Sans/Mono fonts wired (`layout.tsx`) | **merged** |
+| Dev-only CSP `unsafe-eval` (`next.config.js`) | **merged** |
+| `/analytics-v2` route (v3 Analytics pilot) | **merged, live at brightclause.com/analytics-v2** |
+| v1 audit + brief + this plan | **merged** |
+
+Production verified 2026-05-16: `/` and `/analytics` render v1 unchanged; `/analytics-v2` renders v3 with real data; `/api/health` healthy.
+
+---
+
+## 4. Remaining work — batches
+
+Every batch is one PR, branched fresh off `master`, merged via the git-integration path (see §6). Surfaces grouped by primitive-reuse similarity so each batch compounds on the last.
+
+| Batch | Branch | Surfaces reskinned | Why grouped | Effort |
+|---|---|---|---|---|
+| 1 | `feat/v3-batch1-dashboard-obligations` | `/dashboard`, `/obligations` | Heaviest KpiCard + table + RiskPill reuse — fastest wins, lowest risk, proves the shell on real app routes | M |
+| 2 | `feat/v3-batch2-docdetail-graph` | `/documents/[id]`, `/documents/[id]/graph` | The two complex workspace layouts; doc-detail is the core work surface, graph just needs the shell + fullscreen canvas | L |
+| 3 | `feat/v3-batch3-search-compare-deals` | `/search`, `/compare`, `/deals`, `/deals/[id]` | Lighter, empty-state-heavy surfaces; all kept (no demotion) | M |
+| 4 | `chore/v3-finalise` | Promote `/analytics-v2` → `/analytics`, drop the now-duplicate old Analytics, light-theme token map, drop Cormorant + DM Sans imports, remove stray `frontend/nul` + PWA artefacts, consistency pass | M |
+
+Batches are independent enough to parallelise across worktrees if desired, but the recommended order is 1 → 2 → 3 → 4 because each batch hardens the primitives the next one reuses, and Batch 4 must be last (it removes the v1 fallbacks).
+
+### Per-surface contract (applies to every surface in every batch)
+
+For each route: wrap the page in `<V3Shell>`, swap the rendering JSX to v3 primitives, keep the **exact** data fetching, hooks, state, handlers, and feature logic. No API change. No behaviour change. If a feature exists in v1 it exists identically in v3. Verify the reskinned page against its v1 audit entry in `docs/v1-audit/AUDIT.md` and its v1 screenshot.
 
 ---
 
 ## 5. Output paths reserved
 
-Per multi-worktree rule §5 ("Source-of-truth files are reserved by being named"). Pre-mint overlap check (`wt-mint.sh`) reads this table.
-
-| Wave | Reserved paths |
+| Batch | Reserved paths |
 |---|---|
-| 0 | `frontend/src/styles/v3-tokens.css`, `frontend/src/app/layout.tsx` (font + token import block only), `frontend/next.config.js`, `frontend/package.json`, `frontend/package-lock.json` |
-| 1 | `frontend/src/components/v3/**` (shell + primitives + future theme provider, all version-namespaced), `frontend/src/app/_dev/primitives/**` (new harness route) |
-| 2 | `frontend/src/app/analytics-v2/**` (new) |
-| 3 | `frontend/src/app/dashboard/**`, `frontend/src/components/v3/command-palette/**` (new), `frontend/src/app/search/page.tsx` (link-only, palette is primary) |
-| 4 | `frontend/src/app/documents/[id]/**`, `frontend/src/components/v3/pdf-viewer/**` (if split-pane lands here vs Wave 6) |
-| 5 | `frontend/src/app/obligations/**` |
-| 6 | `frontend/src/app/documents/[id]/graph/**` |
-| 7 | `frontend/src/app/analytics/**` (replaces analytics-v2), `frontend/src/styles/v3-tokens.css` (light theme map appended), `frontend/src/components/v3/theme-provider.tsx` |
-| 8 | `frontend/tailwind.config.ts`, `frontend/src/app/globals.css`, `frontend/src/app/compare/**` (deletion), `frontend/src/app/deals/**` (deletion), Vercel project settings (external) |
+| 1 | `frontend/src/app/dashboard/**`, `frontend/src/app/obligations/**`, `frontend/src/components/v3/**` (new shared primitives only — additive) |
+| 2 | `frontend/src/app/documents/[id]/**` (incl. `chat-panel`, `pdf-viewer`, `timeline`, `graph/`), `frontend/src/components/v3/**` (additive) |
+| 3 | `frontend/src/app/search/**`, `frontend/src/app/compare/**`, `frontend/src/app/deals/**`, `frontend/src/components/v3/**` (additive) |
+| 4 | `frontend/src/app/analytics/**`, `frontend/src/app/analytics-v2/**` (removed after promote), `frontend/src/styles/v3-tokens.css` (light map), `frontend/src/app/layout.tsx` (drop old fonts), `frontend/next.config.js`, `frontend/tailwind.config.ts`, `frontend/src/app/globals.css` |
 
-**Convention:** all new v3 components live under `frontend/src/components/v3/**` — version-namespaced so future redesigns can coexist or supersede cleanly. Older non-v3 components remain at their existing paths and are only removed in Wave 8.
+Shared v3 primitives live under `frontend/src/components/v3/**` and are version-namespaced. Adding a primitive is additive and never conflicts; modifying an existing primitive's signature is a cross-batch change and must be called out in the PR.
 
 ---
 
 ## 6. Process discipline
 
+### Deploy path (HARD RULE — incident-derived)
+**Never `vercel --prod` / `vercel deploy --prod` against this project from a local checkout.** Production drifted to the rejected v2 landing twice (2026-05-15 ×2) because CLI deploys ship the local working tree and a manual `vercel alias set` then pins `brightclause.com` to it. The only sanctioned path:
+
+1. Branch off `master`, do the reskin, push the branch.
+2. Open a PR. Vercel builds a preview automatically (preview is Vercel-auth-walled — that is acceptable; the diff is rendering-only and verified locally + post-merge).
+3. Merge the PR (rebase). Vercel git integration auto-builds a production deployment from `master`.
+4. If `brightclause.com` does not auto-repoint to the new git deployment (manual-alias stickiness from the incident), `vercel alias set <git-production-deployment> brightclause.com` ONCE to the CI-built deployment — never to a CLI-built one.
+5. Verify on `brightclause.com` directly. Keep the previous good deployment id noted for instant rollback.
+
+Full rationale: [c:/Users/Hard-Worker/.claude/projects/i--Scratch-ContractClarity/memory/project_vercel_prod_deploy_hazard.md](file:///c:/Users/Hard-Worker/.claude/projects/i--Scratch-ContractClarity/memory/project_vercel_prod_deploy_hazard.md).
+
 ### Rebase-on-start
-Every fresh session in any wave worktree runs `git fetch origin master --quiet && git rebase origin/master` **before any other action**. Sessions overrunning 24h rebase daily. Not at PR time — at session start.
+Every fresh session in any batch branch runs `git fetch origin master --quiet && git rebase origin/master` before any other action. Batches branch fresh off master — never reuse a merged branch.
 
-### PR queuing
-GitHub auto-merge enabled with **rebase** strategy. Never manual-merge two PRs simultaneously across sessions. Let GitHub serialise.
+### Definition of "batch is done"
+- [ ] PR merged to master (rebase)
+- [ ] Vercel git-integration production deploy is the merged commit
+- [ ] `brightclause.com` repointed to the git deployment if stickiness recurs
+- [ ] Every reskinned route loads 200, renders the v3 shell, no console errors on the golden path
+- [ ] Every route NOT in this batch still renders unchanged (spot-checked)
+- [ ] `/api/health` still 200
+- [ ] §3 / §4 status updated in the same PR or an immediate follow-up commit
 
-### Branch protection
-Wave 0's PR also enables branch protection on `master`: required PR, required CI, no direct push, no force push. (Currently absent — I pushed `feat/v2-landing` and was offered an auto-PR-creation hint; master itself is unprotected.) Pull this forward to Wave 0 if you want it tightened before any v3 hits production.
+No 24h soak gate. Next batch may start as soon as the previous batch's production verification passes.
 
-### Vercel hardening
-Until Wave 8 lands the production-branch lock, **no `vercel --prod` runs against this project without explicit per-deploy authorization from Macdara on the specific commit**. The 2026-05-15 22:40 AWST unauthorised production deploy (rolled back same evening) is the precedent that justifies this discipline.
-
-### Definition of "wave is done"
-A wave's gate is passed only when ALL of these are true:
-
-- [ ] PR(s) merged to master via rebase
-- [ ] Production deploy is the merged commit (Vercel deployments tab shows it)
-- [ ] brightclause.com loaded in a browser, visually inspected against BRIEF.md success criteria
-- [ ] Lighthouse run on the changed route — no regression vs previous wave's score (mobile + desktop)
-- [ ] No console errors, no 404s on assets, no failed network requests on golden path
-- [ ] ≥24 hours elapsed without rollback or hotfix
-- [ ] Status table in §3 of this file updated (`status` → `merged`)
-- [ ] Output paths in §5 updated if files moved during the wave
-
-Wave N+1 may start scoping only after these check.
-
-### Smaller PRs (multi-worktree rule §6)
-A wave is one feature or one fix. Wave 3 (Dashboard + ⌘K) is the only multi-feature wave and is acceptable because ⌘K replaces `/search` functionally and the two ship together to keep the search affordance unbroken.
+### Smaller PRs
+One batch = one PR. If a batch's diff exceeds ~800 lines or touches a primitive's public signature, split it.
 
 ---
 
-## 7. Disposition of existing branches
+## 7. Disposition of branches
 
 | Branch | Status | Action |
 |---|---|---|
-| `master` | Production source of truth | Untouched until Wave 0 PR merges. Branch protection enabled in Wave 0. |
-| `feat/v2-landing` | Superseded | Do not delete (work product preserved). Do not merge. Will be left in the registry as `archived` once Wave 0 lands. |
-| `feat/v3-redesign` | Wave 0 in flight | Continue Wave 0 work here. PR's title and body should reference this plan. On Wave 1 mint, create a fresh branch off master — do not reuse this one. |
-| `docs/redesign-plan` (this branch) | Plan PR pending | Merges to master before Wave 0 PR opens. The lock arrives before the work. |
+| `master` | Production source of truth | Git-integration auto-deploys to production. Never CLI-deploy. |
+| `feat/v2-landing` | Superseded | Do not delete, do not merge. Preserved. |
+| `feat/v3-redesign` | Merged (PR #29) | Auto-deleted on merge. Do not reuse. |
+| `docs/redesign-plan` | Local-only artefact | Superseded by this revision. May be deleted. |
+| `chore/v3-bundle-ship` (worktree) | Obsolete | The bundle it was to ship is merged. Worktree at `I:/Scratch/BrightClause-brightclause-v3-bundle-ship` can be removed via `wt-finish.sh`. |
+| `chore/v3-plan-reskin-batches` | This revision's PR | Merges to master before Batch 1 opens. |
 
 ---
 
@@ -138,34 +126,19 @@ A wave is one feature or one fix. Wave 3 (Dashboard + ⌘K) is the only multi-fe
 
 | Risk | Mitigation |
 |---|---|
-| Direction wrong, discovered mid-Wave | BRIEF.md locks direction. Wave 2 (Analytics pilot at `/analytics-v2`) is a parallel-route validation before any existing route is touched. If it fails to deliver the BRIEF §What success looks like criterion, replan before Wave 3. |
-| Token system unstable under app-density layouts | Wave 1 includes the `/_dev/primitives` harness route. Primitives must render correctly in isolation before Wave 2 wires them into Analytics. |
-| Production deployed outside plan (recurrence of 2026-05-15 incident) | Wave 8 hardens Vercel. Pre-Wave-8: per-deploy authorization rule (see §6). Wave 0 also enables master branch protection. |
-| Stale branches regress fixes | Rebase-on-start discipline (§6). Branches >2 days old rebase before merge. |
-| Multi-worktree conflicts | Output paths reserved (§5). Wave 4–6 are sequential per BRIEF build order, reducing parallel-write surface. |
-| Scope creep into backend / features | §2 "explicitly out" list. PRs adding non-redesign work get split or rejected. |
-| Compare and Deals routes still in code post-Wave 7 | Wave 8 deletes them. Until then, they continue to render the v1 design language — acceptable visible inconsistency for the duration of the build. |
-| Light theme regresses dark theme | Wave 7 is the only wave that touches both themes. Visual diff (screenshot baseline) on every existing route required as gate. |
+| Production drift to v2 (recurrence) | §6 hard rule: git-integration path only, never CLI. Memory file is the standing reason. |
+| A reskin silently changes behaviour | Per-surface contract (§4): data/hooks/handlers byte-identical, only JSX swapped. Verify against v1 audit + screenshot. |
+| Preview auth-wall blocks pre-merge verification | Accepted: diff is rendering-only, verified locally before commit and on production immediately after merge, rollback id noted. |
+| Primitive signature change ripples across batches | Additive-only by default; signature changes flagged in PR and that batch goes last or solo. |
+| Batch branch goes stale | Rebase-on-start (§6). Batches are short-lived (one PR each). |
+| Scope creep into backend/features | §2 out-list. Reskin PRs that touch data/API logic get split or rejected. |
 
 ---
 
-## 9. Out-of-band open questions
-
-Not direction decisions (those are locked in BRIEF). Process decisions that need a one-line answer from Macdara before Wave 0 closes.
-
-1. **Master branch protection: pull forward to Wave 0 or leave for Wave 8?** Recommend: pull forward.
-2. **PR-per-screen or PR-per-wave for Wave 3?** (Wave 3 is the only wave with two surfaces — Dashboard + ⌘K palette.) Recommend: one PR; they ship together because ⌘K replaces `/search` functionally.
-3. **Storybook or `/_dev/primitives` harness for Wave 1?** Recommend: `/_dev/primitives` (no extra tool, faster setup, ships behind `NODE_ENV=development` guard).
-4. **Vercel deployment protection level?** Options: (a) production-branch lock only, (b) lock + require manual promote on Vercel dashboard, (c) lock + require GitHub Approved Reviewer. Recommend (b).
-5. **Wave 0 owner.** Macdara handles directly on `feat/v3-redesign`, or hand-off via a `/new-worktree` scoped prompt? Currently: Macdara directly, in flight.
-
----
-
-## 10. References
+## 9. References
 
 - BRIEF: [`docs/redesign/BRIEF.md`](./BRIEF.md)
 - v1 audit: [`docs/v1-audit/AUDIT.md`](../v1-audit/AUDIT.md)
-- v1 audit screenshots: [`docs/v1-audit/screenshots/`](../v1-audit/screenshots/)
-- Multi-worktree rule: [`~/.claude/rules/multi-worktree-projects.md`](file:///c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md)
-- Git workflow rule: [`~/.claude/rules/git-workflow.md`](file:///c:/Users/Hard-Worker/.claude/rules/git-workflow.md)
-- Superseded branch (preserved): `feat/v2-landing`
+- v1 + v3 screenshots: [`docs/v1-audit/screenshots/`](../v1-audit/screenshots/)
+- Vercel deploy hazard memory: [c:/Users/Hard-Worker/.claude/projects/i--Scratch-ContractClarity/memory/project_vercel_prod_deploy_hazard.md](file:///c:/Users/Hard-Worker/.claude/projects/i--Scratch-ContractClarity/memory/project_vercel_prod_deploy_hazard.md)
+- Multi-worktree rule: [c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md](file:///c:/Users/Hard-Worker/.claude/rules/multi-worktree-projects.md)
