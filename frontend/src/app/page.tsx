@@ -227,6 +227,12 @@ export default function LandingPage() {
             <Image src="/logo-minimal.png" alt="BrightClause" width={32} height={32} style={{ objectFit: 'contain' }} priority />
             <span style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--v3-text-primary)' }}>BrightClause</span>
           </div>
+          <nav aria-label="Landing sections" className="v3-landing-nav">
+            <a href="#demo">Demo</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="#architecture">Architecture</a>
+          </nav>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <a
               href="https://github.com/m4cd4r4/BrightClause"
@@ -350,12 +356,14 @@ export default function LandingPage() {
       </section>
 
       {/* Screenshot Showcase (lazy - below fold) */}
-      <Suspense fallback={<div style={{ padding: '96px 0' }} />}>
-        <ScreenshotShowcase />
-      </Suspense>
+      <div id="demo" style={{ scrollMarginTop: 80 }}>
+        <Suspense fallback={<div style={{ padding: '96px 0' }} />}>
+          <ScreenshotShowcase />
+        </Suspense>
+      </div>
 
       {/* How It Works */}
-      <section style={{ ...sectionStyle, padding: '80px 0' }}>
+      <section id="how-it-works" style={{ ...sectionStyle, padding: '80px 0', scrollMarginTop: 64 }}>
         <div className="max-w-6xl mx-auto px-6">
           <motion.div {...reveal()} style={{ textAlign: 'center', marginBottom: 64 }}>
             <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
@@ -427,7 +435,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features - Bento Layout */}
-      <section style={{ ...sectionStyle, padding: '112px 0' }}>
+      <section id="features" style={{ ...sectionStyle, padding: '112px 0', scrollMarginTop: 64 }}>
         <div className="max-w-6xl mx-auto px-6">
           <motion.div {...reveal()} style={{ textAlign: 'center', marginBottom: 64 }}>
             <h2 style={{ fontSize: 'clamp(1.875rem, 4vw, 2.25rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
@@ -586,7 +594,7 @@ export default function LandingPage() {
       </section>
 
       {/* Architecture */}
-      <section style={{ ...sectionStyle, padding: '112px 0' }}>
+      <section id="architecture" style={{ ...sectionStyle, padding: '112px 0', scrollMarginTop: 64 }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: 48, alignItems: 'center' }}>
             <motion.div
