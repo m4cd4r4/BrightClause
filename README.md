@@ -10,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 
-[Live Demo](https://brightclause.com) | [API Docs](http://localhost:8002/docs) | [Quick Start](#quick-start)
+[Live Demo](https://brightclause.com) | [API Reference](#api-reference) | [Quick Start](#quick-start)
 
 <img src="docs/screenshot-readme.png" alt="BrightClause Portfolio Analytics — risk heatmap with cross-document clause scoring" width="800" />
 
@@ -29,7 +29,7 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
 | Feature | Description |
 |---------|-------------|
 | **4-Tier OCR** | PyMuPDF, Tesseract, PaddleOCR, Vision LLM fallback |
-| **Clause Extraction** | 16+ clause types with AI-powered risk scoring |
+| **Clause Extraction** | 16 clause types with AI-powered risk scoring |
 | **BYOK Extraction** | Bring Your Own Anthropic API key — upload any document and extract clauses on demand |
 | **Contract Q&A Chat** | RAG-powered chat — ask questions about any document in natural language |
 | **Plain-English Translator** | One-click clause explanation in simple, non-legal language |
@@ -147,7 +147,7 @@ flowchart TD
 |------------|---------|
 | **Next.js 14** | React framework with App Router |
 | **TypeScript** | Type safety |
-| **TailwindCSS** | Utility-first styling with custom ink/accent palette |
+| **TailwindCSS** | Utility-first styling on the v3 design-token system (dark + light) |
 | **Framer Motion** | Page transitions & entrance animations |
 | **Playwright** | Cross-browser E2E testing (Chrome, Firefox, WebKit) |
 
@@ -384,23 +384,27 @@ BrightClause/
 
 ### Colors
 
+v3 design tokens (dark is the default; a light theme ships via the `html.light` toggle).
+
 | Token | Value | Usage |
 |-------|-------|-------|
-| `ink-950` | `#0a0a0b` | Background |
-| `ink-900` | `#18181b` | Cards, surfaces |
-| `accent` | `#c9a227` | Legal gold (primary actions) |
-| `critical` | `#ef4444` | Red &mdash; Critical risk |
-| `high` | `#f97316` | Orange &mdash; High risk |
-| `medium` | `#f59e0b` | Amber &mdash; Medium risk |
-| `low` | `#10b981` | Emerald &mdash; Low risk |
+| `--v3-canvas` | `#0a0a0c` | Page background |
+| `--v3-panel` | `#111114` | Sidebar / section surfaces |
+| `--v3-card` | `#16161a` | Cards, rows |
+| `--v3-accent` | `#d4a82d` | Legal gold (primary actions only) |
+| `--v3-risk-critical` | `#ef4444` | Critical risk |
+| `--v3-risk-high` | `#f97316` | High risk |
+| `--v3-risk-medium` | `#eab308` | Medium risk |
+| `--v3-risk-low` | `#10b981` | Low risk |
 
 ### Typography
 
 | Font | Usage |
 |------|-------|
-| **Cormorant Garamond** | Display headings |
-| **DM Sans** | Body text |
-| **JetBrains Mono** | Code, data labels, clause references |
+| **Geist Sans** | Display & body text |
+| **Geist Mono** | Code, data labels, clause references |
+
+No serif anywhere; two-tier elevation, no glassmorphism.
 
 ---
 
@@ -465,7 +469,7 @@ Public contract datasets for testing:
 
 ### Completed
 - [x] PDF upload with 4-tier OCR pipeline
-- [x] Clause extraction with risk scoring (16+ clause types)
+- [x] Clause extraction with risk scoring (16 clause types)
 - [x] Knowledge graph visualization (interactive canvas with zoom/pan/filters)
 - [x] Hybrid semantic + keyword search
 - [x] E2E test suite with Playwright (Chrome, Firefox, WebKit)
@@ -491,6 +495,9 @@ Public contract datasets for testing:
 - [x] Deal grouping with aggregate risk analysis
 - [x] In-app PDF viewer with clause navigation
 - [x] BYOK (Bring Your Own Key) — Claude API extraction per-request, key stored in sessionStorage only
+- [x] v3 design-system reskin across every surface (Geist, four-tier dark + light theme)
+- [x] Mobile-responsive app shell (off-canvas drawer) and per-page reflow incl. an accordion analytics heatmap
+- [x] Overlay accessibility — focus-trapped drawer/command-palette/cinema, background `inert`, reduced-motion respected
 
 ### Planned
 - [ ] Browser-only privacy mode (pdf.js + WebLLM, no server required)
