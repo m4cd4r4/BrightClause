@@ -259,6 +259,17 @@ export default function LandingPage() {
             transition={{ duration: reduce ? 0 : 0.6 }}
             style={{ textAlign: 'center', maxWidth: 768, margin: '0 auto' }}
           >
+            <div
+              className="v3-mono"
+              style={{
+                display: 'inline-flex', alignItems: 'center',
+                padding: '6px 14px', marginBottom: 24, borderRadius: 999,
+                background: 'rgba(212, 168, 45, 0.1)', border: '1px solid rgba(212, 168, 45, 0.3)',
+                color: 'var(--v3-accent)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em',
+              }}
+            >
+              Portfolio Project - Contract Analysis for M&amp;A Due Diligence
+            </div>
             <h1
               style={{
                 fontSize: 'clamp(2.75rem, 6vw, 4.5rem)', fontWeight: 600, letterSpacing: '-0.03em',
@@ -734,6 +745,43 @@ export default function LandingPage() {
                 Try It Live
                 <ArrowRight style={{ width: 20, height: 20 }} className="transition-transform group-hover:translate-x-1" />
               </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Built by Macdara - portfolio / paid-engagement */}
+      <section style={{ ...sectionStyle, padding: '80px 0' }}>
+        <div className="max-w-3xl mx-auto px-6" style={{ textAlign: 'center' }}>
+          <motion.div {...reveal()}>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 1.875rem)', fontWeight: 600, marginBottom: 16, color: 'var(--v3-text-primary)', letterSpacing: '-0.02em' }}>
+              Built by Macdara
+            </h2>
+            <p style={{ color: 'var(--v3-text-secondary)', fontSize: 16, lineHeight: 1.6, marginBottom: 32, maxWidth: 576, marginLeft: 'auto', marginRight: 'auto' }}>
+              Portfolio project demonstrating full-stack delivery: Next.js, FastAPI, Anthropic SDK,
+              pgvector, Playwright, Vercel, accessibility, security. Source is open. Available as a
+              paid engagement on request.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <a
+                href="https://github.com/m4cd4r4/BrightClause"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="v3-btn"
+                style={{ height: 44, padding: '0 20px', fontSize: 15 }}
+              >
+                <Github style={{ width: 16, height: 16 }} aria-hidden="true" />
+                View source on GitHub
+              </a>
+              <a
+                href="https://m4cd4r4.github.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="v3-btn v3-btn-ghost"
+                style={{ height: 44, padding: '0 20px', fontSize: 15 }}
+              >
+                More work at m4cd4r4.github.io
+              </a>
             </div>
           </motion.div>
         </div>
