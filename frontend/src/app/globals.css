@@ -494,3 +494,29 @@ html.light .bg-ink-800\/50 {
   }
 }
 
+/* Landing header section-nav: shown on desktop, hidden on phones so the
+   header stays uncluttered (logo + GitHub + Try It Live only). */
+.v3-landing-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.v3-landing-nav a {
+  font-size: 14px;
+  color: var(--v3-text-secondary);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.v3-landing-nav a:hover {
+  color: var(--v3-text-primary);
+}
+@media (max-width: 860px) {
+  .v3-landing-nav { display: none; }
+}
+
+/* Smooth in-page anchor scrolling for the landing section-nav,
+   suppressed when the user prefers reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
