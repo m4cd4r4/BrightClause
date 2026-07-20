@@ -55,6 +55,41 @@ BrightClause transforms contract review from weeks to minutes. Upload PDFs, extr
 
 ---
 
+## See It In Action
+
+Recorded against the running application with real contract data - three public
+filings (an NDA, a SaaS licence, and a business acquisition agreement).
+
+### Contract portfolio and risk assessment
+
+Select any contract to get an instant risk breakdown: severity counts across four
+tiers, plus the specific clauses flagged for attention.
+
+<img src="docs/01-dashboard.gif" alt="Portfolio dashboard: selecting contracts reveals a risk breakdown with critical, high, medium and low clause counts" width="900" />
+
+### Portfolio analytics
+
+A risk heatmap across clause type and document, a portfolio health score, and
+clause distribution over the whole corpus.
+
+<img src="docs/02-analytics.gif" alt="Analytics view: risk heatmap of clause type by document, health score, and portfolio risk tiers" width="900" />
+
+### Document analysis
+
+Per-document risk assessment, an extracted contract timeline, and clause filtering
+by type - each clause with a plain-English summary and a risk badge.
+
+<img src="docs/03-document.gif" alt="Document view: risk tiers, contract timeline, and clause filtering by type with plain-English summaries" width="900" />
+
+### Knowledge graph
+
+Entities and relationships extracted from a single contract, laid out as an
+interactive force-directed graph and colour-coded by entity type.
+
+<img src="docs/04-graph.gif" alt="Knowledge graph: 117 entities and 131 relationships colour-coded by party, person, date, location, term and percentage" width="900" />
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -156,6 +191,18 @@ flowchart TD
 | **TailwindCSS** | Utility-first styling on the v3 design-token system (dark + light) |
 | **Framer Motion** | Page transitions & entrance animations |
 | **Playwright** | Cross-browser E2E testing (Chrome, Firefox, WebKit) |
+
+---
+
+## Known Issues
+
+- **Hybrid search is broken.** `POST /api/search` fails for every query in all three
+  modes (hybrid, semantic, keyword). The raw SQL in the search service hits
+  `asyncpg.exceptions.PostgresSyntaxError: syntax error at or near ":"` - a `::vector`
+  cast being parsed as a SQLAlchemy named bind parameter. The UI reports this as
+  "No Results Found" rather than surfacing the error, so it looks empty rather than
+  broken. Everything else in the feature table works; this one needs the cast escaped
+  or the query moved to bound parameters.
 
 ---
 
