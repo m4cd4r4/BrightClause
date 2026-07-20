@@ -1,9 +1,11 @@
 # BrightClause
 
-> **Unmaintained.** The hosted service has been retired and `brightclause.com` /
-> `api.brightclause.com` are no longer running. The code is released under the MIT
-> licence and is free to fork, adapt, and self-host. Issues and PRs are welcome but
-> are not actively monitored - if you want to take this further, fork it.
+> **Portfolio showcase project.** BrightClause is a demonstration of full-stack
+> delivery, not a commercial product and not a maintained service. The live demo at
+> **[brightclause.com](https://brightclause.com)** runs on real contract data - three
+> public filings - and is free to explore, no sign-up. The code is MIT licensed: fork
+> it, adapt it, self-host it. Issues and PRs are welcome but may not get a response.
+> See [Known Issues](#known-issues) before building on it.
 
 <div align="center">
 
@@ -16,7 +18,7 @@
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
 [![Licence](https://img.shields.io/badge/Licence-MIT-blue?style=flat-square)](LICENSE)
 
-[API Reference](#api-reference) | [Quick Start](#quick-start)
+[Live Demo](https://brightclause.com) | [API Reference](#api-reference) | [Quick Start](#quick-start)
 
 <img src="docs/screenshot-readme.png" alt="BrightClause Portfolio Analytics — risk heatmap with cross-document clause scoring" width="800" />
 
