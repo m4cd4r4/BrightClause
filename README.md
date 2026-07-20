@@ -1,5 +1,10 @@
 # BrightClause
 
+> **Unmaintained.** The hosted service has been retired and `brightclause.com` /
+> `api.brightclause.com` are no longer running. The code is released under the MIT
+> licence and is free to fork, adapt, and self-host. Issues and PRs are welcome but
+> are not actively monitored - if you want to take this further, fork it.
+
 <div align="center">
 
 **AI-Powered Contract Intelligence**
@@ -9,8 +14,9 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20+%20pgvector-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/E2E_Tests-Playwright-45ba4b?style=flat-square&logo=playwright)](https://playwright.dev/)
+[![Licence](https://img.shields.io/badge/Licence-MIT-blue?style=flat-square)](LICENSE)
 
-[Live Demo](https://brightclause.com) | [API Reference](#api-reference) | [Quick Start](#quick-start)
+[API Reference](#api-reference) | [Quick Start](#quick-start)
 
 <img src="docs/screenshot-readme.png" alt="BrightClause Portfolio Analytics — risk heatmap with cross-document clause scoring" width="800" />
 
